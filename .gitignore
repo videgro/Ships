@@ -4,6 +4,10 @@
 /libs/arm*
 /libs/x86/
 .recommenders
+.classpath
+.project
+.settings
+lint.xml
 project.properties
 /DOWNLOADS/
 /DOC/
