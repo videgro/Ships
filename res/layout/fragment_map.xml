@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<WebView
+	    android:id="@+id/webview"
+	    android:layout_width="fill_parent"
+	    android:layout_height="0dp"
+	    android:layout_weight="1" />
+	
+	<ToggleButton
+	        android:id="@+id/startStopAisButton"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"        
+	        android:textOff="@string/toggle_turn_on_ais"
+	        android:textOn="@string/toggle_turn_off_ais" />
+	
+	<ScrollView android:layout_height="50dp" android:layout_width="fill_parent">
+	    <TextView
+	        android:id="@+id/textView1"
+	        android:maxLines="100"
+	    	android:singleLine="false" 
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" />
+    </ScrollView>
+	
+    <include layout="@layout/promo" />
+
+</LinearLayout>

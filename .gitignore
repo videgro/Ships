@@ -1,0 +1,13 @@
+/bin/
+/gen/
+/obj/
+/libs/arm*
+/libs/x86/
+.recommenders
+project.properties
+/DOWNLOADS/
+/DOC/
+private.xml
+
+
+

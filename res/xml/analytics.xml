@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ga_trackingId">UA-37241060-6</string>
+    
+    <integer name="ga_sessionTimeout">300</integer>
+
+    <bool name="ga_autoActivityTracking">true</bool>
+    
+    <!-- Enable automatic exception tracking -->
+    <bool name="ga_reportUncaughtExceptions">true</bool>
+    
+    <!--<string name="ga_logLevel">verbose</string>-->
+    
+    <!-- Prevent data from appearing in reports. Useful for testing. -->
+  	<!--<bool name="ga_dryRun">false</bool>-->
+
+    <screenName name="net.videgro.ships.fragments.ShowMapFragment">
+        ShowMapFragment View
+    </screenName>
+    
+    <screenName name="net.videgro.ships.fragments.CalibrateFragment">
+        CalibrateFragment View
+    </screenName>    
+</resources>

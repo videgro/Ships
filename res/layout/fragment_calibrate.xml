@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF" >
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/title_calibrate"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_gravity="center"
+        android:contentDescription="@string/alt_rtlsdrStick"
+        android:src="@drawable/rtlsdr" />
+    
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/description_calibrate"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <LinearLayout android:orientation="horizontal"
+        		  android:layout_width="match_parent"
+		          android:layout_height="wrap_content" >
+		<ToggleButton
+		        android:id="@+id/startStopCalibrateNormalButton"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"         
+		        android:textOff="@string/toggle_turn_on_calibrating_normal"
+		        android:textOn="@string/toggle_turn_off_calibrating_normal" />
+		
+		<ToggleButton
+		        android:id="@+id/startStopCalibrateThoroughButton"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"         
+		        android:textOff="@string/toggle_turn_on_calibrating_thorough"
+		        android:textOn="@string/toggle_turn_off_calibrating_thorough" />
+    </LinearLayout>
+	
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+	<ScrollView android:layout_height="50dp" android:layout_width="fill_parent">
+	    <TextView
+	        android:id="@+id/textView1"
+	        android:maxLines="100"
+	    	android:singleLine="false" 
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" />
+    </ScrollView>
+	
+	<include layout="@layout/promo" />
+
+</LinearLayout>
+

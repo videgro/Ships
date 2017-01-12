@@ -1,0 +1,59 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:key="@string/pref_GeneralSettings" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_loggingVerbose"
+            android:summary="@string/pref_loggingVerbose_summary"
+            android:title="@string/pref_loggingVerbose_title" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_MapSettings_title" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_mapZoomToExtend"
+            android:summary="@string/pref_mapZoomToExtend_summary"
+            android:title="@string/pref_mapZoomToExtend_title" />
+        <!-- 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_mapFetchAllZoomLevels"
+            android:summary="@string/pref_mapFetchAllZoomLevels_summary"
+            android:title="@string/pref_mapFetchAllZoomLevels_title" />
+		-->
+		<!-- 
+        <EditTextPreference
+            android:defaultValue="@string/pref_mapCacheMaxDiskUsage"
+            android:dialogTitle="@string/pref_mapCacheMaxDiskUsage_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_ppm"
+            android:summary="@string/pref_mapCacheMaxDiskUsage_summary"
+            android:title="@string/pref_mapCacheMaxDiskUsage_title" />
+        -->
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_AisReceiverSettings_title" >
+        <!-- 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_rtlSdrForceRoot"
+            android:summary="@string/pref_rtlSdrForceRoot_summary"
+            android:title="@string/pref_rtlSdrForceRoot_title" />
+		-->
+        <EditTextPreference
+            android:defaultValue="@string/pref_rtlSdrPpm_default"
+            android:dialogTitle="@string/pref_rtlSdrPpm_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_rtlSdrPpm"
+            android:summary="@string/pref_rtlSdrPpm_summary"
+            android:title="@string/pref_rtlSdrPpm_title" />
+        <Preference android:title="@string/pref_rtlSdrPpmInvalidate_title"
+            android:key="@string/pref_rtlSdrPpmInvalidate"
+            android:summary="@string/pref_rtlSdrPpmInvalidate_summary"/>
+        <EditTextPreference
+            inputType="phone"
+            android:defaultValue="@string/pref_aisMessagesDestinationHost_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationHost_dialog_title"
+            android:key="@string/pref_aisMessagesDestinationHost"
+            android:summary="@string/pref_aisMessagesDestinationHost_summary"
+            android:title="@string/pref_aisMessagesDestinationHost_title" />
+    </PreferenceCategory>  
+</PreferenceScreen>
