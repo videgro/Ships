@@ -1,0 +1,9 @@
+[submodule "jni/rtl-ais"]
+	path = jni/rtl-ais
+	url = https://github.com/dgiardini/rtl-ais.git
+[submodule "jni/libusb"]
+	path = jni/libusb
+	url = https://github.com/libusb/libusb.git
+[submodule "jni/rtl-sdr"]
+	path = jni/rtl-sdr
+	url = https://github.com/keenerd/rtl-sdr.git
