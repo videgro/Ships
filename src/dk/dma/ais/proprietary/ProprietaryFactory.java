@@ -44,8 +44,10 @@ public abstract class ProprietaryFactory {
     private final String prefix;
 
     public ProprietaryFactory(String prefix) {
-        this.prefix = requireNonNull(prefix);
-        if (prefix.length() != 3) {
+        //this.prefix = requireNonNull(prefix); // Min API level 19
+    	this.prefix=prefix;
+    	
+        if (prefix==null || prefix.length() != 3) {
             throw new IllegalArgumentException("Prefix length must be exactly 3, was '" + prefix + "'");
         }
     }

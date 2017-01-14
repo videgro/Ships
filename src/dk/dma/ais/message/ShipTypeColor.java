@@ -52,8 +52,9 @@ public enum ShipTypeColor {
         return shipTypes;
     }
 
-    public static ShipTypeColor getColor(ShipType type) {
-        ShipTypeColor c = REVERSE_LOOKUP.get(requireNonNull(type));
-        return c == null ? ShipTypeColor.TURQUOISE : c;
+    public static ShipTypeColor getColor(ShipType type) {    	
+        //ShipTypeColor c = REVERSE_LOOKUP.get(requireNonNull(type)); // Min API level 19   
+        final ShipTypeColor c = type==null ? null : REVERSE_LOOKUP.get(type);
+    	return c == null ? ShipTypeColor.TURQUOISE : c;
     }
 }
