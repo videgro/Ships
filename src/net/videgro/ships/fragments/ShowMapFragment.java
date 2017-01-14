@@ -255,6 +255,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		switch (id) {
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
 			getFragmentManager().beginTransaction().replace(R.id.container, CalibrateFragment.newInstance()).commit();
+			// FIXME: Observed exception: "NullPointerException (@ShowMapFragment:onImagePopupDispose:257) {main}"
 		break;
 		case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
 			// TODO: Currently all errors are fatal, because we can't stop and restart the RTL-SDR dongle correctly

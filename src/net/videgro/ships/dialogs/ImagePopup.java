@@ -7,14 +7,18 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.graphics.drawable.ColorDrawable;
 import android.text.Html;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 
 public class ImagePopup extends Dialog implements OnDismissListener {
+	final String TAG="ImagePopup";
+	
 	private static final int SIZE_PERCENTAGE=60;
 	
 	private int id;
@@ -43,7 +47,16 @@ public class ImagePopup extends Dialog implements OnDismissListener {
 
 		// Image
 		ImageView imageView = (ImageView) findViewById(R.id.imageView);
-		imageView.setImageResource(imageResource);
+		try {
+			imageView.setImageResource(imageResource);
+		} catch (OutOfMemoryError e){
+			/*
+			 * FIXME: Observed exception: "OutOfMemoryError (@ImagePopup:<init>:46) {main}"
+			 */
+			final String msg="Drawing image - OutOfMemoryError";
+			Log.e(TAG,msg+": "+e.getMessage());
+			Analytics.logEvent(context, TAG,msg,e.getMessage());
+		}
 	
 		// Text
 		TextView textView = (TextView) findViewById(R.id.textView);

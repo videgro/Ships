@@ -119,7 +119,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         
         // Parse arguments
 	    final Uri data = getIntent().getData();	    
-	    arguments = data.toString().replace(getString(R.string.intent_filter_schema) + "://", "");
+	    arguments = data.toString().replace(getString(R.string.opendevice_intent_filter_schema) + "://", "");
 	    
 	    final Bundle extras = getIntent().getExtras();
 	    if (extras != null) {

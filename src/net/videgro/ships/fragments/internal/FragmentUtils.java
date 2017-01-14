@@ -27,25 +27,37 @@ public final class FragmentUtils {
 		Log.d(TAG,tag);
 		final String aisMessagesDestinationHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(fragment.getActivity());
 		final String arguments = "-p " + ppm + " -P "+NMEA_UDP_PORT+" -h " + aisMessagesDestinationHost + " -R -x -S 60 -n";
-		final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(fragment.getString(R.string.intent_filter_schema) + "://" + arguments));
+		
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://" + arguments));
+		/*
+		 * FIXME: Observed exception: "IllegalStateException (@FragmentUtils:startReceivingAisFromAntenna:30) {CalibrateTask}"
+		 */
+		
 		fragment.startActivityForResult(intent, reqCode);
 	}
 	
 	public static void changeRtlSdrPpm(final Fragment fragment,final int reqCode,final int ppm) {
 		final String tag="changeRtlSdrPpm - ";
 		Log.d(TAG,tag);
-		final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(fragment.getString(R.string.intent_filter_schema) + "://"));
+
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://"));
+		/*
+		 * FIXME: Observed exception: "IllegalStateException (@FragmentUtils:changeRtlSdrPpm:37) {CalibrateTask}"
+		 */
 		
 		// Request to change PPM instead of (re)starting RTL-SDR
 		intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
 
-		fragment.startActivityForResult(intent, reqCode);	
+		fragment.startActivityForResult(intent, reqCode);
 	}
 	
 	public static void stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
 		final String tag="stopReceivingAisFromAntenna - ";		
 		Log.d(TAG,tag);
-		final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(fragment.getString(R.string.intent_filter_schema) + "://"));
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://"));
 		intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
 		fragment.startActivityForResult(intent, reqCode);
 	}

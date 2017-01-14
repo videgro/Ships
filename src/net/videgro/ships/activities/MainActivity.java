@@ -14,6 +14,8 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// FIXME: Observed exception "IllegalAccessException (@MainActivity:onCreate:16) {main}"
+
 		setContentView(R.layout.activity_main);
 	
 		final ActionBar actionBar=getActionBar();
