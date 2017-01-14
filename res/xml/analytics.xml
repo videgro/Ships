@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ga_trackingId">UA-37241060-6</string>
-    
     <integer name="ga_sessionTimeout">300</integer>
 
     <bool name="ga_autoActivityTracking">true</bool>
