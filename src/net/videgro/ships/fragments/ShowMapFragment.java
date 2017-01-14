@@ -1,5 +1,8 @@
 package net.videgro.ships.fragments;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gson.Gson;
 
 import android.annotation.SuppressLint;
@@ -57,19 +60,17 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private Location lastReceivedOwnLocation=null;
 	private ToggleButton startStopButton;
 	
+	/**
+	 * Contains all received MMSIs. A set contains unique entries.
+	 */
+	private Set<String> mmsiReceived=new HashSet<String>();
+	
 	public static final ShowMapFragment newInstance() {
 		return new ShowMapFragment();
 	}
 
 	private ShowMapFragment() {
 		// No public constructor, use newInstance()
-	}	
-	
-	@Override
-	public void onDestroy() {
-		destroyNmeaUdpClientService();
-		destroyLocationService();    
-		super.onDestroy();
 	}
 	
 	@SuppressLint("NewApi")
@@ -127,6 +128,19 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		Analytics.logScreenView(getActivity(), TAG);
 	}
 		
+	@Override
+	public void onStop() {
+		Analytics.logEvent(getActivity(), TAG,"Number of received ships",""+mmsiReceived.size());
+		super.onStop();
+	}
+	
+	@Override
+	public void onDestroy() {
+		destroyNmeaUdpClientService();
+		destroyLocationService();
+		super.onDestroy();
+	}
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -279,6 +293,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		if (ship != null && ship.isValid()) {
 			if (ship.isValid()){
 				final String json = new Gson().toJson(ship);
+				mmsiReceived.add(""+ship.getMmsi());
 				
 				final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "");
 				logStatus("Ship location received ("+shipIdent+")");
