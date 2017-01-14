@@ -135,7 +135,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
 				final OpenDeviceResult startRtlSdrResult = FragmentUtils.parseOpenCloseDeviceActivityResult(data);
-				
+				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResult.toString());
 				logStatus(startRtlSdrResult.toString());
 				
 				if (resultCode != Activity.RESULT_OK) {

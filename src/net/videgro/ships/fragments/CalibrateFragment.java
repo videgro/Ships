@@ -107,6 +107,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
 				final OpenDeviceResult startRtlSdrResult = FragmentUtils.parseOpenCloseDeviceActivityResult(data);
+				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResult.toString());
 				logStatus(startRtlSdrResult.toString());
 				
 				if (resultCode == Activity.RESULT_OK) {
