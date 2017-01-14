@@ -41,7 +41,7 @@
         <EditTextPreference
             android:defaultValue="@string/pref_rtlSdrPpm_default"
             android:dialogTitle="@string/pref_rtlSdrPpm_dialog_title"
-            android:inputType="number"
+            android:inputType="numberSigned"
             android:key="@string/pref_rtlSdrPpm"
             android:summary="@string/pref_rtlSdrPpm_summary"
             android:title="@string/pref_rtlSdrPpm_title" />

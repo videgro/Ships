@@ -18,9 +18,9 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 		THOROUGH, NORMAL
 	}	
 	
-	private static final int PPM_UNDEFINED=-1;
-	private static final int PPM_MIDDLE=50;
-	private static final int PPM_MINIMAL=0;
+	private static final int PPM_UNDEFINED=Integer.MAX_VALUE;
+	private static final int PPM_MIDDLE=0;
+	private static final int PPM_MINIMAL=-100;
 	private static final int PPM_MAXIMAL=100;
 	
 	private static final int PPM_STEP_SIZE=3;
