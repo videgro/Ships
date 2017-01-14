@@ -56,4 +56,6 @@
             android:summary="@string/pref_aisMessagesDestinationHost_summary"
             android:title="@string/pref_aisMessagesDestinationHost_title" />
     </PreferenceCategory>  
+
+    <net.videgro.ships.preferences.PromoPreferenceRateMe android:key="rate" />
 </PreferenceScreen>
