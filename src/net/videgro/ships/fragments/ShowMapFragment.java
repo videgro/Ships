@@ -262,6 +262,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			} else {
 				Log.e(TAG,tag+"Invalid PPM: "+ppm);
 			}					
+		} else{
+			logStatus("Receiving AIS already, continue.");
 		}
 	}
 	
