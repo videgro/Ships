@@ -2,7 +2,8 @@
 <resources>
     <!-- General -->        
     <string name="app_name">Ships</string>
-    <string name="app_market_url">market://details?id=net.videgro.ships"</string>
+    <string name="app_url">https://play.google.com/store/apps/details?id=net.videgro.ships</string>
+    <string name="app_market_url">market://details?id=net.videgro.ships</string>
     
     <string name="opendevice_intent_filter_schema">opendevice</string>
     <string name="action_settings">Settings</string>
@@ -10,6 +11,11 @@
     <!-- Pages -->
     <string name="page_show_map">Show map</string>
     
+    <!-- Sharing -->
+    <string name="share_subject">I would like to share this ships map with you.</string>
+    <string name="share_text">Shared via:</string>
+    <string name="share_action_text">Share</string>
+
     <!-- Buttons -->
 	<string name="toggle_turn_on_calibrating_normal">START (dense traffic)</string>
 	<string name="toggle_turn_off_calibrating_normal">STOP (dense traffic)</string>

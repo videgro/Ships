@@ -1,5 +1,10 @@
 package net.videgro.ships.fragments;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,11 +17,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
@@ -24,6 +36,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ShareActionProvider;
+import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import net.videgro.ships.Analytics;
@@ -59,11 +73,13 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private ServiceConnection nmeaUdpClientServiceConnection;
 	private Location lastReceivedOwnLocation=null;
 	private ToggleButton startStopButton;
+	private File screenshotFile;
+	private ShareActionProvider shareActionProvider;
 	
 	/**
 	 * Contains all received MMSIs. A set contains unique entries.
 	 */
-	private Set<String> mmsiReceived=new HashSet<String>();
+	private Set<Integer> mmsiReceived=new HashSet<Integer>();
 	
 	public static final ShowMapFragment newInstance() {
 		return new ShowMapFragment();
@@ -81,6 +97,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		final View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
 		logTextView = (TextView) rootView.findViewById(R.id.textView1);
+		screenshotFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "ships_screenshot.jpg");
 
 		Utils.loadAd(rootView);
 		
@@ -260,6 +277,64 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		Utils.logStatus(getActivity(),logTextView,status);
 	}
 	
+	private Intent getShareIntent() {
+		final ArrayList<Uri> uris = new ArrayList<Uri>();
+		uris.add(Uri.parse("file://"+screenshotFile.toString()));
+
+		final Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+		shareIntent.putExtra(Intent.EXTRA_SUBJECT,getString(R.string.share_subject));
+		shareIntent.putExtra(Intent.EXTRA_TEXT,"\n\n"+getString(R.string.share_text)+" "+getString(R.string.app_name)+" - "+getString(R.string.app_url));
+		shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+		shareIntent.setType("*/*");
+
+		return shareIntent;
+	}
+
+	private File takeScreenShot() {
+		Log.i(TAG, "takeScreenShot");
+		File result = null;
+
+		Picture picture = webView.capturePicture();
+		Bitmap b = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(b);
+		picture.draw(c);
+
+		FileOutputStream fosScreenshot = null;
+		try {
+			fosScreenshot = new FileOutputStream(screenshotFile);
+
+			if (fosScreenshot != null) {
+				b.compress(Bitmap.CompressFormat.JPEG, 100, fosScreenshot);
+				fosScreenshot.close();
+				Log.i(TAG, "takeScreenShot >> Screenshot available at: " + screenshotFile.toString());
+				result = screenshotFile;
+			}
+		} catch (FileNotFoundException e) {
+			Log.e(TAG, "takeScreenShot", e);
+		} catch (IOException e) {
+			Log.e(TAG, "takeScreenShot", e);
+		}
+
+		return result;
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		menu.setGroupVisible(R.id.main_menu_group_share, true);
+
+		shareActionProvider = (ShareActionProvider) menu.findItem(R.id.menu_share).getActionProvider();
+		shareActionProvider.setShareIntent(getShareIntent());
+		shareActionProvider.setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
+			@Override
+			public boolean onShareTargetSelected(ShareActionProvider actionProvider, Intent intent) {
+				Analytics.logEvent(getActivity(), TAG, "share",""+mmsiReceived.size());
+				takeScreenShot();
+				return false;
+			}
+		});
+	}
+
 	/************************** LISTENER IMPLEMENTATIONS ******************/
 
 	/**** START ImagePopupListener ****/
@@ -293,7 +368,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		if (ship != null && ship.isValid()) {
 			if (ship.isValid()){
 				final String json = new Gson().toJson(ship);
-				mmsiReceived.add(""+ship.getMmsi());
+				mmsiReceived.add(ship.getMmsi());
 				
 				final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "");
 				logStatus("Ship location received ("+shipIdent+")");

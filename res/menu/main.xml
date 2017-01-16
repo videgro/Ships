@@ -2,6 +2,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="net.videgro.ships.MainActivity" >
 
+    <group android:id="@+id/main_menu_group_share">
+       <item
+            android:id="@+id/menu_share"
+            android:actionProviderClass="android.widget.ShareActionProvider"
+            android:showAsAction="ifRoom"
+            android:title="@string/share_action_text"/>
+    </group>
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

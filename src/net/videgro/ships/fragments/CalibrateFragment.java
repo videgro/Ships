@@ -8,11 +8,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.ProgressBar;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import net.videgro.ships.Analytics;
@@ -186,6 +190,11 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		Utils.logStatus(getActivity(),logTextView,status);
 	}
 	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		// Not possible to share anything from this fragment
+		menu.setGroupVisible(R.id.main_menu_group_share, false);
+	}
 	
 	/************************** LISTENER IMPLEMENTATIONS ******************/
 	
