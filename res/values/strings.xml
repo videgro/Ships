@@ -91,7 +91,7 @@
 	<string name="pref_rtlSdrPpm">pref_rtlSdrPpm</string>
     <string name="pref_rtlSdrPpm_default">99999</string>
     <string name="pref_rtlSdrPpm_dialog_title">The RTL-SDR parts per million offset.</string>
-    <string name="pref_rtlSdrPpm_summary">Use the calibrate future to determine this automatically or set this value manually.</string>       
+    <string name="pref_rtlSdrPpm_summary">Use the calibrate feature to determine this automatically or set this value manually.</string> 
     <string name="pref_rtlSdrPpm_title">RTL-SDR: PPM</string>
     
     <string name="pref_rtlSdrPpmInvalidate">pref_rtlSdrPpmInvalidate</string>
