@@ -21,45 +21,47 @@ public final class FragmentUtils {
 	private FragmentUtils(){
 		// Utility class, no public constructor
 	}
-
-	public static void startReceivingAisFromAntenna(final Fragment fragment,final int reqCode,final int ppm) {
+	
+	public static boolean startReceivingAisFromAntenna(final Fragment fragment,final int reqCode,final int ppm) {
 		final String tag="startReceivingAisFromAntenna - ";
 		Log.d(TAG,tag);
+		boolean result=false;
 		final String aisMessagesDestinationHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(fragment.getActivity());
-		final String arguments = "-p " + ppm + " -P "+NMEA_UDP_PORT+" -h " + aisMessagesDestinationHost + " -R -x -S 60 -n";
-		
-		final Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://" + arguments));
-		/*
-		 * FIXME: Observed exception: "IllegalStateException (@FragmentUtils:startReceivingAisFromAntenna:30) {CalibrateTask}"
-		 */
-		
-		fragment.startActivityForResult(intent, reqCode);
+		final String arguments = "-p " + ppm + " -P "+NMEA_UDP_PORT+" -h " + aisMessagesDestinationHost + " -R -x -S 60 -n";		
+		final Intent intent=createOpenDeviceIntent(fragment,arguments);
+		if (intent!=null){
+			fragment.startActivityForResult(intent, reqCode);
+			result=true;
+		}
+		return result;
 	}
 	
-	public static void changeRtlSdrPpm(final Fragment fragment,final int reqCode,final int ppm) {
+	public static boolean changeRtlSdrPpm(final Fragment fragment,final int reqCode,final int ppm) {
 		final String tag="changeRtlSdrPpm - ";
 		Log.d(TAG,tag);
-
-		final Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://"));
-		/*
-		 * FIXME: Observed exception: "IllegalStateException (@FragmentUtils:changeRtlSdrPpm:37) {CalibrateTask}"
-		 */
-		
-		// Request to change PPM instead of (re)starting RTL-SDR
-		intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
-
-		fragment.startActivityForResult(intent, reqCode);
+		boolean result=false;
+		final Intent intent=createOpenDeviceIntent(fragment,null);		
+		if (intent!=null){
+			// Request to change PPM instead of (re)starting RTL-SDR
+			intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
+	
+			fragment.startActivityForResult(intent, reqCode);
+			result=true;
+		}
+		return result;
 	}
 	
-	public static void stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
+	public static boolean stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
 		final String tag="stopReceivingAisFromAntenna - ";		
 		Log.d(TAG,tag);
-		final Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(fragment.getString(R.string.opendevice_intent_filter_schema) + "://"));
-		intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
-		fragment.startActivityForResult(intent, reqCode);
+		boolean result=false;
+		final Intent intent=createOpenDeviceIntent(fragment,null);
+		if (intent!=null){
+			intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
+			fragment.startActivityForResult(intent, reqCode);
+			result=true;
+		}
+		return result;
 	}
 	
 	public static OpenDeviceResult parseOpenCloseDeviceActivityResult(final Intent data){
@@ -82,5 +84,19 @@ public final class FragmentUtils {
 			Log.e(TAG,tag,e);			
 		}
 		System.exit(0);
+	}
+	
+	private static Intent createOpenDeviceIntent(final Fragment fragment,final String arguments){
+		final String tag="createOpenDeviceIntent - ";		
+		Intent result=null;
+		if (fragment!=null && fragment.isAdded()){
+			result = new Intent(Intent.ACTION_VIEW);
+			final String filterSchema = fragment.getString(R.string.opendevice_intent_filter_schema);
+			final Uri intentData = Uri.parse(filterSchema+ "://" + (arguments==null ? "" : arguments));
+			result.setData(intentData);
+		} else {
+			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
+		}
+		return result;
 	}
 }

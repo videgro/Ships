@@ -254,14 +254,15 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private void startReceivingAisFromAntenna(){
 		final String tag="startReceivingAisFromAntenna - ";
 		if (!FragmentUtils.rtlSdrRunning){
-			final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(getActivity());		
+			final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(getActivity());
 			if (SettingsUtils.isValidPpm(ppm)) {
-				logStatus("Start receiving AIS (PPM: "+ppm+")");
-				FragmentUtils.startReceivingAisFromAntenna(this,REQ_CODE_START_RTLSDR,ppm);
-				// Will continue at onActivityResult (REQ_CODE_START_RTLSDR)
+				final boolean startResult = FragmentUtils.startReceivingAisFromAntenna(this,REQ_CODE_START_RTLSDR,ppm);				
+				logStatus((startResult ? "Requested" : "Failed") +" to receive AIS from antenna (PPM: "+ppm+").");
+
+				// On positive result: Will continue at onActivityResult (REQ_CODE_START_RTLSDR)
 			} else {
 				Log.e(TAG,tag+"Invalid PPM: "+ppm);
-			}					
+			}
 		} else{
 			logStatus("Receiving AIS already, continue.");
 		}

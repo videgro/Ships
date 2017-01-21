@@ -38,8 +38,12 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 	
 	private int ppm=PPM_UNDEFINED;
 	private boolean ppmIsValid=false;
-	private boolean ppmAllValuesTried;
 	
+	/**
+	 * Will be true when all PPM values are tried or trying next PPM failed.
+	 */
+	private boolean failedToTryNextPpm;
+
 	private int lowPpm=PPM_MIDDLE;
 	private int highPpm=PPM_MIDDLE;
 	
@@ -72,9 +76,9 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 		
 		step=0;
 		
-		while (!isCancelled() && !ppmAllValuesTried && !ppmIsValid){
+		while (!isCancelled() && !failedToTryNextPpm && !ppmIsValid){
 			pendingRequestToOpenDevice=true;
-			ppmAllValuesTried=!tryNextPpm();
+			failedToTryNextPpm=!tryNextPpm();
 			waitForPendingRequestToOpenDevice();
 			try {
 				Thread.sleep(scanType.equals(ScanType.THOROUGH) ? PPM_MONITOR_TIME_THOROUGH : PPM_MONITOR_TIME_NORMAL);
@@ -82,14 +86,14 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 				Log.e(TAG,"doInBackground - During monitoring.",e);
 			}
 			
-			Log.e(TAG,"ppmAllValuesTried: "+ppmAllValuesTried);
+			Log.e(TAG,"ppmAllValuesTried: "+failedToTryNextPpm);
 		}
 		
 		Log.e(TAG,"EXIT FROM WHILE");
 		
 		destroyNmeaUdpClientService();
 
-		if (ppmAllValuesTried){
+		if (failedToTryNextPpm){
 			listener.onCalibrateFailed();
 		}
 		
@@ -139,8 +143,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 		
 		if (ppm!=PPM_UNDEFINED){
 			step++;
-			listener.onTryPpm(firstTry,Math.round(step/NUMBER_OF_STEPS*100),ppm);
-			result=true;
+			result=listener.onTryPpm(firstTry,Math.round(step/NUMBER_OF_STEPS*100),ppm);			
 		}
 		
 		return result;

@@ -14,9 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.ProgressBar;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import net.videgro.ships.Analytics;
@@ -154,7 +152,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	
 	private void startThoroughCalibrating(){		
 		startStopCalibrateButtonNormal.setEnabled(false);
-		startCalibrateTask(CalibrateTask.ScanType.NORMAL);
+		startCalibrateTask(CalibrateTask.ScanType.THOROUGH);
 	}
 	
 	private void stopThoroughCalibrating(){
@@ -201,17 +199,25 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	/**** START CalibrateListener ****/
 	
 	@Override
-	public void onTryPpm(boolean firstTry,int percentage,int ppm) {
-		logStatus("Trying: "+ppm+", Progress: "+percentage+" %");
-		calibrateProgressBar.setProgress(percentage);
-		
-		if (firstTry){
-			FragmentUtils.startReceivingAisFromAntenna(this, REQ_CODE_START_RTLSDR,ppm);
+	public boolean onTryPpm(boolean firstTry,int percentage,int ppm) {
+		final String tag="onTryPpm - ";
+		boolean result=false;
+		if (isAdded()){
+			logStatus("Trying: "+ppm+", Progress: "+percentage+" %");
+			calibrateProgressBar.setProgress(percentage);
+
+			if (firstTry){
+				result=FragmentUtils.startReceivingAisFromAntenna(this, REQ_CODE_START_RTLSDR,ppm);
+			} else {
+				result=FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,ppm);
+			}
+
+			// Will continue at onActivityResult (REQ_CODE_START_RTLSDR)
 		} else {
-			FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,ppm);	
-		}		
+			Log.w(TAG,tag+"Fragment is not added to activity.");
+		}
 		
-		// Will continue at onActivityResult (REQ_CODE_START_RTLSDR)
+		return result;
 	}
 	
 	@Override
