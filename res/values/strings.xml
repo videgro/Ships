@@ -5,6 +5,8 @@
     <string name="app_url">https://play.google.com/store/apps/details?id=net.videgro.ships</string>
     <string name="app_market_url">market://details?id=net.videgro.ships</string>
     
+    <string name="url_mmsi_info">http://www.marinetraffic.com/en/ais/details/ships/mmsi:PLACEHOLDER_MMSI</string>
+    
     <string name="opendevice_intent_filter_schema">opendevice</string>
     <string name="action_settings">Settings</string>
        

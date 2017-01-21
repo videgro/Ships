@@ -68,9 +68,9 @@ function addShip(ship) {
 	
 	// Create new marker
 	var lonLat = new OpenLayers.LonLat(ship.lon, ship.lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-
+	
 	var popupText = "<table>";
-	popupText += "<tr><td colspan='2'><h3>"+ship.name+ " MMSI: " + ship.mmsi +"</h3></td></tr>";	
+	popupText += "<tr><td colspan='2'><h3><a href='PLACEHOLDER_MMSI"+ship.mmsi+"'>"+ship.name+ " MMSI: " + ship.mmsi +"</a></h3></td></tr>";
 	popupText += "<tr><td>Callsign:</td><td>" + ship.callsign + "</td></tr>";
 	popupText += "<tr><td>Ship type:</td><td>" + ship.shipType + "</td></tr>";
 	popupText += "<tr><td>Destination:</td><td>" + ship.dest + "</td></tr>";

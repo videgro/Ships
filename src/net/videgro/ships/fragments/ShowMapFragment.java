@@ -64,6 +64,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private static final int REQ_CODE_START_RTLSDR = 1201;
 	private static final int REQ_CODE_STOP_RTLSDR = 1202;
 	
+	/**
+	 * The value of this placeholder is used literally in the webview link (ship popup) and in the string resources "url_mmsi_info".
+	 * Respectively indicating that this is a special URL and must be opened in a new browser and as a placeholder to be replaced by the real MMSI value.
+	 */
+	private static final String PLACEHOLDER_MMSI="PLACEHOLDER_MMSI";
+
 	private WebView webView;
 	private TextView logTextView;
 	private Nmea2Ship nmea2Ship = new Nmea2Ship();
@@ -204,11 +210,25 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		webSettings.setAllowFileAccessFromFileURLs(true);
 
 		webView.setWebViewClient(new WebViewClient() {
+			@Override
 			public void onPageFinished(WebView view, String url) {
 				webView.loadUrl("javascript:setZoomToExtent("+Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity()))+")");
 				if (lastReceivedOwnLocation!=null){
 					webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");					
 				}
+			}
+
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				boolean result = false;
+				if (url != null && url.contains(PLACEHOLDER_MMSI)) {
+					final String mmsi = url.split(PLACEHOLDER_MMSI)[1];
+					final String newUrl = getString(R.string.url_mmsi_info).replace(PLACEHOLDER_MMSI, mmsi);
+					Analytics.logEvent(getActivity(), TAG, "shipinfo", mmsi);
+					view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(newUrl)));
+					result = true;
+				}
+				return result;
 			}
 		});
 		webView.loadUrl("file:///android_asset/index.html");
