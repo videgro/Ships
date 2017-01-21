@@ -393,7 +393,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 				final String json = new Gson().toJson(ship);
 				mmsiReceived.add(ship.getMmsi());
 				
-				final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "");
+				final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
 				logStatus("Ship location received ("+shipIdent+")");
 	
 				if (getActivity()!=null){

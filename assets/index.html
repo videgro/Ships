@@ -8,7 +8,10 @@
 		.olImageLoadError { 
     		/* when OL encounters a 404, don't display the pink image */
     		display: none !important;
-    	}    	
+		}
+		.flag {
+			width: 20px;
+		}
 	</style>
   </head>
   
@@ -70,7 +73,8 @@ function addShip(ship) {
 	var lonLat = new OpenLayers.LonLat(ship.lon, ship.lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
 	
 	var popupText = "<table>";
-	popupText += "<tr><td colspan='2'><h3><a href='PLACEHOLDER_MMSI"+ship.mmsi+"'>"+ship.name+ " MMSI: " + ship.mmsi +"</a></h3></td></tr>";
+	popupText += "<tr><td colspan='2'><h3><a href='PLACEHOLDER_MMSI"+ship.mmsi+"'><img class='flag' src='file:///android_asset/images/flags/"+ship.countryFlag+".png'>"+ship.name+ " " + ship.mmsi +"</a></h3></td></tr>";
+	popupText += "<tr><td>Country:</td><td>" + ship.countryName + "</td></tr>";
 	popupText += "<tr><td>Callsign:</td><td>" + ship.callsign + "</td></tr>";
 	popupText += "<tr><td>Ship type:</td><td>" + ship.shipType + "</td></tr>";
 	popupText += "<tr><td>Destination:</td><td>" + ship.dest + "</td></tr>";

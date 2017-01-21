@@ -6,6 +6,8 @@ public class Ship {
 	private static final String UNKNOWN="UNKNOWN";
 	
 	private final int mmsi;
+	private String countryName;
+	private String countryFlag;
 	private String name="";
 	private double lat;
 	private double lon;
@@ -52,6 +54,12 @@ public class Ship {
 	
 	public Ship(int mmsi) {
 		this.mmsi = mmsi;
+
+		final Mid mid=retrieveMid();
+		if (mid!=null){
+			countryName=mid.getFriendlyName();
+			countryFlag=mid.getFlagCode();
+		}
 	}
 
 	public int getMmsi() {
@@ -313,29 +321,40 @@ public class Ship {
 	public void setAudioAvailable(boolean audioAvailable) {
 		this.audioAvailable = audioAvailable;
 	}
-	
+
+	public String getCountryName() {
+		return countryName;
+	}
+
+	public String getCountryFlag() {
+		return countryFlag;
+	}
+
 	public boolean isValid(){
 		return (lat<0.0d || lat>0.0d) && (lon<0.0d || lon>0.0d);		
+	}
+	
+	private Mid retrieveMid(){
+		final int midSize=3;
+		Mid result=null;
+		final String mmsiAsString=mmsi+"";
+		if (mmsiAsString.length()>midSize){
+			result=Mid.valueOf(Mid.PREFIX+mmsiAsString.substring(0,midSize));
+		}
+		return result;
 	}
 
 	@Override
 	public String toString() {
-		return "Ship [mmsi=" + mmsi + ", name=" + name + ", lat=" + lat
-				+ ", lon=" + lon + ", heading=" + heading + ", timestamp="
-				+ timestamp + ", cog=" + cog + ", navStatus=" + navStatus
-				+ ", raim=" + raim + ", rot=" + rot + ", sensorRot="
-				+ sensorRot + ", sog=" + sog + ", specialManIndicator="
-				+ specialManIndicator + ", subMessage=" + subMessage
-				+ ", dest=" + dest + ", callsign=" + callsign + ", dimBow="
-				+ dimBow + ", dimPort=" + dimPort + ", dimStarboard="
-				+ dimStarboard + ", dimStern=" + dimStern + ", draught="
-				+ draught + ", dte=" + dte + ", eta=" + eta + ", etaDate="
-				+ etaDate + ", imo=" + imo + ", shipType=" + shipType
-				+ ", version=" + version + ", altitude=" + altitude
-				+ ", commStateSelectorFlag="
-				+ commStateSelectorFlag + ", regionalReserved="
-				+ regionalReserved + ", syncState=" + syncState + ", vendorId="
-				+ vendorId + "]";
+		return "Ship [mmsi=" + mmsi + ", countryName=" + countryName + ", countryFlag=" + countryFlag + ", name=" + name
+				+ ", lat=" + lat + ", lon=" + lon + ", heading=" + heading + ", timestamp=" + timestamp + ", cog=" + cog
+				+ ", navStatus=" + navStatus + ", raim=" + raim + ", rot=" + rot + ", sensorRot=" + sensorRot + ", sog="
+				+ sog + ", specialManIndicator=" + specialManIndicator + ", subMessage=" + subMessage + ", dest=" + dest
+				+ ", callsign=" + callsign + ", dimBow=" + dimBow + ", dimPort=" + dimPort + ", dimStarboard="
+				+ dimStarboard + ", dimStern=" + dimStern + ", draught=" + draught + ", dte=" + dte + ", eta=" + eta
+				+ ", etaDate=" + etaDate + ", imo=" + imo + ", shipType=" + shipType + ", version=" + version
+				+ ", altitude=" + altitude + ", commStateSelectorFlag=" + commStateSelectorFlag + ", regionalReserved="
+				+ regionalReserved + ", syncState=" + syncState + ", vendorId=" + vendorId + ", audioAvailable="
+				+ audioAvailable + "]";
 	}
-
 }
