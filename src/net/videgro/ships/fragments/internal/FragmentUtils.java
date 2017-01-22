@@ -50,7 +50,7 @@ public final class FragmentUtils {
 		}
 		return result;
 	}
-	
+
 	public static boolean stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
 		final String tag="stopReceivingAisFromAntenna - ";		
 		Log.d(TAG,tag);
@@ -64,13 +64,18 @@ public final class FragmentUtils {
 		return result;
 	}
 	
-	public static OpenDeviceResult parseOpenCloseDeviceActivityResult(final Intent data){
+	private static OpenDeviceResult parseOpenCloseDeviceActivityResult(final Intent data){
 		OpenDeviceResult result=null;
 		if (data!=null){
 			result=new OpenDeviceResult(data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_MESSAGE),data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_DEVICE_DESCRIPTION),data.getIntExtra(OpenDeviceActivity.EXTRA_RESULT_ERROR_REASON,-1));
 		}
 		
 		return result;
+	}
+
+	public static String parseOpenCloseDeviceActivityResultAsString(final Intent data){
+		final OpenDeviceResult startRtlSdrResult = parseOpenCloseDeviceActivityResult(data);
+		return (startRtlSdrResult!=null) ? startRtlSdrResult.toString() : "RESULT UNKNOWN";
 	}
 	
 	public static void stopApplication(final Fragment fragment){

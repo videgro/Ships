@@ -23,7 +23,6 @@ import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 import net.videgro.ships.fragments.internal.FragmentUtils;
-import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.CalibrateListener;
 import net.videgro.ships.tasks.CalibrateTask;
 
@@ -108,9 +107,9 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
-				final OpenDeviceResult startRtlSdrResult = FragmentUtils.parseOpenCloseDeviceActivityResult(data);
-				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResult.toString());
-				logStatus(startRtlSdrResult.toString());
+				final String startRtlSdrResultAsString=FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
+				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResultAsString);
+				logStatus(startRtlSdrResultAsString);
 				
 				if (resultCode == Activity.RESULT_OK) {
 					FragmentUtils.rtlSdrRunning=true;
@@ -121,11 +120,11 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 					}
 				} else {	
 					resetGuiToInitialState();
-					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,"Failed to start RTL-SDR","<p style='text-decoration: underline'>"+startRtlSdrResult.toString()+"</p>",R.drawable.thumbs_down_circle);
+					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,"Failed to start RTL-SDR","<p style='text-decoration: underline'>"+startRtlSdrResultAsString+"</p>",R.drawable.thumbs_down_circle);
 				}
 				break;
 			case REQ_CODE_STOP_RTLSDR:
-				logStatus(FragmentUtils.parseOpenCloseDeviceActivityResult(data).toString());
+				logStatus(FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data));
 				FragmentUtils.rtlSdrRunning=false;
 				if (resultCode == Activity.RESULT_OK) {										
 					if (calibrateTask!=null){						

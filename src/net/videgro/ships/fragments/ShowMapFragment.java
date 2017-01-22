@@ -46,7 +46,6 @@ import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 import net.videgro.ships.fragments.internal.FragmentUtils;
-import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import net.videgro.ships.nmea2ship.Nmea2Ship;
@@ -171,19 +170,19 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
-				final OpenDeviceResult startRtlSdrResult = FragmentUtils.parseOpenCloseDeviceActivityResult(data);
-				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResult.toString());
-				logStatus(startRtlSdrResult.toString());
-				
+				final String startRtlSdrResultAsString=FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
+				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResultAsString);
+				logStatus(startRtlSdrResultAsString);
+
 				if (resultCode != Activity.RESULT_OK) {
 					resetGuiToInitialState();
-					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,getString(R.string.popup_start_device_failed_title),getString(R.string.popup_start_device_failed_message)+" "+startRtlSdrResult.toString(),R.drawable.thumbs_down_circle);
+					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,getString(R.string.popup_start_device_failed_title),getString(R.string.popup_start_device_failed_message)+" "+startRtlSdrResultAsString,R.drawable.thumbs_down_circle);
 				} else {
 					FragmentUtils.rtlSdrRunning=true;
 				}
 				break;
 			case REQ_CODE_STOP_RTLSDR:
-				logStatus(FragmentUtils.parseOpenCloseDeviceActivityResult(data).toString());
+				logStatus(FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data));
 				FragmentUtils.rtlSdrRunning=false;
 				break;
 	
