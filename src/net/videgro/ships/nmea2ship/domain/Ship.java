@@ -2,9 +2,13 @@ package net.videgro.ships.nmea2ship.domain;
 
 import java.util.Date;
 
+import android.util.Log;
+
 public class Ship {
+	private static final String TAG="Ship";
+
 	private static final String UNKNOWN="UNKNOWN";
-	
+
 	private final int mmsi;
 	private String countryName;
 	private String countryFlag;
@@ -59,6 +63,9 @@ public class Ship {
 		if (mid!=null){
 			countryName=mid.getFriendlyName();
 			countryFlag=mid.getFlagCode();
+		} else {
+			countryName=UNKNOWN;
+			countryFlag=UNKNOWN;
 		}
 	}
 
@@ -339,7 +346,12 @@ public class Ship {
 		Mid result=null;
 		final String mmsiAsString=mmsi+"";
 		if (mmsiAsString.length()>midSize){
-			result=Mid.valueOf(Mid.PREFIX+mmsiAsString.substring(0,midSize));
+			final String midAsString = mmsiAsString.substring(0,midSize);
+			try {
+				result=Mid.valueOf(Mid.PREFIX+midAsString);
+			} catch (IllegalArgumentException e){
+				Log.w(TAG,"retrieveMid - invalid - "+midAsString);
+			}
 		}
 		return result;
 	}
