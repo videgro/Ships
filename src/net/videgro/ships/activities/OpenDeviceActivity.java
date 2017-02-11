@@ -1,5 +1,6 @@
 package net.videgro.ships.activities;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,7 +14,6 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
@@ -26,7 +26,7 @@ import net.videgro.ships.tools.OpenDeviceHelper;
  * 
  * https://developer.android.com/guide/topics/connectivity/usb/host.html
  */
-public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServiceListener {
+public class OpenDeviceActivity extends Activity implements RtlSdrServiceListener {
 	private static final String TAG="OpenDeviceActivity";
 	
 	public static final String EXTRA_DISCONNECT="extra_disconnect";

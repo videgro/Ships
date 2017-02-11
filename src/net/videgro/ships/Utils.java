@@ -4,25 +4,25 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import net.videgro.ships.activities.MainActivity;
-import net.videgro.ships.dialogs.ImagePopup;
-import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdRequest.Builder;
+import com.google.android.gms.ads.AdView;
+
 import android.app.Activity;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdRequest.Builder;
-import com.google.android.gms.ads.AdView;
+import net.videgro.ships.activities.MainActivity;
+import net.videgro.ships.dialogs.ImagePopup;
+import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 
 public final class Utils {
 	private static final String TAG = "Utils";
@@ -70,26 +70,26 @@ public final class Utils {
 	}
 	
 	public static void sendNotification(final Context context,final String postfix,final String message){
-		NotificationCompat.Builder mBuilder =
-		        new NotificationCompat.Builder(context)
+		final Notification.Builder mBuilder =
+		        new Notification.Builder(context)
 		        .setSmallIcon(R.drawable.ic_launcher)
 		        .setContentTitle(context.getText(R.string.app_name)+" "+postfix)
 		        .setContentText(message);
 		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = new Intent(context, MainActivity.class);
+		final Intent resultIntent = new Intent(context, MainActivity.class);
 
 		// The stack builder object will contain an artificial back stack for the
 		// started Activity.
 		// This ensures that navigating backward from the Activity leads out of
 		// your application to the Home screen.
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 		// Adds the back stack for the Intent (but not the Intent itself)
 		stackBuilder.addParentStack(MainActivity.class);
 		// Adds the Intent that starts the Activity to the top of the stack
 		stackBuilder.addNextIntent(resultIntent);
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(resultPendingIntent);
-		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		final NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		int mId=0;
 		mNotificationManager.notify(mId, mBuilder.build());
