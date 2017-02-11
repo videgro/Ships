@@ -14,8 +14,8 @@ import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
-import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 import net.videgro.ships.fragments.internal.FragmentUtils;
+import net.videgro.ships.listeners.ImagePopupListener;
 
 public class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener, ImagePopupListener {
 	private static final String TAG = "SettingsFragment";
@@ -68,7 +68,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 		SettingsUtils.setToPreferencesPpm(getView().getContext(),Integer.MAX_VALUE);
 		
 		// Show popup and on closing popup, close application
-		Utils.showPopup(IMAGE_POPUP_ID_MUST_STOP,getActivity(),this,getString(R.string.popup_other_rtlsdr_device_title),getString(R.string.popup_other_rtlsdr_device_message),R.drawable.warning_icon);
+		Utils.showPopup(IMAGE_POPUP_ID_MUST_STOP,getActivity(),this,getString(R.string.popup_other_rtlsdr_device_title),getString(R.string.popup_other_rtlsdr_device_message),R.drawable.warning_icon,null);
 	}
 
 	private String getAppVersion() {

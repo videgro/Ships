@@ -21,9 +21,9 @@ import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
-import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 import net.videgro.ships.fragments.internal.FragmentUtils;
 import net.videgro.ships.listeners.CalibrateListener;
+import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.tasks.CalibrateTask;
 
 public class CalibrateFragment extends Fragment implements CalibrateListener, ImagePopupListener {
@@ -120,7 +120,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 					}
 				} else {	
 					resetGuiToInitialState();
-					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,"Failed to start RTL-SDR","<p style='text-decoration: underline'>"+startRtlSdrResultAsString+"</p>",R.drawable.thumbs_down_circle);
+					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,"Failed to start RTL-SDR",startRtlSdrResultAsString,R.drawable.thumbs_down_circle,null);
 				}
 				break;
 			case REQ_CODE_STOP_RTLSDR:
@@ -223,21 +223,21 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	public void onCalibrateReady(final int ppm){
 		SettingsUtils.setToPreferencesPpm(getActivity(),ppm);
 		Analytics.logEvent(getActivity(), TAG, "onCalibrateReady",""+ppm);
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY,getActivity(),this,getString(R.string.popup_found_ppm_title),getString(R.string.popup_found_ppm_message)+" "+ppm,R.drawable.thumbs_up_circle);		
+		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY,getActivity(),this,getString(R.string.popup_found_ppm_title),getString(R.string.popup_found_ppm_message)+" "+ppm,R.drawable.thumbs_up_circle,null);		
 	}	
 	
 	@Override
 	public void onCalibrateFailed() {
 		logStatus("Not possible to determine PPM.");
 		Analytics.logEvent(getActivity(), TAG, "onCalibrateFailed","");
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_not_found_ppm_title),getString(R.string.popup_not_found_ppm_message),R.drawable.thumbs_down_circle);
+		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_not_found_ppm_title),getString(R.string.popup_not_found_ppm_message),R.drawable.thumbs_down_circle,null);
 	}
 	
 	@Override
 	public void onCalibrateCancelled() {
 		logStatus("Calibration cancelled.");
 		Analytics.logEvent(getActivity(), TAG, "onCalibrateCancelled","");
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_calibration_cancelled_title),getString(R.string.popup_calibration_cancelled_message),R.drawable.warning_icon);		
+		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_calibration_cancelled_title),getString(R.string.popup_calibration_cancelled_message),R.drawable.warning_icon,null);		
 	}	
 	
 	/**** END CalibrateListener ****/

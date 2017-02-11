@@ -9,20 +9,23 @@ import com.google.android.gms.ads.AdRequest.Builder;
 import com.google.android.gms.ads.AdView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import net.videgro.ships.activities.MainActivity;
-import net.videgro.ships.dialogs.ImagePopup;
-import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
+import net.videgro.ships.listeners.ImagePopupListener;
 
 public final class Utils {
 	private static final String TAG = "Utils";
@@ -97,20 +100,6 @@ public final class Utils {
 		Analytics.logEvent(context,TAG,"sendNotification","message");
 	}	
 	
-	public static void showPopup(final int id,final Activity activity,final ImagePopupListener listener,final String title,final String message,final int imageResource){
-		final String txt="<h1>"+title+"</h1><p style='text-decoration: none'>"+message+"</p>";
-		if (activity!=null){
-			activity.runOnUiThread(new Runnable() {
-		        @Override
-		        public void run() {		        	
-		        	new ImagePopup(id,activity,listener,txt,imageResource).show();
-		        }
-			});
-		} else {
-			Log.e(TAG,"showPopup - activity is null.");
-		}
-	}
-	
 	public static void logStatus(final Activity activity,final TextView textView,final String status) {
 		final String tag="logStatus - ";
 		Log.d(TAG,tag+status);
@@ -135,5 +124,46 @@ public final class Utils {
 		} else {
 			Log.e(TAG,tag+"Huh? No activity set. ("+text+")");
 		}
+	}
+
+	public static void showPopup(final int id,final Activity activity,final ImagePopupListener listener,final String title,final String message,final int imageResource,final Long automaticDismissDelay){
+		final String tag="showPopup - ";
+
+		activity.runOnUiThread(new Runnable() {
+		    public void run() {
+		    	final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
+				ad.setTitle(title);
+				ad.setMessage(Html.fromHtml(message));
+				ad.setIcon(imageResource);
+				ad.setNeutralButton("OK", new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						if (listener!=null){
+							listener.onImagePopupDispose(id);
+						}
+					}
+				});
+
+				final AlertDialog alert = ad.create();
+				alert.show();
+
+				if (automaticDismissDelay != null) {
+					final Handler handler = new Handler();
+					final Runnable runnable = new Runnable() {
+						public void run() {
+							if (alert != null && alert.isShowing()) {
+								try {
+									alert.dismiss();
+								} catch (IllegalArgumentException e) {
+									// FIXME: Ugly fix (View not attached to window manager)
+									Log.e(TAG,tag+"Auto dismiss", e);
+								}
+							}
+						}
+					};
+					handler.postDelayed(runnable, automaticDismissDelay);
+				}
+		    }
+		});		
 	}
 }

@@ -114,5 +114,4 @@
     <string name="msg_gps_not_enabled">GPS is not enabled. Enable GPS to view your current position at the map.</string>
     
     <string name="alt_rtlsdrStick">RTL-SDR device</string>
-    <string name="alt_imagePopup_image">image</string>
 </resources>

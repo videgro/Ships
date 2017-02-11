@@ -44,8 +44,8 @@ import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
-import net.videgro.ships.dialogs.ImagePopup.ImagePopupListener;
 import net.videgro.ships.fragments.internal.FragmentUtils;
+import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import net.videgro.ships.nmea2ship.Nmea2Ship;
@@ -136,7 +136,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		
 		final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(this.getActivity());
 		if (!SettingsUtils.isValidPpm(ppm)) {
-			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING,this.getActivity(),this,getString(R.string.popup_no_ppm_set_title),getString(R.string.popup_no_ppm_set_message),R.drawable.warning_icon);			
+			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING,this.getActivity(),this,getString(R.string.popup_no_ppm_set_title),getString(R.string.popup_no_ppm_set_message),R.drawable.warning_icon,null);
 		} else {
 			webView.loadUrl("javascript:setZoomToExtent("+Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity()))+")");
 			startReceivingAisFromAntenna();
@@ -176,7 +176,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 				if (resultCode != Activity.RESULT_OK) {
 					resetGuiToInitialState();
-					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,getString(R.string.popup_start_device_failed_title),getString(R.string.popup_start_device_failed_message)+" "+startRtlSdrResultAsString,R.drawable.thumbs_down_circle);
+					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,getString(R.string.popup_start_device_failed_title),getString(R.string.popup_start_device_failed_message)+" "+startRtlSdrResultAsString,R.drawable.thumbs_down_circle,null);
 				} else {
 					FragmentUtils.rtlSdrRunning=true;
 				}
