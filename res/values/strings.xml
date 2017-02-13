@@ -76,9 +76,9 @@
   	<string name="pref_mapZoomToExtend">pref_mapZoomToExtend</string>
   	<string name="pref_mapZoomToExtend_summary">On every update of a ship position, zoom the map so it will display all ships.</string>
   	<string name="pref_mapZoomToExtend_title">Zoom to extend</string>
-  	<string name="pref_mapFetchAllZoomLevels">pref_mapFetchAllZoomLevels</string>
-  	<string name="pref_mapFetchAllZoomLevels_summary">Pre fetch map tiles for all zoomlevels. Will speed up zooming in and out, but will download more data and uses more disk storage.</string>
-  	<string name="pref_mapFetchAllZoomLevels_title">Fetch all zoomlevels</string>
+  	<string name="pref_mapFetchLowerZoomLevels">pref_mapFetchLowerZoomLevels</string>  	              
+  	<string name="pref_mapFetchLowerZoomLevels_summary">Pre fetch map tiles for lower zoomlevels. Will speed up zooming in and out, but will download more data and uses more disk storage.</string>
+  	<string name="pref_mapFetchLowerZoomLevels_title">Fetch lower zoomlevels</string>
   	<string name="pref_mapCacheMaxDiskUsage">pref_mapCacheMaxDiskUsage</string>
   	<string name="pref_mapCacheMaxDiskUsage_default">5</string>
   	<string name="pref_mapCacheMaxDiskUsage_dialog_title">Tiles cache: Maximum disk usage. (MB)</string>

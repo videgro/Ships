@@ -13,13 +13,11 @@
             android:key="@string/pref_mapZoomToExtend"
             android:summary="@string/pref_mapZoomToExtend_summary"
             android:title="@string/pref_mapZoomToExtend_title" />
-        <!-- 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="@string/pref_mapFetchAllZoomLevels"
-            android:summary="@string/pref_mapFetchAllZoomLevels_summary"
-            android:title="@string/pref_mapFetchAllZoomLevels_title" />
-		-->		 
+            android:key="@string/pref_mapFetchLowerZoomLevels"
+            android:summary="@string/pref_mapFetchLowerZoomLevels_summary"
+            android:title="@string/pref_mapFetchLowerZoomLevels_title" />
         <EditTextPreference
             android:defaultValue="@string/pref_mapCacheMaxDiskUsage_default"
             android:dialogTitle="@string/pref_mapCacheMaxDiskUsage_dialog_title"

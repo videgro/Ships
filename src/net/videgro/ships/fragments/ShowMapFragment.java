@@ -143,6 +143,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING,this.getActivity(),this,getString(R.string.popup_no_ppm_set_title),getString(R.string.popup_no_ppm_set_message),R.drawable.warning_icon,null);
 		} else {
 			webView.loadUrl("javascript:setZoomToExtent("+Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity()))+")");
+			webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles("+Boolean.toString(SettingsUtils.parseFromPreferencesMapCacheLowerZoomlevels(getActivity()))+")");
 			startReceivingAisFromAntenna();
 		}
 	}
@@ -225,6 +226,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			@Override
 			public void onPageFinished(WebView view, String url) {
 				webView.loadUrl("javascript:setZoomToExtent("+Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity()))+")");
+				webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles("+Boolean.toString(SettingsUtils.parseFromPreferencesMapCacheLowerZoomlevels(getActivity()))+")");
 				if (lastReceivedOwnLocation!=null){
 					webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");					
 				}
