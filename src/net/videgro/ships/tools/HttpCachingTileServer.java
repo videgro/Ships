@@ -8,25 +8,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import android.os.Environment;
 import android.util.Log;
 import fi.iki.elonen.NanoHTTPD;
+import net.videgro.ships.tasks.HttpCacheFifoTask;
 
 public class HttpCachingTileServer extends NanoHTTPD {
 	private static final String TAG = "HttpCachingTileServer - ";
 
 	private static final String DIRECTORY_TILES_CACHE = "map_tiles_cache";
-	private static final int MAX_AGE = 1000 * 60 * 60 * 24 * 30; // 30 days
-	private static final int MIN_FREE_BYTES = 1024 * 1024 * 100; // 100 megabytes
+	private static final long MAX_AGE = 1000L * 60 * 60 * 24 * 30; // 30 days
+	private static final long MIN_FREE_BYTES = 1024L * 1024 * 100; // 100 megabytes
 
 	private static final String[] ALLOWED_URLS = { "openstreetmap", "openseamap" };
 	
 	private static HttpCachingTileServer instance;
+	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private boolean running=false;
+	private FutureTask<String> httpCacheFifoTask=null;
+	
+	private long maxDiskUsageInBytes;
+	
+	private int hitCount=0;
+	private int networkCount=0;
+	private int requestCount=0;
+	private int notFoundCount=0;
 	
 	public static HttpCachingTileServer getInstance(){
 		if (instance==null){
@@ -39,8 +51,10 @@ public class HttpCachingTileServer extends NanoHTTPD {
 		super(8181);		
 	}
 	
-	public void startServer(){
+	public boolean startServer(final long maxDiskUsageInBytes){
+		boolean result=false;
 		if (!running){
+			this.maxDiskUsageInBytes=maxDiskUsageInBytes;
 			try {
 				start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
 				Log.i(TAG, "Running! Point your browser to http://localhost:8181/ \n");
@@ -49,11 +63,13 @@ public class HttpCachingTileServer extends NanoHTTPD {
 			}
 			createCacheDir();
 			running=true;
+			result=true;
 		}
+		return result;
 	}
 
 	private void createCacheDir() {
-		final File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIRECTORY_TILES_CACHE);
+		final File file = retrieveCacheDir();
 		Log.i(TAG, "Cache dir: " + file.getAbsolutePath());
 		if (!file.mkdirs()) {
 			Log.w(TAG, "Directory not created");
@@ -66,14 +82,16 @@ public class HttpCachingTileServer extends NanoHTTPD {
 		InputStream inputStream = null;
 		OutputStream outputStream = null;
 
-		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIRECTORY_TILES_CACHE + "/" + urlAsString.replace(":", "").replace("/", "_"));
+		final File file = new File(retrieveCacheDir(),"/" + urlAsString.replace(":", "").replace("/", "_"));
 
 		if (file.exists() && ((Calendar.getInstance().getTimeInMillis() - file.lastModified()) < MAX_AGE)) {
-			Log.i(TAG, "File: " + file.getAbsolutePath() + " exists, serve file from cache.");
+			//Log.i(TAG, "File: " + file.getAbsolutePath() + " exists, serve file from cache.");
+			hitCount++;
 		} else {
-			// Log.i(TAG,"Downloading file: "+file.getAbsolutePath()+" from URL: "+urlAsString);
+			//Log.i(TAG,"Downloading file: "+file.getAbsolutePath()+" from URL: "+urlAsString);
+			networkCount++;
 			try {
-				URL url = new URL(urlAsString);
+				final URL url = new URL(urlAsString);
 				connection = (HttpURLConnection) url.openConnection();
 				// connection.setRequestProperty("User-Agent", "");
 				// connection.setRequestMethod("POST");
@@ -87,11 +105,9 @@ public class HttpCachingTileServer extends NanoHTTPD {
 				while ((num = inputStream.read(buf)) != -1) {
 					outputStream.write(buf, 0, num);
 				}
-			} catch (MalformedURLException e) {
-				Log.e(TAG, tag, e);
-
+				applyFifo();
 			} catch (IOException e) {
-				Log.e(TAG, tag, e);
+				Log.e(TAG, tag, e);			 
 			} finally {
 				if (outputStream != null) {
 					try {
@@ -131,23 +147,27 @@ public class HttpCachingTileServer extends NanoHTTPD {
 		final String tag = "serve - ";
 
 		Response res = null;
+		
+		requestCount++;
 
 		final String url = "http:/" + session.getUri(); // URI starts with /
 		if (isAllowed(url)) {
-
 			if (isExternalStorageWritable()) {
 				if (isEnoughDiskSpace()) {
-					File imageFile = getImage(url);
-
-					try {
-						res = newFixedLengthResponse(Response.Status.OK, "image/png", new FileInputStream(imageFile), (int) imageFile.length());
-						res.addHeader("Accept-Ranges", "bytes");
-						
-						res.addHeader("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT");						
-			            res.addHeader("Access-Control-Allow-Origin",  "*");
-			            res.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
-					} catch (FileNotFoundException e) {
-						Log.e(TAG, tag, e);
+					final File imageFile = getImage(url);
+					if (imageFile.exists()){
+						try {
+							res = newFixedLengthResponse(Response.Status.OK, "image/png", new FileInputStream(imageFile), (int) imageFile.length());
+							res.addHeader("Accept-Ranges", "bytes");
+							
+							res.addHeader("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT");						
+				            res.addHeader("Access-Control-Allow-Origin",  "*");
+				            res.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
+						} catch (FileNotFoundException e) {
+							Log.e(TAG, tag, e);
+						}
+					} else {
+						Log.e(TAG, tag + "Image file does not exist ("+imageFile+").");
 					}
 				} else {
 					Log.e(TAG, tag + "Not enough disk space available.");
@@ -158,18 +178,29 @@ public class HttpCachingTileServer extends NanoHTTPD {
 		} else {
 			Log.e(TAG, tag + "URL is not allowed.");
 		}
+		
+		if (res==null){
+			notFoundCount++;
+			res=newFixedLengthResponse(Response.Status.NOT_FOUND,NanoHTTPD.MIME_PLAINTEXT,"Error 404, file not found.");			
+		}
 
 		return res;
 	}
-
-	public int cleanup() {
+	
+	private File retrieveCacheDir(){
+		return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIRECTORY_TILES_CACHE);
+	}
+	
+	public int cleanupOldFiles() {
 		int deletedFiles = 0;
-		File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIRECTORY_TILES_CACHE);
+		final long now = Calendar.getInstance().getTimeInMillis();
+		final File folder = retrieveCacheDir();
 		if (folder != null) {
 			final File[] files = folder.listFiles();
 			if (files != null) {
-				for (final File fileEntry : folder.listFiles()) {
-					if (!fileEntry.isDirectory() && ((Calendar.getInstance().getTimeInMillis() - fileEntry.lastModified()) > MAX_AGE)) {
+				for (final File fileEntry : files) {
+					final long age=now-fileEntry.lastModified();
+					if (!fileEntry.isDirectory() && (age > MAX_AGE)) {
 						if (fileEntry.delete()) {
 							deletedFiles++;
 						}
@@ -190,5 +221,44 @@ public class HttpCachingTileServer extends NanoHTTPD {
 		String state = Environment.getExternalStorageState();
 		return Environment.MEDIA_MOUNTED.equals(state);
 	}
+		
+	/**
+	 * Returns the number of HTTP requests whose response was provided by the cache.
+	 */
+ 	public int getHitCount(){
+ 		return hitCount;
+ 	}
 
+ 	/**
+ 	 * Returns the number of HTTP requests that required the network to either supply a response or validate a locally cached response.
+ 	 */
+	public int getNetworkCount(){
+		return networkCount;
+	}
+
+	/**
+	 * Returns the total number of HTTP requests that were made. 
+	 */
+	public int getRequestCount(){
+		return requestCount;
+	}
+	
+	/**
+	 * Return the number of files which were not found.	 
+	 */
+	public int getNotFoundCount() {
+		return notFoundCount;
+	}
+
+	public String getStatistics(){
+		return "Number of requests made: "+requestCount+", Number of responses from cache: "+hitCount+", Number of network requests: "+networkCount+", Number of not found files: "+notFoundCount+".";
+	}
+	
+	private void applyFifo(){
+		if (httpCacheFifoTask==null || httpCacheFifoTask.isDone() || httpCacheFifoTask.isCancelled()){
+			// Just cue one at a time
+			httpCacheFifoTask = new FutureTask<String>(new HttpCacheFifoTask(retrieveCacheDir(),maxDiskUsageInBytes));
+			executor.execute(httpCacheFifoTask);
+		}
+	}
 }

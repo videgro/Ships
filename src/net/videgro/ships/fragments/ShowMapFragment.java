@@ -152,7 +152,16 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		
 	@Override
 	public void onStop() {
-		Analytics.logEvent(getActivity(), TAG,"Number of received ships",""+mmsiReceived.size());
+		final String tag="onStop";
+
+		if (mmsiReceived.size()==0){
+			Analytics.logEvent(getActivity(), TAG,tag,"No ships received.");
+		} else {
+			Analytics.logEvent(getActivity(), TAG,"Number of received ships",""+mmsiReceived.size());
+		}
+
+		Analytics.logEvent(getActivity(), TAG,"HttpCachingTileServer - Statistics",HttpCachingTileServer.getInstance().getStatistics());
+
 		super.onStop();
 	}
 	
@@ -194,9 +203,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private void setupHttpCachingTileServer(){
 		final String tag = "setupHttpCachingTileServer - ";
 		final HttpCachingTileServer httpCachingTileServer = HttpCachingTileServer.getInstance();		
-		final int cleanup = httpCachingTileServer.cleanup();
+		final int cleanup = httpCachingTileServer.cleanupOldFiles();
 		Log.i(TAG, tag + "Deleted: " + cleanup + " files from caching tile server.");
-		httpCachingTileServer.startServer();
+		httpCachingTileServer.startServer(SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
