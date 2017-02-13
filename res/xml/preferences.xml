@@ -19,16 +19,14 @@
             android:key="@string/pref_mapFetchAllZoomLevels"
             android:summary="@string/pref_mapFetchAllZoomLevels_summary"
             android:title="@string/pref_mapFetchAllZoomLevels_title" />
-		-->
-		<!-- 
+		-->		 
         <EditTextPreference
-            android:defaultValue="@string/pref_mapCacheMaxDiskUsage"
+            android:defaultValue="@string/pref_mapCacheMaxDiskUsage_default"
             android:dialogTitle="@string/pref_mapCacheMaxDiskUsage_dialog_title"
             android:inputType="number"
-            android:key="@string/pref_ppm"
+            android:key="@string/pref_mapCacheMaxDiskUsage"
             android:summary="@string/pref_mapCacheMaxDiskUsage_summary"
-            android:title="@string/pref_mapCacheMaxDiskUsage_title" />
-        -->
+            android:title="@string/pref_mapCacheMaxDiskUsage_title" />  
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_AisReceiverSettings_title" >
         <!-- 

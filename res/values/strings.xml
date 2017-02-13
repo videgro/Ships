@@ -80,6 +80,7 @@
   	<string name="pref_mapFetchAllZoomLevels_summary">Pre fetch map tiles for all zoomlevels. Will speed up zooming in and out, but will download more data and uses more disk storage.</string>
   	<string name="pref_mapFetchAllZoomLevels_title">Fetch all zoomlevels</string>
   	<string name="pref_mapCacheMaxDiskUsage">pref_mapCacheMaxDiskUsage</string>
+  	<string name="pref_mapCacheMaxDiskUsage_default">5</string>
   	<string name="pref_mapCacheMaxDiskUsage_dialog_title">Tiles cache: Maximum disk usage. (MB)</string>
   	<string name="pref_mapCacheMaxDiskUsage_summary">Maximal disk storage used by the caching tiles server.</string>
   	<string name="pref_mapCacheMaxDiskUsage_title">Tiles cache: Maximum disk usage.</string>
