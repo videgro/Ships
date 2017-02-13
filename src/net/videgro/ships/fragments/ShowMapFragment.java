@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -57,6 +58,9 @@ import net.videgro.ships.tools.HttpCachingTileServer;
 public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, NmeaReceivedListener, ImagePopupListener {
 	private static final String TAG = "ShowMapFragment";
 
+	
+	private final DecimalFormat GPS_COORD_FORMAT = new DecimalFormat("##.00");
+	
 	private static final int IMAGE_POPUP_ID_CALIBRATE_WARNING=1101;
 	private static final int IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR=1102;
 	
@@ -425,7 +429,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	
 	@Override
 	public void onOwnLocationReceived(final Location location) {
-		logStatus("Own location received: Lon: " + location.getLongitude() + ", Lat: " + location.getLatitude());
+		logStatus("Own location received: Lon: " + GPS_COORD_FORMAT.format(location.getLongitude()) + ", Lat: " + GPS_COORD_FORMAT.format(location.getLatitude()));
 		lastReceivedOwnLocation=location;
 				
 		if (getActivity()!=null){
