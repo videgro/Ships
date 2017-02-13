@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -380,8 +381,11 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	public void onImagePopupDispose(int id) {
 		switch (id) {
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
-			getFragmentManager().beginTransaction().replace(R.id.container, CalibrateFragment.newInstance()).commit();
-			// FIXME: Observed exception: "NullPointerException (@ShowMapFragment:onImagePopupDispose:257) {main}"
+			final String switchToFragmentResult = FragmentUtils.switchToFragment(getFragmentManager(),CalibrateFragment.newInstance());
+			if (!switchToFragmentResult.isEmpty()){
+				Analytics.logEvent(getActivity(), TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
+				FragmentUtils.stopApplication(this);
+			}
 		break;
 		case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
 			// TODO: Currently all errors are fatal, because we can't stop and restart the RTL-SDR dongle correctly

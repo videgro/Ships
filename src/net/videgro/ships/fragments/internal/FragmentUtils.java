@@ -1,6 +1,8 @@
 package net.videgro.ships.fragments.internal;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
@@ -89,6 +91,33 @@ public final class FragmentUtils {
 			Log.e(TAG,tag,e);			
 		}
 		System.exit(0);
+	}
+	
+	public static String switchToFragment(final FragmentManager fragmentManager,final Fragment fragment){
+		String err="UNDEFINED";
+		
+		if (fragmentManager!=null){
+			final FragmentTransaction transaction = fragmentManager.beginTransaction();
+			
+			if (transaction!=null){
+				if (fragment!=null){
+					final FragmentTransaction transaction2 = transaction.replace(R.id.container,fragment);
+					if (transaction2!=null){
+						transaction2.commit();
+						err="";						
+					} else {
+						err="Fragment transaction after REPLACE is NULL.";
+					}
+				} else {
+					err="Fragment is NULL.";
+				}
+			} else {
+				err="Fragment transaction is NULL.";
+			}
+		} else {
+			err="Fragment manager is NULL.";
+		}
+		return err;
 	}
 	
 	private static Intent createOpenDeviceIntent(final Fragment fragment,final String arguments){
