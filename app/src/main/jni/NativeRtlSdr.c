@@ -217,7 +217,7 @@ JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis
 	char ** argv;
 
 	allocate_args_from_string(nargs, nargslength, &argc, &argv);
-	main(fd, n_uspfs_path, argc, argv);
+	main_android(fd, n_uspfs_path, argc, argv);
 
 	(*env)->ReleaseStringUTFChars(env, args, nargs);
 	if (uspfs_path != NULL){

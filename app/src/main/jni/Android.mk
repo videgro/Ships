@@ -1,7 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 APP_PLATFORM:= android-16
 APP_ABI:= armeabi armeabi-v7a x86
-    
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -33,17 +33,17 @@ LOCAL_SRC_FILES:= \
  rtl-ais/aisdecoder/lib/filter.c \
  rtl-ais/tcp_listener/tcp_listener.c \
  NativeRtlSdr.c
- 
+
 LOCAL_C_INCLUDES += \
-jni/libusb \
-jni/libusb/android \
-jni/libusb/libusb \
-jni/libusb/libusb/os \
-jni/rtl-sdr/include \
-jni/rtl-sdr/src \
-jni/rtl-ais \
-jni/rtl-ais/aisdecoder \
-jni/rtl-ais/aisdecoder/lib
+ $(LOCAL_PATH)/libusb \
+ $(LOCAL_PATH)/libusb/android \
+ $(LOCAL_PATH)/libusb/libusb \
+ $(LOCAL_PATH)/libusb/libusb/os \
+ $(LOCAL_PATH)/rtl-sdr/include \
+ $(LOCAL_PATH)/rtl-sdr/src \
+ $(LOCAL_PATH)/rtl-ais \
+ $(LOCAL_PATH)/rtl-ais/aisdecoder \
+ $(LOCAL_PATH)/rtl-ais/aisdecoder/lib
 
 LOCAL_CFLAGS += -Wall -DLIBUSB_DESCRIBE="" -O3 -fno-builtin-printf -fno-builtin-fprintf
 LOCAL_MODULE:= NativeRtlSdr
