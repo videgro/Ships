@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -381,7 +380,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	public void onImagePopupDispose(int id) {
 		switch (id) {
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
-			final String switchToFragmentResult = FragmentUtils.switchToFragment(getFragmentManager(),CalibrateFragment.newInstance());
+			final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),CalibrateFragment.newInstance());
 			if (!switchToFragmentResult.isEmpty()){
 				Analytics.logEvent(getActivity(), TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
 				FragmentUtils.stopApplication(this);

@@ -1,5 +1,6 @@
 package net.videgro.ships.fragments.internal;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -93,29 +94,34 @@ public final class FragmentUtils {
 		System.exit(0);
 	}
 	
-	public static String switchToFragment(final FragmentManager fragmentManager,final Fragment fragment){
+	public static String switchToFragment(final Activity activity,final Fragment fragment){
 		String err="UNDEFINED";
 		
-		if (fragmentManager!=null){
-			final FragmentTransaction transaction = fragmentManager.beginTransaction();
-			
-			if (transaction!=null){
-				if (fragment!=null){
-					final FragmentTransaction transaction2 = transaction.replace(R.id.container,fragment);
-					if (transaction2!=null){
-						transaction2.commit();
-						err="";						
+		if (activity!=null){
+			final FragmentManager fragmentManager=activity.getFragmentManager();
+			if (fragmentManager!=null){
+				final FragmentTransaction transaction = fragmentManager.beginTransaction();
+				
+				if (transaction!=null){
+					if (fragment!=null){
+						final FragmentTransaction transaction2 = transaction.replace(R.id.container,fragment);
+						if (transaction2!=null){
+							transaction2.commit();
+							err="";						
+						} else {
+							err="Fragment transaction after REPLACE is NULL.";
+						}
 					} else {
-						err="Fragment transaction after REPLACE is NULL.";
+						err="Fragment is NULL.";
 					}
 				} else {
-					err="Fragment is NULL.";
+					err="Fragment transaction is NULL.";
 				}
 			} else {
-				err="Fragment transaction is NULL.";
+				err="Fragment manager is NULL.";
 			}
 		} else {
-			err="Fragment manager is NULL.";
+			err="Activity is NULL.";
 		}
 		return err;
 	}

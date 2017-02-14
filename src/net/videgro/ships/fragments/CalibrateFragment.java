@@ -3,7 +3,6 @@ package net.videgro.ships.fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -181,7 +180,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	}
 	
 	private void switchToShowMapFragment(){
-		final String switchToFragmentResult = FragmentUtils.switchToFragment(getFragmentManager(),ShowMapFragment.newInstance());
+		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),ShowMapFragment.newInstance());
 		if (!switchToFragmentResult.isEmpty()){
 			Analytics.logEvent(getActivity(), TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
 			FragmentUtils.stopApplication(this);
