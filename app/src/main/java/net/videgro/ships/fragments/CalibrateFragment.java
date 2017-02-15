@@ -42,10 +42,6 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	private ToggleButton startStopCalibrateButtonThorough;
 
 	private CalibrateTask calibrateTask;
-	
-	public static final CalibrateFragment newInstance() {
-		return new CalibrateFragment();
-	}
 
 	@SuppressLint("NewApi")
 	@Override
@@ -180,7 +176,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	}
 	
 	private void switchToShowMapFragment(){
-		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),ShowMapFragment.newInstance());
+		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new ShowMapFragment());
 		if (!switchToFragmentResult.isEmpty()){
 			Analytics.logEvent(getActivity(), TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
 			FragmentUtils.stopApplication(this);

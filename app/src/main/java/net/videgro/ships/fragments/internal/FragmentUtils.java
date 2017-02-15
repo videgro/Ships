@@ -81,16 +81,22 @@ public final class FragmentUtils {
 		return (startRtlSdrResult!=null) ? startRtlSdrResult.toString() : "RESULT UNKNOWN";
 	}
 	
-	public static void stopApplication(final Fragment fragment){
-		final String tag="stopApplication - ";
-		final int waitTime=5000;
-		Analytics.logEvent(fragment.getActivity(), TAG, "stopApplication","");
-		fragment.getActivity().finish();
-		try {
-			Thread.sleep(waitTime);
-		} catch (InterruptedException e) {
-			Log.e(TAG,tag,e);			
+	public static void stopApplication(final Fragment fragment) {
+		final String tag = "stopApplication - ";
+		final int waitTime = 5000;
+
+		if (fragment != null && fragment.getActivity() != null) {
+			final Activity activity=fragment.getActivity();
+			Analytics.logEvent(activity, TAG, "stopApplication", "");
+			activity.finish();
+
+			try {
+				Thread.sleep(waitTime);
+			} catch (InterruptedException e) {
+				Log.e(TAG,tag,e);
+			}
 		}
+
 		System.exit(0);
 	}
 	

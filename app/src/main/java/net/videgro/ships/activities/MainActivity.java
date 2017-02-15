@@ -22,7 +22,7 @@ public class MainActivity extends Activity {
 		actionBar.setDisplayShowTitleEnabled(true);
 		//actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		
-		getFragmentManager().beginTransaction().replace(R.id.container, ShowMapFragment.newInstance()).commit();
+		getFragmentManager().beginTransaction().replace(R.id.container, new ShowMapFragment()).commit();
 	}
 
 	@Override

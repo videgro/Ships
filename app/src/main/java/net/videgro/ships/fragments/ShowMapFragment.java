@@ -89,15 +89,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	 * Contains all received MMSIs. A set contains unique entries.
 	 */
 	private Set<Integer> mmsiReceived=new HashSet<Integer>();
-	
-	public static final ShowMapFragment newInstance() {
-		return new ShowMapFragment();
-	}
 
-	private ShowMapFragment() {
-		// No public constructor, use newInstance()
-	}
-	
 	@SuppressLint("NewApi")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -380,7 +372,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	public void onImagePopupDispose(int id) {
 		switch (id) {
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
-			final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),CalibrateFragment.newInstance());
+			final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new CalibrateFragment());
 			if (!switchToFragmentResult.isEmpty()){
 				Analytics.logEvent(getActivity(), TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
 				FragmentUtils.stopApplication(this);
