@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+
 import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
 import net.videgro.ships.services.RtlSdrAisService;
@@ -151,7 +152,9 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     @Override
     protected void onStop() {
         Log.i(TAG,"onStop");
-        unregisterReceiver(usbReceiver);
+		if (usbReceiver!=null) {
+			unregisterReceiver(usbReceiver);
+		}
         super.onStop();
     }
 	
