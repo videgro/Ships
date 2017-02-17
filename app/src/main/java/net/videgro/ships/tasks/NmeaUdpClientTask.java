@@ -1,57 +1,68 @@
 package net.videgro.ships.tasks;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
+import net.videgro.ships.tasks.domain.DatagramSocketConfig;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-
-import android.os.AsyncTask;
-import android.util.Log;
 
 public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
 	private static final String TAG="NmeaUdpClientTask";
-	
-	private int port;
-	
-	private NmeaUdpClientListener listener;
 
-	public NmeaUdpClientTask(NmeaUdpClientListener listener,final int port) {
+	private final DatagramSocketConfig datagramSocketConfigIn;
+	private final DatagramSocketConfig datagramSocketConfigRepeater;
+	
+	private final NmeaUdpClientListener listener;
+
+	public NmeaUdpClientTask(final NmeaUdpClientListener listener,final DatagramSocketConfig datagramSocketConfigIn,final DatagramSocketConfig datagramSocketConfigRepeater) {
 		this.listener = listener;
-		this.port=port;
+		this.datagramSocketConfigIn=datagramSocketConfigIn;
+		this.datagramSocketConfigRepeater=datagramSocketConfigRepeater;
 	}
 
 	public String doInBackground(Void... params) {
+		final String tag="doInBackground - ";
 		Thread.currentThread().setName(TAG);
 		
-		DatagramSocket serverSocket = null;
-		try {
-			serverSocket = new DatagramSocket(port);
+		DatagramSocket serverSocketIn = null;
 
-			Log.d(TAG, "Listening on udp: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
+		try {
+			serverSocketIn = new DatagramSocket(datagramSocketConfigIn.getPort(), InetAddress.getByName(datagramSocketConfigIn.getAddress()));
+			Log.d(TAG, "Listening on UDP: " + datagramSocketConfigIn);
+
+			if (datagramSocketConfigRepeater!=null){
+				Log.d(TAG, "Repeating on UDP: " + datagramSocketConfigRepeater);
+			}
 
 			byte[] receiveData = new byte[1024];
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			final DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
 			while (!isCancelled()) {
-				serverSocket.receive(receivePacket);
+				serverSocketIn.receive(receivePacket);
+
+                // Repeat: Copy packet and send to new destination
+                if (datagramSocketConfigRepeater!=null){
+                    final DatagramSocket serverSocketRepeater = new DatagramSocket();
+                    final DatagramPacket packet = new DatagramPacket(receivePacket.getData(),receivePacket.getLength(),InetAddress.getByName(datagramSocketConfigRepeater.getAddress()),datagramSocketConfigRepeater.getPort());
+                    serverSocketRepeater.send(packet);
+                }
+
 				final String sentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
 				final String lines[] = sentence.split("\\r?\\n");
 				for (final String line : lines) {
-					Log.d(TAG,"doInBackground - NMEA received - "+line);
+					Log.d(TAG,tag+"NMEA received - "+line);
 					listener.onNmeaReceived(line);
 				}
 			}
-		} catch (UnknownHostException e) {
-			Log.e(TAG, "", e);
-		} catch (SocketException e) {
-			Log.e(TAG, "", e);
 		} catch (IOException e) {
-			Log.e(TAG, "", e);
+			Log.e(TAG,tag, e);
 		} finally {
-			if (serverSocket != null && !serverSocket.isClosed()) {
-				serverSocket.close();
+			if (serverSocketIn != null && !serverSocketIn.isClosed()) {
+				serverSocketIn.close();
 			}
 		}
 

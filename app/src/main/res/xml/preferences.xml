@@ -1,4 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <net.videgro.ships.preferences.PromoPreferenceRateMe android:key="rate" />
 
     <PreferenceCategory android:key="@string/pref_GeneralSettings" >
         <CheckBoxPreference
@@ -44,6 +45,9 @@
         <Preference android:title="@string/pref_rtlSdrPpmInvalidate_title"
             android:key="@string/pref_rtlSdrPpmInvalidate"
             android:summary="@string/pref_rtlSdrPpmInvalidate_summary"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_ThirdPartyPlotter_title">
+        <Preference android:summary="@string/pref_ThirdPartyPlotter_summary" />
         <EditTextPreference
             inputType="phone"
             android:defaultValue="@string/pref_aisMessagesDestinationHost_default"
@@ -51,6 +55,13 @@
             android:key="@string/pref_aisMessagesDestinationHost"
             android:summary="@string/pref_aisMessagesDestinationHost_summary"
             android:title="@string/pref_aisMessagesDestinationHost_title" />
+        <EditTextPreference
+            android:defaultValue="@string/pref_aisMessagesDestinationPort_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationPort_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_aisMessagesDestinationPort"
+            android:summary="@string/pref_aisMessagesDestinationPort_summary"
+            android:title="@string/pref_aisMessagesDestinationPort_title" />
     </PreferenceCategory>  
 
     <net.videgro.ships.preferences.PromoPreferenceRateMe android:key="rate" />

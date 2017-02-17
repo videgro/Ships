@@ -7,15 +7,15 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
-import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.activities.OpenDeviceActivity;
+import net.videgro.ships.services.NmeaUdpClientService;
 
 public final class FragmentUtils {
 	private static final String TAG="FragmentUtils";
-	private static final int NMEA_UDP_PORT=10110;
-	
+
 	/**
 	 * Shared across fragments
 	 */
@@ -29,8 +29,7 @@ public final class FragmentUtils {
 		final String tag="startReceivingAisFromAntenna - ";
 		Log.d(TAG,tag);
 		boolean result=false;
-		final String aisMessagesDestinationHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(fragment.getActivity());
-		final String arguments = "-p " + ppm + " -P "+NMEA_UDP_PORT+" -h " + aisMessagesDestinationHost + " -R -x -S 60 -n";		
+		final String arguments = "-p " + ppm + " -P "+NmeaUdpClientService.NMEA_UDP_PORT+" -h " + NmeaUdpClientService.NMEA_UDP_HOST + " -R -x -S 60 -n";
 		final Intent intent=createOpenDeviceIntent(fragment,arguments);
 		if (intent!=null){
 			fragment.startActivityForResult(intent, reqCode);

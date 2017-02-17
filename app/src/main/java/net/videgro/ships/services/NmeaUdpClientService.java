@@ -1,12 +1,5 @@
 package net.videgro.ships.services;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import net.videgro.ships.Analytics;
-import net.videgro.ships.listeners.NmeaReceivedListener;
-import net.videgro.ships.tasks.NmeaUdpClientTask;
-import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -14,10 +7,21 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import net.videgro.ships.Analytics;
+import net.videgro.ships.SettingsUtils;
+import net.videgro.ships.listeners.NmeaReceivedListener;
+import net.videgro.ships.tasks.NmeaUdpClientTask;
+import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
+import net.videgro.ships.tasks.domain.DatagramSocketConfig;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class NmeaUdpClientService extends Service implements NmeaUdpClientListener {
 	private static final String TAG = "NmeaUdpClientService";
 
-	private static final int NMEA_UDP_PORT=10110;
+	public static final int NMEA_UDP_PORT=10109;
+    public static final String NMEA_UDP_HOST="127.0.0.1";
 
 	private final IBinder binder = new ServiceBinder();
 	private Set<NmeaReceivedListener> listeners=new HashSet<NmeaReceivedListener>();
@@ -56,8 +60,23 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
-			nmeaUdpClientTask = new NmeaUdpClientTask(this,NMEA_UDP_PORT);
-			nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            final DatagramSocketConfig datagramSocketConfigIn=new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT);
+
+            // Config NMEA repeater
+            final String repeatHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(this);
+            final int repeatPort = SettingsUtils.parseFromPreferencesAisMessagesDestinationPort(this);
+
+            DatagramSocketConfig datagramSocketConfigRepeater=null;
+            if (repeatPort>0 && repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
+                datagramSocketConfigRepeater = new DatagramSocketConfig(repeatHost,repeatPort);
+                Analytics.logEvent(this, TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
+            } else {
+                Log.w(TAG,tag+"IGNORE repeat setting: Asked to repeat to build in address:port or invalid settings.");
+            }
+
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,datagramSocketConfigIn,datagramSocketConfigRepeater);
+            nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}

@@ -84,13 +84,9 @@
   	<string name="pref_mapCacheMaxDiskUsage_dialog_title">Tiles cache: Maximum disk usage. (MB)</string>
   	<string name="pref_mapCacheMaxDiskUsage_summary">Maximal disk storage used by the caching tiles server.</string>
   	<string name="pref_mapCacheMaxDiskUsage_title">Tiles cache: Maximum disk usage.</string>
+
   	<string name="pref_AisReceiverSettings_title">AIS Receiver</string>
-  	<string name="pref_aisMessagesDestinationHost">pref_aisMessagesDestinationHost</string>
-  	<string name="pref_aisMessagesDestinationHost_default">127.0.0.1</string>
-  	<string name="pref_aisMessagesDestinationHost_dialog_title">AIS messages destination host, default: 127.0.0.1 (IP address)</string>
-  	<string name="pref_aisMessagesDestinationHost_summary">Expert setting:  The IP address to send received AIS messages to. Will always use UDP, port 10110.</string>
-  	<string name="pref_aisMessagesDestinationHost_title">AIS Messages destination host</string>
-	
+
 	<!--
     <string name="pref_rtlSdrForceRoot">pref_forceRoot</string>
     <string name="pref_rtlSdrForceRoot_summary">Force root to access RTL-SDR device.</string>
@@ -106,7 +102,22 @@
     <string name="pref_rtlSdrPpmInvalidate">pref_rtlSdrPpmInvalidate</string>
     <string name="pref_rtlSdrPpmInvalidate_summary">Invalidate the current PPM setting.</string>
     <string name="pref_rtlSdrPpmInvalidate_title">Use other RTL-SDR device</string>
-  
+
+    <string name="pref_ThirdPartyPlotter_title">Third party plotter (i.e. OpenCPN)</string>
+    <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection. Default: address 127.0.0.1 and port 10110.</string>
+
+    <string name="pref_aisMessagesDestinationHost">pref_aisMessagesDestinationHost</string>
+    <string name="pref_aisMessagesDestinationHost_default">127.0.0.1</string>
+    <string name="pref_aisMessagesDestinationHost_dialog_title">AIS messages destination host (IP address)</string>
+    <string name="pref_aisMessagesDestinationHost_summary">The IP address to send received AIS messages to. </string>
+    <string name="pref_aisMessagesDestinationHost_title">AIS Messages destination host</string>
+
+    <string name="pref_aisMessagesDestinationPort">pref_aisMessagesDestinationPort</string>
+    <string name="pref_aisMessagesDestinationPort_default">10110</string>
+    <string name="pref_aisMessagesDestinationPort_dialog_title">AIS messages destination port (UDP port)</string>
+    <string name="pref_aisMessagesDestinationPort_summary">The UDP port to send received AIS messages to.</string>
+    <string name="pref_aisMessagesDestinationPort_title">AIS Messages destination port</string>
+
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_calibrate">Calibrate</string>
     
