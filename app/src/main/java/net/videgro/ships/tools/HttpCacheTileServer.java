@@ -1,5 +1,11 @@
 package net.videgro.ships.tools;
 
+import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
+
+import net.videgro.ships.tasks.HttpCacheFifoTask;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,10 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import android.os.Environment;
-import android.util.Log;
 import fi.iki.elonen.NanoHTTPD;
-import net.videgro.ships.tasks.HttpCacheFifoTask;
 
 public class HttpCacheTileServer extends NanoHTTPD {
 	private static final String TAG = "HttpCacheTileServer - ";
@@ -29,6 +32,8 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	private static final String[] ALLOWED_URLS = { "openstreetmap", "openseamap" };
 	
 	private static HttpCacheTileServer instance;
+
+	private Context context;
 	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private boolean running=false;
 	private FutureTask<String> httpCacheFifoTask=null;
@@ -50,84 +55,91 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	private HttpCacheTileServer() {
 		super(8181);		
 	}
-	
-	public boolean startServer(final long maxDiskUsageInBytes){
+
+    public void init(final Context context,final long maxDiskUsageInBytes){
+        this.context=context;
+        this.maxDiskUsageInBytes=maxDiskUsageInBytes;
+    }
+
+	public boolean startServer(){
+        final String tag="startServer - ";
 		boolean result=false;
+
 		if (!running){
-			this.maxDiskUsageInBytes=maxDiskUsageInBytes;
-			try {
+            final int cleanup = cleanupOldFiles();
+            Log.i(TAG, tag + "Deleted: " + cleanup + " files from caching tile server.");
+
+            try {
 				start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-				Log.i(TAG, "Running! Point your browser to http://localhost:8181/ \n");
+				Log.i(TAG,tag+"Running! Point your browser to http://localhost:8181/ \n");
 			} catch (IOException e) {
-				Log.e(TAG, "startServer", e);
+				Log.e(TAG,tag, e);
 			}
-			createCacheDir();
 			running=true;
 			result=true;
 		}
 		return result;
 	}
 
-	private void createCacheDir() {
-		final File file = retrieveCacheDir();
-		Log.i(TAG, "Cache dir: " + file.getAbsolutePath());
-		if (!file.mkdirs()) {
-			Log.w(TAG, "Directory not created");
-		}
-	}
-
 	private File getImage(final String urlAsString) {
-		final String tag = "getImage";
+		final String tag = "getImage - ";
 		HttpURLConnection connection = null;
 		InputStream inputStream = null;
 		OutputStream outputStream = null;
 
-		final File file = new File(retrieveCacheDir(),"/" + urlAsString.replace(":", "").replace("/", "_"));
+        File file = null;
 
-		if (file.exists() && ((Calendar.getInstance().getTimeInMillis() - file.lastModified()) < MAX_AGE)) {
-			//Log.i(TAG, "File: " + file.getAbsolutePath() + " exists, serve file from cache.");
-			hitCount++;
-		} else {
-			//Log.i(TAG,"Downloading file: "+file.getAbsolutePath()+" from URL: "+urlAsString);
-			networkCount++;
-			try {
-				final URL url = new URL(urlAsString);
-				connection = (HttpURLConnection) url.openConnection();
-				// connection.setRequestProperty("User-Agent", "");
-				// connection.setRequestMethod("POST");
-				// connection.setDoInput(true);
-				connection.connect();
+        final File cacheDir=retrieveCacheDir();
+        if (cacheDir!=null) {
+            file = new File(cacheDir, "/" + urlAsString.replace(":", "").replace("/", "_"));
 
-				inputStream = connection.getInputStream();
-				outputStream = new FileOutputStream(file);
-				byte[] buf = new byte[512];
-				int num;
-				while ((num = inputStream.read(buf)) != -1) {
-					outputStream.write(buf, 0, num);
-				}
-				applyFifo();
-			} catch (IOException e) {
-				Log.e(TAG, tag, e);			 
-			} finally {
-				if (outputStream != null) {
-					try {
-						outputStream.close();
-					} catch (IOException e) {
-						Log.e(TAG, tag, e);
-					}
-				}
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					} catch (IOException e) {
-						Log.e(TAG, tag, e);
-					}
-				}
-				if (connection != null) {
-					connection.disconnect();
-				}
-			}
-		}
+            if (file.exists() && ((Calendar.getInstance().getTimeInMillis() - file.lastModified()) < MAX_AGE)) {
+                //Log.i(TAG, "File: " + file.getAbsolutePath() + " exists, serve file from cache.");
+                hitCount++;
+            } else {
+                //Log.i(TAG,"Downloading file: "+file.getAbsolutePath()+" from URL: "+urlAsString);
+                networkCount++;
+                try {
+                    final URL url = new URL(urlAsString);
+                    connection = (HttpURLConnection) url.openConnection();
+                    // connection.setRequestProperty("User-Agent", "");
+                    // connection.setRequestMethod("POST");
+                    // connection.setDoInput(true);
+                    connection.connect();
+
+                    inputStream = connection.getInputStream();
+                    outputStream = new FileOutputStream(file);
+                    byte[] buf = new byte[512];
+                    int num;
+                    while ((num = inputStream.read(buf)) != -1) {
+                        outputStream.write(buf, 0, num);
+                    }
+                    applyFifo();
+                } catch (IOException e) {
+                    Log.e(TAG, tag, e);
+                } finally {
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, tag, e);
+                        }
+                    }
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, tag, e);
+                        }
+                    }
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
+                }
+            }
+        } else {
+            Log.e(TAG,tag+"No cache directory available.");
+        }
 
 		return file;
 	}
@@ -152,29 +164,21 @@ public class HttpCacheTileServer extends NanoHTTPD {
 
 		final String url = "http:/" + session.getUri(); // URI starts with /
 		if (isAllowed(url)) {
-			if (isExternalStorageWritable()) {
-				if (isEnoughDiskSpace()) {
-					final File imageFile = getImage(url);
-					if (imageFile.exists()){
-						try {
-							res = newFixedLengthResponse(Response.Status.OK, "image/png", new FileInputStream(imageFile), (int) imageFile.length());
-							res.addHeader("Accept-Ranges", "bytes");
-							
-							res.addHeader("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT");						
-				            res.addHeader("Access-Control-Allow-Origin",  "*");
-				            res.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
-						} catch (FileNotFoundException e) {
-							Log.e(TAG, tag, e);
-						}
-					} else {
-						Log.e(TAG, tag + "Image file does not exist ("+imageFile+").");
-					}
-				} else {
-					Log.e(TAG, tag + "Not enough disk space available.");
-				}
-			} else {
-				Log.e(TAG, tag + "Not possible to use external storage.");
-			}
+            final File imageFile = getImage(url);
+            if (imageFile!=null && imageFile.exists()){
+                try {
+                    res = newFixedLengthResponse(Response.Status.OK, "image/png", new FileInputStream(imageFile), (int) imageFile.length());
+                    res.addHeader("Accept-Ranges", "bytes");
+
+                    res.addHeader("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT");
+                    res.addHeader("Access-Control-Allow-Origin",  "*");
+                    res.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, tag, e);
+                }
+            } else {
+                Log.e(TAG, tag + "Image file does not exist ("+imageFile+").");
+            }
 		} else {
 			Log.e(TAG, tag + "URL is not allowed.");
 		}
@@ -187,14 +191,31 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		return res;
 	}
 	
-	private File retrieveCacheDir(){
-		return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIRECTORY_TILES_CACHE);
+	private File retrieveCacheDir() {
+        final String tag="retrieveCacheDir - ";
+        File result = null;
+        if (isExternalStorageWritable()){
+            result=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
+            if (!result.exists() && !result.mkdirs()) {
+                Log.w(TAG,tag+"Not possible to create directory.");
+            } else if (result.getFreeSpace()<MIN_FREE_BYTES){
+                Log.w(TAG,tag+"Not enough free space on external files dir. Minimal required: "+MIN_FREE_BYTES+" bytes.");
+                result=null;
+            }
+        }
+
+        if (result==null){
+            Log.w(TAG,tag+"No external files directory available, use cache directory.");
+            result = context.getCacheDir();
+        }
+        return result;
 	}
 	
-	public int cleanupOldFiles() {
+	private int cleanupOldFiles() {
 		int deletedFiles = 0;
 		final long now = Calendar.getInstance().getTimeInMillis();
 		final File folder = retrieveCacheDir();
+        Log.d(TAG,"Cleaning directory: "+folder);
 		if (folder != null) {
 			final File[] files = folder.listFiles();
 			if (files != null) {
@@ -211,14 +232,9 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		return deletedFiles;
 	}
 
-	private boolean isEnoughDiskSpace() {
-		final long freeBytes = new File(Environment.getExternalStorageDirectory().toString()).getFreeSpace();
-		return freeBytes > MIN_FREE_BYTES;
-	}
-
 	/* Checks if external storage is available for read and write */
 	private boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
+		final String state = Environment.getExternalStorageState();
 		return Environment.MEDIA_MOUNTED.equals(state);
 	}
 		

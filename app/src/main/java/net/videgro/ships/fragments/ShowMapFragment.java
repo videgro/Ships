@@ -1,16 +1,5 @@
 package net.videgro.ships.fragments;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.gson.Gson;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
@@ -41,6 +30,9 @@ import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import com.google.gson.Gson;
+
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
@@ -55,10 +47,18 @@ import net.videgro.ships.services.NmeaUdpClientService;
 import net.videgro.ships.services.TrackService;
 import net.videgro.ships.tools.HttpCacheTileServer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, NmeaReceivedListener, ImagePopupListener {
 	private static final String TAG = "ShowMapFragment";
 
-	
 	private final DecimalFormat GPS_COORD_FORMAT = new DecimalFormat("##.00");
 	
 	private static final int IMAGE_POPUP_ID_CALIBRATE_WARNING=1101;
@@ -200,9 +200,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	private void setupHttpCachingTileServer(){
 		final String tag = "setupHttpCachingTileServer - ";
 		final HttpCacheTileServer httpCacheTileServer = HttpCacheTileServer.getInstance();
-		final int cleanup = httpCacheTileServer.cleanupOldFiles();
-		Log.i(TAG, tag + "Deleted: " + cleanup + " files from caching tile server.");
-		httpCacheTileServer.startServer(SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
+		httpCacheTileServer.init(getActivity(),SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
+		httpCacheTileServer.startServer();
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
