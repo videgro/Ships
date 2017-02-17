@@ -53,7 +53,7 @@ import net.videgro.ships.nmea2ship.Nmea2Ship;
 import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.services.NmeaUdpClientService;
 import net.videgro.ships.services.TrackService;
-import net.videgro.ships.tools.HttpCachingTileServer;
+import net.videgro.ships.tools.HttpCacheTileServer;
 
 public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, NmeaReceivedListener, ImagePopupListener {
 	private static final String TAG = "ShowMapFragment";
@@ -157,7 +157,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			Analytics.logEvent(getActivity(), TAG,"Number of received ships",""+mmsiReceived.size());
 		}
 
-		Analytics.logEvent(getActivity(), TAG,"HttpCachingTileServer - Statistics",HttpCachingTileServer.getInstance().getStatistics());
+		Analytics.logEvent(getActivity(), TAG,"HttpCacheTileServer - Statistics", HttpCacheTileServer.getInstance().getStatistics());
 
 		super.onStop();
 	}
@@ -199,10 +199,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	
 	private void setupHttpCachingTileServer(){
 		final String tag = "setupHttpCachingTileServer - ";
-		final HttpCachingTileServer httpCachingTileServer = HttpCachingTileServer.getInstance();		
-		final int cleanup = httpCachingTileServer.cleanupOldFiles();
+		final HttpCacheTileServer httpCacheTileServer = HttpCacheTileServer.getInstance();
+		final int cleanup = httpCacheTileServer.cleanupOldFiles();
 		Log.i(TAG, tag + "Deleted: " + cleanup + " files from caching tile server.");
-		httpCachingTileServer.startServer(SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
+		httpCacheTileServer.startServer(SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")

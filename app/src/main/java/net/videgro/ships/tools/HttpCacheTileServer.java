@@ -19,8 +19,8 @@ import android.util.Log;
 import fi.iki.elonen.NanoHTTPD;
 import net.videgro.ships.tasks.HttpCacheFifoTask;
 
-public class HttpCachingTileServer extends NanoHTTPD {
-	private static final String TAG = "HttpCachingTileServer - ";
+public class HttpCacheTileServer extends NanoHTTPD {
+	private static final String TAG = "HttpCacheTileServer - ";
 
 	private static final String DIRECTORY_TILES_CACHE = "map_tiles_cache";
 	private static final long MAX_AGE = 1000L * 60 * 60 * 24 * 30; // 30 days
@@ -28,7 +28,7 @@ public class HttpCachingTileServer extends NanoHTTPD {
 
 	private static final String[] ALLOWED_URLS = { "openstreetmap", "openseamap" };
 	
-	private static HttpCachingTileServer instance;
+	private static HttpCacheTileServer instance;
 	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private boolean running=false;
 	private FutureTask<String> httpCacheFifoTask=null;
@@ -40,14 +40,14 @@ public class HttpCachingTileServer extends NanoHTTPD {
 	private int requestCount=0;
 	private int notFoundCount=0;
 	
-	public static HttpCachingTileServer getInstance(){
+	public static HttpCacheTileServer getInstance(){
 		if (instance==null){
-			instance=new HttpCachingTileServer();
+			instance=new HttpCacheTileServer();
 		}
 		return instance;
 	}
 	
-	private HttpCachingTileServer() {
+	private HttpCacheTileServer() {
 		super(8181);		
 	}
 	
