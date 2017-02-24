@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "net.videgro.ships"
@@ -31,5 +31,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-analytics:+'
     compile 'com.google.android.gms:play-services-ads:+'
     compile 'com.google.code.gson:gson:2.8.0'
-    compile files('libs/nanohttpd-2.3.1.jar')
+    compile 'org.nanohttpd:nanohttpd:2.3.1'
 }
