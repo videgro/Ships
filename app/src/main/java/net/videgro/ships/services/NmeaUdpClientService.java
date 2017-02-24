@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.SettingsUtils;
@@ -14,6 +15,8 @@ import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +27,7 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
     public static final String NMEA_UDP_HOST="127.0.0.1";
 
 	private final IBinder binder = new ServiceBinder();
-	private Set<NmeaReceivedListener> listeners=new HashSet<NmeaReceivedListener>();
+	private final Set<NmeaReceivedListener> listeners=new HashSet<NmeaReceivedListener>();
 	
 	private NmeaUdpClientTask nmeaUdpClientTask;
 
@@ -60,25 +63,56 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
-
-            final DatagramSocketConfig datagramSocketConfigIn=new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT);
-
-            // Config NMEA repeater
-            final String repeatHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(this);
-            final int repeatPort = SettingsUtils.parseFromPreferencesAisMessagesDestinationPort(this);
-
-            DatagramSocketConfig datagramSocketConfigRepeater=null;
-            if (repeatPort>0 && repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
-                datagramSocketConfigRepeater = new DatagramSocketConfig(repeatHost,repeatPort);
-                Analytics.logEvent(this, TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
-            } else {
-                Log.w(TAG,tag+"IGNORE repeat setting: Asked to repeat to build in address:port or invalid settings.");
-            }
-
-            nmeaUdpClientTask = new NmeaUdpClientTask(this,datagramSocketConfigIn,datagramSocketConfigRepeater);
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig());
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
+		}
+		return result;
+	}
+
+    private DatagramSocketConfig createRepeaterConfig(){
+        final String tag="createRepeaterConfig - ";
+        DatagramSocketConfig result=null;
+
+        final String repeatHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(this);
+        final int repeatPort = SettingsUtils.parseFromPreferencesAisMessagesDestinationPort(this);
+
+        String informText="Not repeating NMEA messages.";
+        if (repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
+            result = new DatagramSocketConfig(repeatHost,repeatPort);
+            if (validateDatagramSocketConfig(result)) {
+                informText="Repeating NMEA messages to UDP: " + result;
+                Analytics.logEvent(this, TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
+            } else {
+                result=null;
+            }
+        } else {
+            informText="IGNORE NMEA repeat setting: Asked to repeat to build in address:port or invalid settings.";
+        }
+
+        Log.d(TAG,tag+informText);
+        Toast.makeText(this,informText,Toast.LENGTH_LONG);
+
+        return result;
+    }
+
+	private static boolean validateDatagramSocketConfig(final DatagramSocketConfig datagramSocketConfig) {
+		final String tag = "validateDatagramSocketConfig - ";
+
+		boolean result = false;
+
+		if (datagramSocketConfig!=null && datagramSocketConfig.getPort() > 0){
+			final String address=datagramSocketConfig.getAddress();
+			if (address != null && !address.isEmpty()) {
+				try {
+                    // Ignore result, only interested whether an UnknownHostException is thrown.
+					InetAddress.getByName(address);
+                    result = true;
+				} catch (UnknownHostException e) {
+					Log.w(TAG, tag + "Invalid host: "+address, e);
+				}
+			}
 		}
 		return result;
 	}

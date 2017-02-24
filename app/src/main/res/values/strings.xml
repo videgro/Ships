@@ -103,8 +103,8 @@
     <string name="pref_rtlSdrPpmInvalidate_summary">Invalidate the current PPM setting.</string>
     <string name="pref_rtlSdrPpmInvalidate_title">Use other RTL-SDR device</string>
 
-    <string name="pref_ThirdPartyPlotter_title">Third party plotter (i.e. OpenCPN)</string>
-    <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection. Default: address 127.0.0.1 and port 10110.</string>
+    <string name="pref_ThirdPartyPlotter_title">Third party plotter</string>
+    <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection in i.e. OpenCPN. Default: address 127.0.0.1 and port 10110.</string>
 
     <string name="pref_aisMessagesDestinationHost">pref_aisMessagesDestinationHost</string>
     <string name="pref_aisMessagesDestinationHost_default">127.0.0.1</string>
