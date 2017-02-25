@@ -195,12 +195,21 @@ public class HttpCacheTileServer extends NanoHTTPD {
         final String tag="retrieveCacheDir - ";
         File result = null;
         if (isExternalStorageWritable()){
-            result=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
-            if (!result.exists() && !result.mkdirs()) {
-                Log.w(TAG,tag+"Not possible to create directory.");
-            } else if (result.getFreeSpace()<MIN_FREE_BYTES){
+            final File dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
+            if (!dir.exists()) {
+				try {
+					if (!dir.mkdirs()){
+                        Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath());
+					} else {
+                        result=dir;
+                    }
+				} catch (SecurityException e){
+                    Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath(),e);
+				}
+            } else if (dir.getFreeSpace()<MIN_FREE_BYTES){
                 Log.w(TAG,tag+"Not enough free space on external files dir. Minimal required: "+MIN_FREE_BYTES+" bytes.");
-                result=null;
+            } else {
+                result=dir;
             }
         }
 
