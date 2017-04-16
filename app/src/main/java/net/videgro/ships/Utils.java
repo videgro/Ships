@@ -166,4 +166,15 @@ public final class Utils {
 		    }
 		});		
 	}
+
+
+	public static boolean is64bit(){
+		final String VAL_64="64";
+		// API level 21+ use Build.SUPPORTED_64_BIT_ABIS
+		return (android.os.Build.CPU_ABI!=null && android.os.Build.CPU_ABI.contains(VAL_64)) || (android.os.Build.CPU_ABI2!=null && android.os.Build.CPU_ABI2.contains(VAL_64));
+	}
+
+    public static String retrieveAbi(){
+        return ((android.os.Build.CPU_ABI!=null) ? android.os.Build.CPU_ABI:"")+((android.os.Build.CPU_ABI2!=null) ? " - "+android.os.Build.CPU_ABI2:"");
+    }
 }

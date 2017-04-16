@@ -163,12 +163,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String tag = "onStop";
 
         if (mmsiReceived.size() == 0) {
-            Analytics.logEvent(getActivity(), TAG, tag, "No ships received.");
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received.",Utils.retrieveAbi());
         } else {
-            Analytics.logEvent(getActivity(), TAG, "Number of received ships", "" + mmsiReceived.size());
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "Number of received ships",new DecimalFormat("000000").format(mmsiReceived.size()));
         }
 
-        Analytics.logEvent(getActivity(), TAG, "HttpCacheTileServer - Statistics", HttpCacheTileServer.getInstance().getStatistics());
+        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
 
         super.onStop();
     }
@@ -188,7 +188,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         switch (requestCode) {
             case REQ_CODE_START_RTLSDR:
                 final String startRtlSdrResultAsString = FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-                Analytics.logEvent(getActivity(), TAG, "OpenDeviceResult", startRtlSdrResultAsString);
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "OpenDeviceResult", startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
                 logStatus(startRtlSdrResultAsString);
 
                 if (resultCode != Activity.RESULT_OK) {

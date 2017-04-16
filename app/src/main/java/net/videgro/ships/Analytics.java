@@ -9,6 +9,9 @@ import com.google.android.gms.analytics.Tracker;
 
 public final class Analytics {
 	private static Tracker analyticsTracker=null;
+
+	public static final String CATEGORY_STATISTICS="Statistics";
+	public static final String CATEGORY_WARNINGS="Warnings";
 	
 	private Analytics(){
 		// Utility class, no public constructor
