@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -70,7 +71,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private static final String TAG = "ShowMapFragment";
 
     private static final DecimalFormat GPS_COORD_FORMAT = new DecimalFormat("##.00");
-    private static final String FILE_MAP = "ships_map.png";
+    private static final String FILE_MAP = "ships_map.jpg";
 
     private static final int IMAGE_POPUP_ID_CALIBRATE_WARNING = 1101;
     private static final int IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR = 1102;
@@ -216,8 +217,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         if (httpCacheTileServer.startServer()){
             // Server in place, load page
-            webView.loadUrl("file:///android_asset/index.html");
-            // Flow will resume at: onPageFinished
+
+            final String url="file:///android_asset/index.html";
+            if (webView.getUrl()==null || webView.getUrl().isEmpty() || !webView.getUrl().equalsIgnoreCase(url)) {
+                webView.loadUrl("file:///android_asset/index.html");
+                // Flow will resume at: onPageFinished
+            }
         }
     }
 
@@ -323,8 +328,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private Intent getShareIntent() {
-        final ArrayList<Uri> uris = new ArrayList<Uri>();
-        uris.add(Uri.parse("file://" + fileMap.toString()));
+        final ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(FileProvider.getUriForFile(getActivity(),getActivity().getApplicationContext().getPackageName() + getString(R.string.dot_provider),fileMap));
 
         final Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
