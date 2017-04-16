@@ -10,13 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="25" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -54,10 +50,6 @@
 	        android:name="com.google.android.gms.ads.AdActivity"
 	        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
 	        android:theme="@android:style/Theme.Translucent" />
-
-        <fragment
-            android:name=".fragments.ShowMapFragment"
-            android:label="@string/page_show_map" />
 
         <service
             android:name=".services.RtlSdrAisService"
