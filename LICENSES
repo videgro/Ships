@@ -62,3 +62,7 @@ AISDecoder uses parts of GNUAIS project (http://gnuais.sourceforge.net/)
 * Country flags
 Flags downloaded from: https://github.com/stevenrskelton/flag-icon/
 
+* PermissionsDispatcher
+Description: PermissionsDispatcher provides a simple annotation-based API to handle runtime permissions in Android Marshmallow.
+License: Copyright 2016 Shintaro Katafuchi, Marcel Schnelle, Yoshinori Isogai, Licensed under the Apache License, Version 2.0.
+More information: https://hotchemi.github.io/PermissionsDispatcher/

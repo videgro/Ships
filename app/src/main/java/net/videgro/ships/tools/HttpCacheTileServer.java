@@ -61,6 +61,10 @@ public class HttpCacheTileServer extends NanoHTTPD {
         this.maxDiskUsageInBytes=maxDiskUsageInBytes;
     }
 
+	/**
+	 * Start the caching tiles server
+	 * @return TRUE when server is available
+	 */
 	public boolean startServer(){
         final String tag="startServer - ";
 		boolean result=false;
@@ -76,6 +80,8 @@ public class HttpCacheTileServer extends NanoHTTPD {
 				Log.e(TAG,tag, e);
 			}
 			running=true;
+			result=true;
+		} else {
 			result=true;
 		}
 		return result;

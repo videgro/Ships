@@ -50,7 +50,21 @@
 	<string name="popup_are_you_sure_title">Are you sure?</string>
 	<string name="popup_are_you_sure_yes">Yes</string>
 	<string name="popup_are_you_sure_no">No</string>
-	
+
+	<!-- Permissions -->
+	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
+    <string name="permission_externalstorage_denied_title">Denied storage permission</string>
+	<string name="permission_externalstorage_denied">You denied storage permission. The app won\'t function as expected.</string>
+	<string name="permission_externalstorage_neverask">You denied storage permission. The app won\'t function as expected. Please grant permission via Settings-App-Ships-Permissions</string>
+
+	<string name="permission_location_rationale">The app needs location permission to plot your location on the map.</string>
+    <string name="permission_location_denied_title">Denied location permission</string>
+	<string name="permission_location_denied">You denied location permission. The app won\'t function as expected.</string>
+	<string name="permission_location_neverask">You denied location permission. The app won\'t function as expected. Please grant permission via Settings-App-Ships-Permissions</string>
+
+	<string name="button_allow">Allow</string>
+	<string name="button_deny">Deny</string>
+
 	<!-- Status -->
 	<string name="connect_usb_device_status_ok">USB device is open.</string>
 	<string name="connect_usb_device_status_pending_permission_request">No permission to open device, while requesting permission - Not possible to run this application without the right permissions. Sorry!</string>
