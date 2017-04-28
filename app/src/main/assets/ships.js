@@ -359,7 +359,7 @@ function createLayerShips(){
   	
   				if (typeof feature.attributes.message !== 'undefined' && feature.attributes.message != "") {
   					// Must create a popup on ship symbol
-  					var popup = new OpenLayers.Popup.FramedCloud("popup",OpenLayers.LonLat.fromString(feature.geometry.toShortString()),new OpenLayers.Size(200,800),feature.attributes.message, null, true, null);
+  					var popup = new OpenLayers.Popup.FramedCloud("popup",OpenLayers.LonLat.fromString(feature.geometry.toShortString()),new OpenLayers.Size(200,800),feature.attributes.message, null, true);
   					//popup.autoSize = true;
   					//popup.maxSize = new OpenLayers.Size(20,80);
   					//popup.fixedRelativePosition = true;
