@@ -44,6 +44,7 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.HelpActivity" />
         <activity android:name=".activities.SettingsActivity" />
                 
         <activity

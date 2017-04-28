@@ -37,10 +37,14 @@ public class MainActivity extends Activity {
 		boolean result = false;
 		// Handle presses on the action bar items
 		switch (item.getItemId()) {
-		case R.id.action_settings:
-			openSettings();
-			result = true;
-			break;
+			case R.id.action_help:
+				openHelp();
+				result = true;
+				break;
+			case R.id.action_settings:
+				openSettings();
+				result = true;
+				break;
 		default:
 			result = super.onOptionsItemSelected(item);
 		}
@@ -48,7 +52,10 @@ public class MainActivity extends Activity {
 	}
 
 	private void openSettings() {
-		final Intent settingsIntent = new Intent(this, SettingsActivity.class);
-		startActivity(settingsIntent);
+		startActivity(new Intent(this, SettingsActivity.class));
 	}
+
+    private void openHelp() {
+        startActivity(new Intent(this, HelpActivity.class));
+    }
 }

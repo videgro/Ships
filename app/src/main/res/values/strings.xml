@@ -9,11 +9,12 @@
     <string name="url_mmsi_info">http://www.marinetraffic.com/en/ais/details/ships/mmsi:PLACEHOLDER_MMSI</string>
     
     <string name="opendevice_intent_filter_schema">opendevice</string>
+	<string name="action_help">Help</string>
     <string name="action_settings">Settings</string>
        
     <!-- Pages -->
     <string name="page_show_map">Show map</string>
-    
+
     <!-- Sharing -->
     <string name="share_subject">I would like to share this ships map with you.</string>
     <string name="share_text">Shared via:</string>
@@ -138,10 +139,60 @@
 
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_calibrate">Calibrate</string>
+	<string name="title_help_information">Help / Information / Terms and Conditions</string>
     
     <string name="title_calibrate">Calibrate RTL-SDR device</string>
     <string name="description_calibrate">Each RTL-SDR has it\'s unique parts per million offset (PPM). Use this utility to find the PPM for your device or set it directly using the settings of this application. Typical values PPM are between -100 and +100. Average calibration time is between 5 and 10 minutes. Please be patient.</string>
     <string name="msg_gps_not_enabled">GPS is not enabled. Enable GPS to view your current position at the map.</string>
     
     <string name="alt_rtlsdrStick">RTL-SDR device</string>
+
+	<string name="text_help"><![CDATA[
+	    <small>(please read the complete text by scrolling down)</small>
+
+        <h2>Minimal requirements</h2>
+        <p>You can use this app on a device with OTG-support and a so called RTL-SDR dongle connected, in an area where AIS data is available in the air. You must be allowed by local law to receive and process AIS signals.</p>
+        <p>The Ships development team (VIDEGRO) will not be held responsible for any legal issues that might be caused by usage or possession of the app. It is your responsibility to comply with your local law(s) before using Ships. Besides of that we are also not responsible for any issues like financial, raised by using this app and receiving faulty, incomplete and/or delayed information.</p>
+
+        <h2>Where could I buy a compatible RTL-SDR dongle?</h2>
+        <p>Please search at eBay for \'<a href="http://www.ebay.com/sch/i.html?_nkw=RTL2832U">RTL2832U</a>\' price should be less than 10 euro. Besides of that you also need an OTG cable which is also not expensive at all.</p>
+
+        <h2>Why should I use the Ships-app and not another Android-app which is displaying the ships data on a map?</h2>
+        <p>Of course you are free to select your app, this app is however unique because:</p>
+        <p>
+        - It does not need an Internet/data connection to receive ships data, it is receiving live / real data from air;<br />
+        - It is not limited in number of ships;<br />
+        - There is no extra delay added;<br />
+        - No in app purchases: It is free of charge!<br />
+        </p>
+
+        <h2>Can I use this app in my area/country? /<br />Is it allowed to use this app in my area/country?</h2>
+        <p>This app works everywhere where you are able to receive AIS data. To show the maps you need to have a working data connection or cache the map data in advance. To receive the AIS data from air could be regulated by your local authorities.</p>
+
+        <h2>Preparation</h2>
+        <p>Before receiving ship data, you have to fill the dongle specific PPM value. In this app a calibrate utility is build in. You can use this utility only in an area with ships because the utility is using actual AIS data from ships. It is possible that this PPM value will change when your dongle is warming up. There is no clean solution build in this app to solve this problem, when you know the new value, you have to change the PPM by hand from the settings.</p>
+        <p>You can use this app without Internet/data connection. In this case maps are not loaded/refreshed. To use the app without Internet/data connection but with maps, prepare/cache your maps. To do so:<p>
+        <p>
+        1. Make sure you have an Internet/data connection;<br />
+        2. Navigate the map to the desired area and zoom manually all zoom-levels;<br />
+        Your map-data should be cached now at your device.
+        </p>
+
+        <h2>Third party apps / OpenCPN</h2>
+        <p>It is not the intention to rebuild an application like OpenCPN. The app is not so sophisticated as OpenCPN, instead this Android-app has a unique combination of three functionalities:
+        <p>
+        1. Calibration tool for the RTL-SDR dongle (determine dongle specific PPM value);<br />
+        2. Receive AIS data directly from air on your Android device;<br />
+        3. Plot the AIS data on a map at your Android device. Without delay, without extra paid options. All free of charge!<br />
+        </p>
+        <p>When you would like to use the full functionality of OpenCPN, this app is capable to relay the data to OpenCPN. In case you would like to run this Ships app and OpenCPN at the same device, just leave the settings in Ships-app untouched and create in OpenCPN an incoming connection at IP address 127.0.0.1 and UDP port 10110.</p>
+        <p>When you would like to run OpenCPN at another computer (desktop/laptop), change via the Settings the \'AIS messages destination host\' to the IP address of the computer which is running OpenCPN. Make sure the firewall at the computer which is running OpenCPN is accepting incoming UDP data at port 10110. In OpenCPN create an incoming connection at the IP address of the computer running OpenCPN and UDP port 10110. Caution: This IP address is NOT the IP address of your Android device when you are running OpenCPN on another device. Afterwards restart Ship-app to use the new settings. Of course UDP traffic should be routable from the Android-device to the computer running OpenCPN (wifi-network/Internet).</p>
+
+        <h2>Bugs / Comments</h2>
+        <p>In case you experience bugs or have comments, please contact the development team directly by posting a comment <a href="http://blog.videgro.net/2017/01/ships/?refer=app_bugs">here</a>, instead of posting negative feedback at the Google Play store. We will try to fix the problems as soon as possible.</p>
+
+        <p><a href="http://blog.videgro.net/2017/01/ships/?refer=app_information">More information</a></p>
+
+        <small>(press BACK to return to the app)</small>
+   ]]></string>
 </resources>

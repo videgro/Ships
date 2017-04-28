@@ -11,6 +11,13 @@
     </group>
 
     <item
+        android:id="@+id/action_help"
+        android:icon="@drawable/ic_menu_question_mark"
+        android:orderInCategory="80"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_help"/>
+
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
