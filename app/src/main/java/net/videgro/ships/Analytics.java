@@ -12,6 +12,7 @@ public final class Analytics {
 
 	public static final String CATEGORY_STATISTICS="Statistics";
 	public static final String CATEGORY_WARNINGS="Warnings";
+	public static final String CATEGORY_RTLSDR_DEVICE="Device (RTL-SDR)";
 	
 	private Analytics(){
 		// Utility class, no public constructor

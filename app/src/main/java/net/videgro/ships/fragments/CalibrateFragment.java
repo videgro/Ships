@@ -17,11 +17,13 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.fragments.internal.FragmentUtils;
+import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.CalibrateListener;
 import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.tasks.CalibrateTask;
@@ -104,7 +106,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
 				final String startRtlSdrResultAsString=FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-				Analytics.logEvent(getActivity(), TAG,"OpenDeviceResult",startRtlSdrResultAsString);
+                Analytics.logEvent(getActivity(),Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
 				logStatus(startRtlSdrResultAsString);
 				
 				if (resultCode == Activity.RESULT_OK) {

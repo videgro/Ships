@@ -42,6 +42,7 @@ import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.fragments.internal.FragmentUtils;
+import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
@@ -163,9 +164,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String tag = "onStop";
 
         if (mmsiReceived.size() == 0) {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received.",Utils.retrieveAbi());
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received - "+Utils.retrieveAbi(),"");
         } else {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "Number of received ships",new DecimalFormat("000000").format(mmsiReceived.size()));
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "Number of received ships - "+Utils.retrieveAbi(),new DecimalFormat("000000").format(mmsiReceived.size()));
         }
 
         Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
@@ -188,7 +189,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         switch (requestCode) {
             case REQ_CODE_START_RTLSDR:
                 final String startRtlSdrResultAsString = FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-                Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "OpenDeviceResult", startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
+                Analytics.logEvent(getActivity(),Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
                 logStatus(startRtlSdrResultAsString);
 
                 if (resultCode != Activity.RESULT_OK) {
