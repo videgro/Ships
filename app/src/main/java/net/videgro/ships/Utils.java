@@ -1,13 +1,5 @@
 package net.videgro.ships;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdRequest.Builder;
-import com.google.android.gms.ads.AdView;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -24,8 +16,17 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdRequest.Builder;
+import com.google.android.gms.ads.AdView;
+
 import net.videgro.ships.activities.MainActivity;
 import net.videgro.ships.listeners.ImagePopupListener;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public final class Utils {
 	private static final String TAG = "Utils";
@@ -104,10 +105,8 @@ public final class Utils {
 		final String tag="logStatus - ";
 		Log.d(TAG,tag+status);
 		if (activity!=null){
-			if (SettingsUtils.parseFromPreferencesLoggingVerbose(activity)){
-				final String text = LOG_TIME_FORMAT.format(new Date()) + status;
-				updateText(activity,textView,text);
-			}
+			final String text = LOG_TIME_FORMAT.format(new Date()) + status;
+			updateText(activity,textView,text);
 		} else {
 			Log.e(TAG,tag+"Huh? No activity set. ("+status+")");
 		}
