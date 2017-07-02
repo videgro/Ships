@@ -104,7 +104,32 @@
   	<string name="pref_mapCacheMaxDiskUsage_summary">Maximal disk storage used by the caching tiles server.</string>
   	<string name="pref_mapCacheMaxDiskUsage_title">Tiles cache: Maximum disk usage.</string>
 
-  	<string name="pref_AisReceiverSettings_title">AIS Receiver</string>
+	<string name="pref_shipScaleFactor">pref_shipScaleFactor</string>
+	<string name="pref_shipScaleFactor_default">8</string>
+	<string name="pref_shipScaleFactor_dialog_title">Scale factor of ships on map. Default value: 8</string>
+	<string name="pref_shipScaleFactor_summary">Change this value to let ships appear bigger/smaller on the map. Higher value, bigger ships.</string>
+	<string name="pref_shipScaleFactor_title">Ship scale factor</string>
+
+    <string name="pref_ownLocationIcon">pref_ownLocationIcon</string>
+    <string name="pref_ownLocationIcon_title">Own location icon</string>
+    <string name="pref_ownLocationIcon_summary">Icon shown on own location.</string>
+    <string name="pref_ownLocationIcon_default">antenna.png</string>
+    <string-array name="pref_ownLocationIcon_entries">
+        <item>Antenna</item>
+        <item>House</item>
+        <item>Yacht</item>
+        <item>Sailboat</item>
+        <item>Cargo</item>
+    </string-array>
+    <string-array name="pref_ownLocationIcon_values">
+        <item>antenna.png</item>
+        <item>house.png</item>
+        <item>yacht_1.png</item>
+        <item>sailing-yacht_1.png</item>
+        <item>container-ship-top_1.png</item>
+    </string-array>
+
+    <string name="pref_AisReceiverSettings_title">AIS Receiver</string>
 
 	<!--
     <string name="pref_rtlSdrForceRoot">pref_forceRoot</string>

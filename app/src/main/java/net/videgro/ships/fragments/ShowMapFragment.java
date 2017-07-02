@@ -241,6 +241,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             public void onPageFinished(WebView view, String url) {
                 webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity())) + ")");
                 webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles(" + Boolean.toString(SettingsUtils.parseFromPreferencesMapCacheLowerZoomlevels(getActivity())) + ")");
+                webView.loadUrl("javascript:setShipScaleFactor("+SettingsUtils.parseFromPreferencesShipScaleFactor(getActivity())+")");
+                webView.loadUrl("javascript:setOwnLocationIcon('"+SettingsUtils.parseFromPreferencesOwnLocationIcon(getActivity())+"')");
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");
                 }

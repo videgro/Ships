@@ -53,11 +53,60 @@ function addShip(ship) {
 	var angle = Math.round(ship.cog / 10);
 	var origin = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
 	var name=(ship.name=="")?ship.mmsi:ship.name;
-	
-	// Default: 110 x 11 m
-	var width=   ((ship.dimBow!="" && ship.dimStern!="")?parseInt(ship.dimBow)+parseInt(ship.dimStern):110)*.8; // = real length
-	var height=  ((ship.dimStarboard!="" && ship.dimPort!="")?parseInt(ship.dimStarboard)+parseInt(ship.dimPort):11)*8; // = real width
-	
+
+	// Default: 55 x 5 m
+	var width=   ((ship.dimBow!="" && ship.dimStern!="")?parseInt(ship.dimBow)+parseInt(ship.dimStern):55)/10*shipScaleFactor; // = real length
+	var height=  ((ship.dimStarboard!="" && ship.dimPort!="")?parseInt(ship.dimStarboard)+parseInt(ship.dimPort):5)*shipScaleFactor; // = real width
+
+     /*
+     Strings copied from: dk.dma.ais.message.ShipTypeCargo
+     */
+	var shipIcon=DEFAULT_SHIP_ICON;
+	switch (ship.shipType){
+	    case "CARGO":
+    	case "TANKER":
+            shipIcon="container-ship-top.png";
+        break;
+	    case "PILOT":
+	    case "SAR":
+	    case "PORT_TENDER":
+	    case "LAW_ENFORCEMENT":
+	    case "TOWING":
+        case "TOWING_LONG_WIDE":
+        case "TUG":
+	        shipIcon="basic_red.png";
+	    break;
+	    case "MILITARY":
+	        shipIcon="basic_green.png";
+        break;
+	    case "SAILING":
+            shipIcon="sailing-yacht_1.png";
+        break;
+        case "PLEASURE":
+            shipIcon="yacht_4.png";
+        break;
+	    case "PASSENGER":
+	        shipIcon="passenger.png";
+	    break;
+	    case "FISHING":
+	        shipIcon="basic_blue.png";
+	    break;
+	    case "UNKNOWN":
+	        shipIcon="basic_yellow.png";
+	    break;
+	    case "WIG":
+	    case "ANTI_POLLUTION":
+	    case "MEDICAL":
+	    case "DREDGING":
+	    case "DIVING":
+	    case "HSC":
+	    case "SHIPS_ACCORDING_TO_RR":
+	    case "UNDEFINED":
+	    default:
+	        shipIcon=DEFAULT_SHIP_ICON;
+	    break;
+	}
+
 	var shipFeature1 = new OpenLayers.Feature.Vector(
 		// +90 degrees because icon is pointing to the left instead of top
 		origin, {
@@ -67,6 +116,7 @@ function addShip(ship) {
 			width: width,
 			height: height,
 			fontColor: 0,
+			shipIcon: shipIcon,
 			message : popupText
 	})
 	
@@ -289,7 +339,7 @@ function createMap(){
 function createStyleMapShipSymbol(){
   	styleMapShipSymbol = new OpenLayers.StyleMap({
   		"default" : new OpenLayers.Style({
-  			externalGraphic : "file:///android_asset/images/container-ship-top.png",
+  			externalGraphic : "file:///android_asset/images/${shipIcon}",
   			graphicWidth : "${width}",
   			graphicHeight: "${height}",
   			// graphicXOffset: -40,
@@ -425,7 +475,7 @@ function setCurrentPosition(lon,lat){
 	var size = new OpenLayers.Size(50, 50);
 	var offset = new OpenLayers.Pixel(-(size.w/2), -(size.h/2)); // Middle
 	//var icon = new OpenLayers.Icon('http://www.openstreetmap.org/openlayers/img/marker.png',size,offset);
-	var icon = new OpenLayers.Icon('file:///android_asset/images/sailboat-black-side.png',size,offset);
+	var icon = new OpenLayers.Icon('file:///android_asset/images/'+ownLocationIcon,size,offset);
 
 	previousMyPositionMarker=new OpenLayers.Marker(lonLat,icon);
 	layerMyPosition.addMarker(previousMyPositionMarker);
@@ -458,11 +508,25 @@ function setPrefetchLowerZoomLevelsTiles(prefetchLowerZoomLevelsTilesIn){
 	prefetchLowerZoomLevelsTiles=prefetchLowerZoomLevelsTilesIn;
 }
 
+// Called from Java
+function setShipScaleFactor(shipScaleFactorIn){
+	shipScaleFactor=shipScaleFactorIn;
+}
+
+// Called from Java
+function setOwnLocationIcon(ownLocationIconIn){
+	ownLocationIcon=ownLocationIconIn;
+}
+
+
 /*************************************************************************************************************************** */
 
 const TILE_PROXY_URL="127.0.0.1:8181/";
 const ZOOM_LEVELS=18;
 const SPEED_FACTOR=25;
+const DEFAULT_SHIP_SCALE_FACTOR=8;
+const DEFAULT_SHIP_ICON="basic_turquoise.png";
+const DEFAULT_OWN_LOCATION_ICON="antenna.png";
 
 var ships = {};
 var shipsNamePlayed = {};
@@ -478,6 +542,8 @@ var shipVectors;
 var layerMyPosition;
 var styleMapShipSymbol;
 var lineLayer;
+var shipScaleFactor=DEFAULT_SHIP_SCALE_FACTOR;
+var ownLocationIcon=DEFAULT_OWN_LOCATION_ICON;
 
 
 

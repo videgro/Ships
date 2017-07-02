@@ -9,11 +9,25 @@
             android:title="@string/pref_loggingVerbose_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_MapSettings_title" >
+        <EditTextPreference
+            android:defaultValue="@string/pref_shipScaleFactor_default"
+            android:dialogTitle="@string/pref_shipScaleFactor_dialog_title"
+            android:inputType="numberSigned"
+            android:key="@string/pref_shipScaleFactor"
+            android:summary="@string/pref_shipScaleFactor_summary"
+            android:title="@string/pref_shipScaleFactor_title" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="@string/pref_mapZoomToExtend"
             android:summary="@string/pref_mapZoomToExtend_summary"
             android:title="@string/pref_mapZoomToExtend_title" />
+        <ListPreference
+            android:key="@string/pref_ownLocationIcon"
+            android:title="@string/pref_ownLocationIcon_title"
+            android:summary="@string/pref_ownLocationIcon_summary"
+            android:defaultValue="@string/pref_ownLocationIcon_default"
+            android:entries="@array/pref_ownLocationIcon_entries"
+            android:entryValues="@array/pref_ownLocationIcon_values"/>
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="@string/pref_mapFetchLowerZoomLevels"

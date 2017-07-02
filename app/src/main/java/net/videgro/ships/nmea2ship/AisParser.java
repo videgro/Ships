@@ -90,7 +90,10 @@ public class AisParser {
 			ship.setDimStarboard(msg.getDimStarboard());
 			ship.setDimStern(msg.getDimStern());
 			final ShipTypeCargo shipTypeCargo = new ShipTypeCargo(msg.getShipType());
-			ship.setShipType(shipTypeCargo.prettyCargo()+" "+shipTypeCargo.prettyType());								        
+			//ship.setShipType(shipTypeCargo.prettyCargo()+" "+shipTypeCargo.prettyType());
+            if (shipTypeCargo.getShipType()!=null) {
+                ship.setShipType(shipTypeCargo.getShipType().toString());
+            }
 	    }
 	    			    
 	    if (aisMessage instanceof AisMessage5){

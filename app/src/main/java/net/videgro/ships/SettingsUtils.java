@@ -11,6 +11,8 @@ public final class SettingsUtils {
 
 	// Declare the same values as in res/xml/preferences.xml!
 	public static final String KEY_PREF_RTL_SDR_PPM = "pref_rtlSdrPpm";
+    public static final String KEY_PREF_SHIP_SCALE_FACTOR = "pref_shipScaleFactor";
+    public static final String KEY_PREF_OWN_LOCATION_ICON = "pref_ownLocationIcon";
 //	private static final String KEY_PREF_RTL_SDR_FORCE_ROOT = "pref_rtlSdrForceRoot";
 
 	private static final String KEY_PREF_LOGGING_VERBOSE = "pref_loggingVerbose";
@@ -31,6 +33,10 @@ public final class SettingsUtils {
 	private static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
 
 	private static final int RTL_SDR_PPM_VALID_OFFSET = 150;
+    private static final int DEFAULT_SHIP_SCALE_FACTOR = 8;
+
+	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
+    private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
 
 	private SettingsUtils() {
 		// Utility class, no public constructor
@@ -145,4 +151,32 @@ public final class SettingsUtils {
 		}
 		return result;
 	}
+
+	public static int parseFromPreferencesShipScaleFactor(final Context context) {
+		final String tag="parseFromPreferencesShipScaleFactor - ";
+		int result = DEFAULT_SHIP_SCALE_FACTOR;
+		if (context != null) {
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+			if (sharedPref != null) {
+				try {
+					result = Integer.valueOf(sharedPref.getString(KEY_PREF_SHIP_SCALE_FACTOR, Integer.toString(DEFAULT_SHIP_SCALE_FACTOR)));
+				} catch (ClassCastException | NumberFormatException e) {
+					Log.e(TAG,tag, e);
+				}
+			}
+		}
+		return result;
+	}
+
+    public static String parseFromPreferencesOwnLocationIcon(final Context context) {
+        String result = DEFAULT_OWN_LOCATION_ICON;
+        if (context != null) {
+            final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            if (sharedPref != null) {
+                result = sharedPref.getString(KEY_PREF_OWN_LOCATION_ICON, DEFAULT_OWN_LOCATION_ICON);
+            }
+        }
+        return result;
+    }
 }
+
