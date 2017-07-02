@@ -29,6 +29,8 @@
     
 	<string name="toggle_turn_on_ais">START</string>
 	<string name="toggle_turn_off_ais">STOP</string>
+
+    <string name="sliding_drawer_logging">Show logging</string>
 		
 	<!--- Popups -->
 	<string name="popup_found_ppm_title">Found PPM</string>
@@ -53,7 +55,10 @@
 	<string name="popup_are_you_sure_yes">Yes</string>
 	<string name="popup_are_you_sure_no">No</string>
 
-    <string name="popup_64_bits_detected_title">64 bits operating system detected</string>
+	<string name="popup_receiving_ais_title">Receiving AIS</string>
+	<string name="popup_receiving_ais_message">Waiting for AIS data. Please be patient. After receiving data, the ship(s) will be plotted on the map.</string>
+
+	<string name="popup_64_bits_detected_title">64 bits operating system detected</string>
     <string name="popup_64_bits_detected_message">Some crashes are reported on 64 bits devices. When it works for you, you are lucky. Otherwise, please try another device. We are sorry for the inconvenience.</string>
 
 	<!-- Permissions -->

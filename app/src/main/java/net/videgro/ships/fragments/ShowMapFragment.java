@@ -81,6 +81,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private static final int REQ_CODE_START_RTLSDR = 1201;
     private static final int REQ_CODE_STOP_RTLSDR = 1202;
 
+    private static final Long IMAGE_POPUP_AUTOMATIC_DISMISS=1000*5L;
+
     /**
      * The value of this placeholder is used literally in the webview link (ship popup) and in the string resources "url_mmsi_info".
      * Respectively indicating that this is a special URL and must be opened in a new browser and as a placeholder to be replaced by the real MMSI value.
@@ -314,7 +316,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 Log.e(TAG, tag + "Invalid PPM: " + ppm);
             }
         } else {
-            logStatus("Receiving AIS already, continue.");
+            final String msg=getString(R.string.popup_receiving_ais_message);
+            logStatus(msg);
+            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_receiving_ais_title),msg,R.drawable.ic_information,IMAGE_POPUP_AUTOMATIC_DISMISS);
+            // On dismiss: Will continue onImagePopupDispose
         }
     }
 
