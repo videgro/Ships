@@ -292,7 +292,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 
     private void show64bitsWarning(){
         warning64bitsShown=true;
-        Utils.showPopup(IMAGE_POPUP_64_BITS_WARNING, this, this, getString(R.string.popup_64_bits_detected_title), getString(R.string.popup_64_bits_detected_message), R.drawable.warning_icon, null);
+        Utils.showPopup(IMAGE_POPUP_64_BITS_WARNING, this, this, getString(R.string.popup_64_bits_detected_title), getString(R.string.popup_64_bits_detected_message), R.drawable.warning_icon,1000*3L);
         // On dismiss: Will continue onImagePopupDispose->connectUsbDevice->processConnectUsbDeviceStatus
     }
 
@@ -300,7 +300,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 	public void onImagePopupDispose(int id) {
 		switch (id) {
 			case IMAGE_POPUP_64_BITS_WARNING:
-                Analytics.logEvent(this, Analytics.CATEGORY_WARNINGS,"IMAGE_POPUP_64_BITS_WARNING","");
+                Analytics.logEvent(this, Analytics.CATEGORY_WARNINGS,"IMAGE_POPUP_64_BITS_WARNING","DISPOSED");
                 processConnectUsbDeviceStatus(connectUsbDevice());
 				break;
 			default:
