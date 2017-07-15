@@ -114,9 +114,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
         
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
-        
+
         Log.d(TAG, "onCreate");
     }        
     
@@ -134,6 +132,8 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 	    	disconnectRequest=extras.getBoolean(EXTRA_DISCONNECT);
 	    	newPpm=extras.getInt(EXTRA_CHANGE_PPM);	    	
 	    }
+
+		registerReceiver(usbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
 
 	    if (rtlsdrServiceConnection==null){
 	        setupRtlsdrServiceConnection();
@@ -159,9 +159,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     @Override
     protected void onStop() {
         Log.i(TAG,"onStop");
-		if (usbReceiver!=null) {
-			unregisterReceiver(usbReceiver);
-		}
+		unregisterReceiver(usbReceiver);
         super.onStop();
     }
 	
