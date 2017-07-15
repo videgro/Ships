@@ -20,7 +20,6 @@ import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
 import net.videgro.ships.Utils;
-import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.services.RtlSdrAisService;
 import net.videgro.ships.services.RtlSdrService;
 import net.videgro.ships.services.RtlSdrService.RtlSdrServiceListener;
@@ -30,11 +29,9 @@ import net.videgro.ships.tools.OpenDeviceHelper;
  * 
  * https://developer.android.com/guide/topics/connectivity/usb/host.html
  */
-public class OpenDeviceActivity extends Activity implements RtlSdrServiceListener, ImagePopupListener {
+public class OpenDeviceActivity extends Activity implements RtlSdrServiceListener {
 	private static final String TAG="OpenDeviceActivity";
 
-	private static final int IMAGE_POPUP_64_BITS_WARNING = 1101;
-	
 	public static final String EXTRA_DISCONNECT="extra_disconnect";
 	public static final String EXTRA_CHANGE_PPM="extra_change_ppm";
 	public static final String EXTRA_RESULT_MESSAGE="result_message";
@@ -56,8 +53,6 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 	private UsbManager usbManager;	
 	private UsbDevice currentDevice;
 
-    private static boolean warning64bitsShown=false;
-	
 	/**
 	 * Parsed value of intent extra: EXTRA_DISCONNECT
 	 */
@@ -168,7 +163,11 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     	Log.d(TAG,tag);
 
     	int result;
-		
+
+        if (Utils.is64bit()) {
+            Analytics.logEvent(this, Analytics.CATEGORY_ANDROID_DEVICE,"64 bit device","");
+        }
+
 		UsbDevice device=(UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
 		if (device==null){
 			device=new OpenDeviceHelper(this).findDevice();
@@ -288,24 +287,6 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 		finish(NO_ERROR,getString(R.string.connect_usb_device_status_started));		
 	}
 
-    private void show64bitsWarning(){
-        warning64bitsShown=true;
-        Utils.showPopup(IMAGE_POPUP_64_BITS_WARNING, this, this, getString(R.string.popup_64_bits_detected_title), getString(R.string.popup_64_bits_detected_message), R.drawable.warning_icon,1000*3L);
-        // On dismiss: Will continue onImagePopupDispose->connectUsbDevice->processConnectUsbDeviceStatus
-    }
-
-    @Override
-	public void onImagePopupDispose(int id) {
-		switch (id) {
-			case IMAGE_POPUP_64_BITS_WARNING:
-                Analytics.logEvent(this, Analytics.CATEGORY_WARNINGS,"IMAGE_POPUP_64_BITS_WARNING","DISPOSED");
-                processConnectUsbDeviceStatus(connectUsbDevice());
-				break;
-			default:
-				Log.d(TAG,"onImagePopupDispose - id: "+id);
-		}
-	}
-
 	/************************** PRIVATE CLASS IMPLEMENTATIONS ******************/
 		
 	private class RtlsdrServiceConnection implements ServiceConnection {
@@ -329,11 +310,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
 					} else if (rtlSdrService.isRtlSdrRunning()){
 						processConnectUsbDeviceStatus(R.string.connect_usb_device_status_error_running_already);
 					} else {
-                        if (Utils.is64bit() && !warning64bitsShown) {
-                            show64bitsWarning();
-                        } else {
-                            processConnectUsbDeviceStatus(connectUsbDevice());
-                        }
+                        processConnectUsbDeviceStatus(connectUsbDevice());
 					}
 				} else {
 	        		boolean stopResult=rtlSdrService.stopRtlSdr();

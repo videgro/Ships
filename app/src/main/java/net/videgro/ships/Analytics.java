@@ -11,7 +11,7 @@ public final class Analytics {
 	private static Tracker analyticsTracker=null;
 
 	public static final String CATEGORY_STATISTICS="Statistics";
-	public static final String CATEGORY_WARNINGS="Warnings";
+	public static final String CATEGORY_ANDROID_DEVICE="Device (Android)";
 	public static final String CATEGORY_RTLSDR_DEVICE="Device (RTL-SDR)";
 	
 	private Analytics(){
