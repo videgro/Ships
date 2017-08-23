@@ -166,9 +166,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String tag = "onPause";
 
         if (mmsiReceived.size() == 0) {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received - "+Utils.retrieveAbi(),"");
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received",Utils.retrieveAbi());
         } else {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "Number of received ships - "+Utils.retrieveAbi(),new DecimalFormat("000000").format(mmsiReceived.size()));
+            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"Number of received ships",Utils.retrieveAbi(),mmsiReceived.size());
         }
 
         Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());

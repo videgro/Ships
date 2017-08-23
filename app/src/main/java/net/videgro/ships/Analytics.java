@@ -42,5 +42,17 @@ public final class Analytics {
             .setAction(action)
             .setLabel(label)
             .build());
-	}   
+	}
+
+	public static synchronized void logEvent(final Context context,final String category,final String action,final String label,final long value){
+		Tracker t = getTracker(context);
+
+		t.send(new HitBuilders.EventBuilder()
+				.setCategory(category)
+				.setAction(action)
+				.setLabel(label)
+				.setValue(value)
+				.build());
+	}
+
 }
