@@ -356,25 +356,30 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     // Must be public to use PermissionsDispatcher
 	public void takeScreenShot() {
-		Log.i(TAG, "takeScreenShot");
+        final String tag="takeScreenShot - ";
+		Log.i(TAG,tag);
 
 		final Picture picture = webView.capturePicture();
-		final Bitmap b = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
-		final Canvas c = new Canvas(b);
-		picture.draw(c);
+        final int width=picture.getWidth();
+        final int height=picture.getHeight();
 
-		FileOutputStream fosScreenshot = null;
-		try {
-			fosScreenshot = new FileOutputStream(fileMap);
+        if (width>0 && height>0) {
+            final Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            final Canvas c = new Canvas(b);
+            picture.draw(c);
 
-			if (fosScreenshot != null) {
-				b.compress(Bitmap.CompressFormat.JPEG, 100, fosScreenshot);
-				fosScreenshot.close();
-				Log.i(TAG, "takeScreenShot >> Screenshot available at: " + fileMap.toString());
-			}
-		} catch (IOException  e) {
-			Log.e(TAG, "takeScreenShot", e);
-		}
+            FileOutputStream fosScreenshot = null;
+            try {
+                fosScreenshot = new FileOutputStream(fileMap);
+                b.compress(Bitmap.CompressFormat.JPEG, 100, fosScreenshot);
+                fosScreenshot.close();
+                Log.i(TAG,tag+"Screenshot available at: " + fileMap.toString());
+            } catch (IOException e) {
+                Log.e(TAG,tag, e);
+            }
+        } else {
+            Analytics.logEvent(getActivity(), TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
+        }
 	}
 
 	@Override
