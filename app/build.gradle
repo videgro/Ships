@@ -36,8 +36,8 @@ ext {
 }
 
 dependencies {
-    compile "com.google.android.gms:play-services-analytics:11.0.1"
-    compile "com.google.android.gms:play-services-ads:11.0.1"
+    compile "com.google.android.gms:play-services-analytics:11.0.4"
+    compile "com.google.android.gms:play-services-ads:11.0.4"
     compile "com.google.code.gson:gson:2.8.0"
     compile "org.nanohttpd:nanohttpd:2.3.1"
     compile "com.android.support:support-v13:25.3.1"
