@@ -77,6 +77,7 @@
 	<string name="connect_usb_device_status_pending_permission_request">No permission to open device, while requesting permission - Not possible to run this application without the right permissions. Sorry!</string>
 	<string name="connect_usb_device_status_error_no_device_found">Not possible to connect to device. Is the device physically connected? Please insert RTL-SDR device before starting. Application will stop now.</string>
 	<string name="connect_usb_device_status_error_permission_denied">Permission denied to open device - Not possible to run this application without the right permissions. Sorry!</string>
+	<string name="connect_usb_device_status_error_security_exception">Security exception occurred while opening USB device.</string>
 	<string name="connect_usb_device_status_error_unknown">Unknown error while opening USB device.</string>
 	
 	<string name="connect_usb_device_status_error_stop">Error occurred while stopping RTL-SDR device. Stopped already?"</string>

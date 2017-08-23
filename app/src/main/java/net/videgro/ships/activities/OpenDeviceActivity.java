@@ -188,14 +188,21 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     }
 
     private int openDevice(final UsbDevice device) {
-    	Log.d(TAG,"openDevice");
+        final String tag="openDevice - ";
+    	Log.d(TAG,tag);
     	
     	int result;
     	    	
         if (!usbManager.hasPermission(device)) {
             Log.d(TAG,"No permissions to open device: "+device+" - Requesting permission.");
-            usbManager.requestPermission(device, permissionIntent);
-            result=R.string.connect_usb_device_status_pending_permission_request;
+            try {
+                usbManager.requestPermission(device, permissionIntent);
+                result=R.string.connect_usb_device_status_pending_permission_request;
+            } catch (SecurityException e){
+                Log.e(TAG,tag,e);
+                Analytics.logEvent(this, Analytics.CATEGORY_ANDROID_DEVICE,tag,e.getMessage());
+                result=R.string.connect_usb_device_status_error_security_exception;
+            }
         } else {
         	result=startRtlSdrService(device);        	
         }
@@ -252,6 +259,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     	switch (connectUsbDeviceStatus) {
 			case R.string.connect_usb_device_status_error_no_device_found:
 			case R.string.connect_usb_device_status_error_permission_denied:
+            case R.string.connect_usb_device_status_error_security_exception:
 			case R.string.connect_usb_device_status_error_unknown:
 				finish(ERROR_REASON_MISC,getString(connectUsbDeviceStatus));
 				break;
