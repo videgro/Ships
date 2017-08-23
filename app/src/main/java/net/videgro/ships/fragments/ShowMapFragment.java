@@ -162,8 +162,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     @Override
-    public void onStop() {
-        final String tag = "onStop";
+    public void onPause() {
+        final String tag = "onPause";
 
         if (mmsiReceived.size() == 0) {
             Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received - "+Utils.retrieveAbi(),"");
@@ -173,7 +173,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
 
-        super.onStop();
+        super.onPause();
     }
 
     @Override
