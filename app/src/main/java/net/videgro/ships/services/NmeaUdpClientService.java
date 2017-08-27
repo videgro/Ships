@@ -83,6 +83,7 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
             result = new DatagramSocketConfig(repeatHost,repeatPort);
             if (validateDatagramSocketConfig(result)) {
                 informText="Repeating NMEA messages to UDP: " + result;
+				Toast.makeText(this,informText,Toast.LENGTH_LONG).show();
                 Analytics.logEvent(this, TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
             } else {
                 result=null;
@@ -92,7 +93,6 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
         }
 
         Log.d(TAG,tag+informText);
-        Toast.makeText(this,informText,Toast.LENGTH_LONG);
 
         return result;
     }
