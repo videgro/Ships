@@ -8,10 +8,6 @@ android {
         applicationId "net.videgro.ships"
         minSdkVersion 16
         targetSdkVersion 25
-
-        ndk {
-            moduleName "NativeRtlSdr"
-        }
     }
 
     buildTypes {
@@ -21,10 +17,11 @@ android {
         }
     }
     externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/Android.mk'
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
         }
     }
+
     compileOptions {
         targetCompatibility 1.7
         sourceCompatibility 1.7
