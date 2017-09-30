@@ -165,7 +165,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
     	int result;
 
         if (Utils.is64bit()) {
-            Analytics.logEvent(this, Analytics.CATEGORY_ANDROID_DEVICE,"64 bit device","");
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_ANDROID_DEVICE,"64 bit device","");
         }
 
 		UsbDevice device=(UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -200,7 +200,7 @@ public class OpenDeviceActivity extends Activity implements RtlSdrServiceListene
                 result=R.string.connect_usb_device_status_pending_permission_request;
             } catch (SecurityException e){
                 Log.e(TAG,tag,e);
-                Analytics.logEvent(this, Analytics.CATEGORY_ANDROID_DEVICE,tag,e.getMessage());
+                Analytics.getInstance().logEvent(Analytics.CATEGORY_ANDROID_DEVICE,tag,e.getMessage());
                 result=R.string.connect_usb_device_status_error_security_exception;
             }
         } else {

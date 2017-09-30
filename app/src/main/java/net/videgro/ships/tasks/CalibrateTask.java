@@ -7,11 +7,13 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
+
 import net.videgro.ships.listeners.CalibrateListener;
-import net.videgro.ships.listeners.NmeaReceivedListener;
+import net.videgro.ships.listeners.ShipReceivedListener;
+import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.services.NmeaUdpClientService;
 
-public class CalibrateTask extends AsyncTask<Void, Void, String> implements NmeaReceivedListener {
+public class CalibrateTask extends AsyncTask<Void, Void, String> implements ShipReceivedListener {
 	private static final String TAG="CalibrateTask";
 	
 	public enum ScanType {
@@ -105,7 +107,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 	}
 	
 	private void setupNmeaUdpClientService(){
-		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((NmeaReceivedListener) this);
+		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((ShipReceivedListener) this);
 		Intent serviceIntent = new Intent(context, NmeaUdpClientService.class);
 		context.startService(serviceIntent);
 		context.bindService(new Intent(context, NmeaUdpClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
@@ -165,8 +167,8 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 	}
 	
 	@Override
-	public void onNmeaReceived(String nmea) {
-		Log.d(TAG, "onNmeaReceived: NMEA: "+nmea);
+	public void onShipReceived(final Ship ship) {
+		Log.d(TAG, "onShipReceived: Ship: "+ship);
 		
 		// Test ppmIsValid ->Fire only once
 		if (!ppmIsValid){
@@ -177,9 +179,9 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Nmea
 	
 	private class NmeaUdpClientServiceConnection implements ServiceConnection {
 		private final String tag="NmeaUdpClientServiceConnection - ";
-		private final NmeaReceivedListener listener;
+		private final ShipReceivedListener listener;
 
-		public NmeaUdpClientServiceConnection(NmeaReceivedListener listener) {
+		NmeaUdpClientServiceConnection(ShipReceivedListener listener) {
 			this.listener = listener;
 		}
 

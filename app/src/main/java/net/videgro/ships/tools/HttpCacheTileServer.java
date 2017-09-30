@@ -33,7 +33,6 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	
 	private static HttpCacheTileServer instance;
 
-	private Context context;
 	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private boolean running=false;
 	private FutureTask<String> httpCacheFifoTask=null;
@@ -44,7 +43,9 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	private int networkCount=0;
 	private int requestCount=0;
 	private int notFoundCount=0;
-	
+
+	private File dirCache=null;
+
 	public static HttpCacheTileServer getInstance(){
 		if (instance==null){
 			instance=new HttpCacheTileServer();
@@ -57,9 +58,37 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	}
 
     public void init(final Context context,final long maxDiskUsageInBytes){
-        this.context=context;
         this.maxDiskUsageInBytes=maxDiskUsageInBytes;
+		retrieveCacheDir(context);
     }
+
+	private void retrieveCacheDir(final Context context) {
+		final String tag="retrieveCacheDir - ";
+		dirCache = null;
+		if (isExternalStorageWritable()){
+			final File dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
+			if (!dir.exists()) {
+				try {
+					if (!dir.mkdirs()){
+						Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath());
+					} else {
+						dirCache=dir;
+					}
+				} catch (SecurityException e){
+					Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath(),e);
+				}
+			} else if (dir.getFreeSpace()<MIN_FREE_BYTES){
+				Log.w(TAG,tag+"Not enough free space on external files dir. Minimal required: "+MIN_FREE_BYTES+" bytes.");
+			} else {
+				dirCache=dir;
+			}
+		}
+
+		if (dirCache==null){
+			Log.w(TAG,tag+"No external files directory available, use cache directory.");
+			dirCache = context.getCacheDir();
+		}
+	}
 
 	/**
 	 * Start the caching tiles server
@@ -95,9 +124,8 @@ public class HttpCacheTileServer extends NanoHTTPD {
 
         File file = null;
 
-        final File cacheDir=retrieveCacheDir();
-        if (cacheDir!=null) {
-            file = new File(cacheDir, "/" + urlAsString.replace(":", "").replace("/", "_"));
+        if (dirCache!=null) {
+            file = new File(dirCache, "/" + urlAsString.replace(":", "").replace("/", "_"));
 
             if (file.exists() && ((Calendar.getInstance().getTimeInMillis() - file.lastModified()) < MAX_AGE)) {
                 //Log.i(TAG, "File: " + file.getAbsolutePath() + " exists, serve file from cache.");
@@ -196,43 +224,13 @@ public class HttpCacheTileServer extends NanoHTTPD {
 
 		return res;
 	}
-	
-	private File retrieveCacheDir() {
-        final String tag="retrieveCacheDir - ";
-        File result = null;
-        if (isExternalStorageWritable()){
-            final File dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
-            if (!dir.exists()) {
-				try {
-					if (!dir.mkdirs()){
-                        Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath());
-					} else {
-                        result=dir;
-                    }
-				} catch (SecurityException e){
-                    Log.w(TAG,tag+"Not possible to create directory: "+ dir.getPath(),e);
-				}
-            } else if (dir.getFreeSpace()<MIN_FREE_BYTES){
-                Log.w(TAG,tag+"Not enough free space on external files dir. Minimal required: "+MIN_FREE_BYTES+" bytes.");
-            } else {
-                result=dir;
-            }
-        }
 
-        if (result==null){
-            Log.w(TAG,tag+"No external files directory available, use cache directory.");
-            result = context.getCacheDir();
-        }
-        return result;
-	}
-	
 	private int cleanupOldFiles() {
 		int deletedFiles = 0;
 		final long now = Calendar.getInstance().getTimeInMillis();
-		final File folder = retrieveCacheDir();
-        Log.d(TAG,"Cleaning directory: "+folder);
-		if (folder != null) {
-			final File[] files = folder.listFiles();
+        Log.d(TAG,"Cleaning directory: "+dirCache);
+		if (dirCache != null) {
+			final File[] files = dirCache.listFiles();
 			if (files != null) {
 				for (final File fileEntry : files) {
 					final long age=now-fileEntry.lastModified();
@@ -288,7 +286,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	private void applyFifo(){
 		if (httpCacheFifoTask==null || httpCacheFifoTask.isDone() || httpCacheFifoTask.isCancelled()){
 			// Just cue one at a time
-			httpCacheFifoTask = new FutureTask<String>(new HttpCacheFifoTask(retrieveCacheDir(),maxDiskUsageInBytes));
+			httpCacheFifoTask = new FutureTask<String>(new HttpCacheFifoTask(dirCache,maxDiskUsageInBytes));
 			executor.execute(httpCacheFifoTask);
 		}
 	}

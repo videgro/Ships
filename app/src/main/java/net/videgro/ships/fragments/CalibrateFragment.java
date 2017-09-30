@@ -91,14 +91,14 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	@Override
 	public void onResume() {
 		super.onResume();
-		final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(getActivity());
+		final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
 		if (SettingsUtils.isValidPpm(ppm)) {
 			Log.d(TAG,"Valid PPM available, no need to calibrate. Switch to Show Map fragment.");
 			switchToShowMapFragment();
 		}
-		Analytics.logScreenView(getActivity(), TAG);
+		Analytics.getInstance().logScreenView(TAG);
 	}
-	
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		Log.i(TAG, "onActivityResult requestCode: " + requestCode + ", resultCode: " + resultCode);
@@ -106,7 +106,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		switch (requestCode) {
 			case REQ_CODE_START_RTLSDR:
 				final String startRtlSdrResultAsString=FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-                Analytics.logEvent(getActivity(),Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
+                Analytics.getInstance().logEvent(Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
 				logStatus(startRtlSdrResultAsString);
 				
 				if (resultCode == Activity.RESULT_OK) {
@@ -180,7 +180,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	private void switchToShowMapFragment(){
 		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new ShowMapFragment());
 		if (!switchToFragmentResult.isEmpty()){
-			Analytics.logEvent(getActivity(), TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
+			Analytics.getInstance().logEvent(TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
 			FragmentUtils.stopApplication(this);
 		}
 	}
@@ -223,23 +223,30 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	
 	@Override
 	public void onCalibrateReady(final int ppm){
-		SettingsUtils.setToPreferencesPpm(getActivity(),ppm);
-		Analytics.logEvent(getActivity(), TAG, "onCalibrateReady",""+ppm);
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY,getActivity(),this,getString(R.string.popup_found_ppm_title),getString(R.string.popup_found_ppm_message)+" "+ppm,R.drawable.thumbs_up_circle,null);		
-	}	
+		SettingsUtils.getInstance().setToPreferencesPpm(ppm);
+        Analytics.getInstance().logEvent(TAG, "onCalibrateReady",""+ppm);
+
+        if (isAdded()){
+			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY, getActivity(), this, getString(R.string.popup_found_ppm_title), getString(R.string.popup_found_ppm_message) + " " + ppm, R.drawable.thumbs_up_circle, null);
+		}
+	}
 	
 	@Override
 	public void onCalibrateFailed() {
 		logStatus("Not possible to determine PPM.");
-		Analytics.logEvent(getActivity(), TAG, "onCalibrateFailed","");
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_not_found_ppm_title),getString(R.string.popup_not_found_ppm_message),R.drawable.thumbs_down_circle,null);
+        Analytics.getInstance().logEvent(TAG, "onCalibrateFailed", "");
+		if (isAdded()) {
+			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED, getActivity(), this, getString(R.string.popup_not_found_ppm_title), getString(R.string.popup_not_found_ppm_message), R.drawable.thumbs_down_circle, null);
+		}
 	}
 	
 	@Override
 	public void onCalibrateCancelled() {
 		logStatus("Calibration cancelled.");
-		Analytics.logEvent(getActivity(), TAG, "onCalibrateCancelled","");
-		Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED,getActivity(),this,getString(R.string.popup_calibration_cancelled_title),getString(R.string.popup_calibration_cancelled_message),R.drawable.warning_icon,null);		
+        Analytics.getInstance().logEvent(TAG, "onCalibrateCancelled", "");
+		if (isAdded()) {
+			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED, getActivity(), this, getString(R.string.popup_calibration_cancelled_title), getString(R.string.popup_calibration_cancelled_message), R.drawable.warning_icon, null);
+		}
 	}	
 	
 	/**** END CalibrateListener ****/

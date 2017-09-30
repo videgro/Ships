@@ -72,5 +72,4 @@ public class PermissionsHelper{
         
         return result;
     }
-	
 }

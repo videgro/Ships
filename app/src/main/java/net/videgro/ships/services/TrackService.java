@@ -22,7 +22,6 @@ public class TrackService extends Service implements LocationListener {
 	public final static String LISTENER = "listener";
 
 	private LocationManager locationManager;
-	private String provider;
 	private final IBinder binder = new ServiceBinder();
 	private OwnLocationReceivedListener listener;
 
@@ -48,7 +47,7 @@ public class TrackService extends Service implements LocationListener {
 		if (locationManager != null) {
 			locationManager.removeUpdates(this);
 		}
-		Analytics.logEvent(this, TAG, "destroy", "");
+		Analytics.getInstance().logEvent(TAG, "destroy", "");
 	}
 
 	private void askLocationManagerForLocationUpdates() {
@@ -57,23 +56,28 @@ public class TrackService extends Service implements LocationListener {
 		// default
 		Criteria criteria = new Criteria();
 
-		provider = locationManager.getBestProvider(criteria, true);
+		final String provider = locationManager.getBestProvider(criteria, true);
 		Log.i(TAG, "Provider " + provider + " has been selected.");
-		Analytics.logEvent(this, TAG, "Selected provider", provider);
+		Analytics.getInstance().logEvent(TAG, "Selected provider", provider);
 
 		if (provider != null) {
-			Location location = locationManager.getLastKnownLocation(provider);
-			if (location != null) {
-				onLocationChanged(location);
+			try {
+				Location location = locationManager.getLastKnownLocation(provider);
+				if (location != null) {
+					onLocationChanged(location);
+				}
+
+				/**
+				 * Minimum time: 1000 ms Minimum distance: 8 meters
+				 *
+				 */
+				locationManager.requestLocationUpdates(provider, 1000, 8, this);
+				Analytics.getInstance().logEvent(TAG, tag, "");
+			} catch (SecurityException e){
+				Log.e(TAG,tag+"SecurityException",e);
+				Analytics.getInstance().logEvent(TAG, tag, e.getMessage());
 			}
 
-			/**
-			 * Minimum time: 1000 ms Minimum distance: 8 meters
-			 * 
-			 */
-			locationManager.requestLocationUpdates(provider, 1000, 8, this);
-
-			Analytics.logEvent(this, TAG, tag, "");
 		} else {
 			Log.w(TAG, tag + "No Provider available.");
 		}

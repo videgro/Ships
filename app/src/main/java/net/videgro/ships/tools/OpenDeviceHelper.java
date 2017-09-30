@@ -21,7 +21,7 @@ public class OpenDeviceHelper {
 	private static final String TAG="OpenDeviceHelper";
 
 	public static final String USB_PERMISSIONS="777";
-    public static final String DEFAULT_USPFS_PATH = "/dev/bus/usb";
+    private static final String DEFAULT_USPFS_PATH = "/dev/bus/usb";
     
     private static final String NAME_USB_DEVICE="usb-device";
     private static final String ATTRIBUTE_VENDOR_ID="vendor-id";

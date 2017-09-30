@@ -20,6 +20,7 @@ public class PromoPreferenceRateMe extends Preference {
 
 	@Override
 	protected View onCreateView(ViewGroup parent) {
+		super.onCreateView(parent);
 		final LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		return inflater.inflate(R.layout.promo_rate_me, null);
 	}

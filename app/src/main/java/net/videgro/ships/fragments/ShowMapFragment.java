@@ -44,9 +44,8 @@ import net.videgro.ships.Utils;
 import net.videgro.ships.fragments.internal.FragmentUtils;
 import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.ImagePopupListener;
-import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
-import net.videgro.ships.nmea2ship.Nmea2Ship;
+import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.services.NmeaUdpClientService;
 import net.videgro.ships.services.TrackService;
@@ -57,8 +56,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -68,7 +65,7 @@ import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 
 @RuntimePermissions
-public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, NmeaReceivedListener, ImagePopupListener {
+public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, ShipReceivedListener, ImagePopupListener {
     private static final String TAG = "ShowMapFragment";
 
     private static final DecimalFormat GPS_COORD_FORMAT = new DecimalFormat("##.00");
@@ -91,7 +88,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private WebView webView;
     private TextView logTextView;
-    private Nmea2Ship nmea2Ship = new Nmea2Ship();
     private TrackService trackService;
     private NmeaUdpClientService nmeaUdpClientService;
     private ServiceConnection locationServiceConnection;
@@ -99,11 +95,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private Location lastReceivedOwnLocation = null;
     private ToggleButton startStopButton;
     private File fileMap;
-
-    /**
-     * Contains all received MMSIs. A set contains unique entries.
-     */
-    private Set<Integer> mmsiReceived = new HashSet<Integer>();
 
     @SuppressLint("NewApi")
     @Override
@@ -142,7 +133,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onStart() {
         super.onStart();
 
-        final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(this.getActivity());
+        final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
         if (!SettingsUtils.isValidPpm(ppm)) {
             Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
         } else {
@@ -158,21 +149,13 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        Analytics.logScreenView(getActivity(), TAG);
+        Analytics.getInstance().logScreenView(TAG);
     }
 
     @Override
     public void onPause() {
         final String tag = "onPause";
-
-        if (mmsiReceived.size() == 0) {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"No ships received",Utils.retrieveAbi());
-        } else {
-            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS,"Number of received ships",Utils.retrieveAbi(),mmsiReceived.size());
-        }
-
-        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
-
+        Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
         super.onPause();
     }
 
@@ -191,7 +174,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         switch (requestCode) {
             case REQ_CODE_START_RTLSDR:
                 final String startRtlSdrResultAsString = FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-                Analytics.logEvent(getActivity(),Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
+                Analytics.getInstance().logEvent(Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
                 logStatus(startRtlSdrResultAsString);
 
                 if (resultCode != Activity.RESULT_OK) {
@@ -216,7 +199,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void setupHttpCachingTileServer() {
         final String tag = "setupHttpCachingTileServer - ";
         final HttpCacheTileServer httpCacheTileServer = HttpCacheTileServer.getInstance();
-        httpCacheTileServer.init(getActivity(), SettingsUtils.parseFromPreferencesMapCacheDiskUsageMax(getActivity()));
+        httpCacheTileServer.init(getActivity(), SettingsUtils.getInstance().parseFromPreferencesMapCacheDiskUsageMax());
 
         if (httpCacheTileServer.startServer()){
             // Server in place, load page
@@ -241,10 +224,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.parseFromPreferencesMapZoomToExtend(getActivity())) + ")");
-                webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles(" + Boolean.toString(SettingsUtils.parseFromPreferencesMapCacheLowerZoomlevels(getActivity())) + ")");
-                webView.loadUrl("javascript:setShipScaleFactor("+SettingsUtils.parseFromPreferencesShipScaleFactor(getActivity())+")");
-                webView.loadUrl("javascript:setOwnLocationIcon('"+SettingsUtils.parseFromPreferencesOwnLocationIcon(getActivity())+"')");
+                webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapZoomToExtend()) + ")");
+                webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapCacheLowerZoomlevels()) + ")");
+                webView.loadUrl("javascript:setShipScaleFactor("+SettingsUtils.getInstance().parseFromPreferencesShipScaleFactor()+")");
+                webView.loadUrl("javascript:setOwnLocationIcon('"+SettingsUtils.getInstance().parseFromPreferencesOwnLocationIcon()+"')");
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");
                 }
@@ -256,7 +239,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (url != null && url.contains(PLACEHOLDER_MMSI)) {
                     final String mmsi = url.split(PLACEHOLDER_MMSI)[1];
                     final String newUrl = getString(R.string.url_mmsi_info).replace(PLACEHOLDER_MMSI, mmsi);
-                    Analytics.logEvent(getActivity(), TAG, "shipinfo", mmsi);
+                    Analytics.getInstance().logEvent(TAG, "shipinfo", mmsi);
                     view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(newUrl)));
                     result = true;
                 }
@@ -275,7 +258,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private void setupNmeaUdpClientService() {
-        nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((NmeaReceivedListener) this);
+        nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((ShipReceivedListener) this);
         Intent serviceIntent = new Intent(getActivity(), NmeaUdpClientService.class);
         getActivity().startService(serviceIntent);
         getActivity().bindService(new Intent(getActivity(), NmeaUdpClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
@@ -306,7 +289,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private void startReceivingAisFromAntenna() {
         final String tag = "startReceivingAisFromAntenna - ";
         if (!FragmentUtils.rtlSdrRunning) {
-            final int ppm = SettingsUtils.parseFromPreferencesRtlSdrPpm(getActivity());
+            final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
             if (SettingsUtils.isValidPpm(ppm)) {
                 final boolean startResult = FragmentUtils.startReceivingAisFromAntenna(this, REQ_CODE_START_RTLSDR, ppm);
                 logStatus((startResult ? "Requested" : "Failed") + " to receive AIS from antenna (PPM: " + ppm + ").");
@@ -378,7 +361,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 Log.e(TAG,tag, e);
             }
         } else {
-            Analytics.logEvent(getActivity(), TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
+            Analytics.getInstance().logEvent(TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
         }
 	}
 
@@ -391,9 +374,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		shareActionProvider.setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
 			@Override
 			public boolean onShareTargetSelected(ShareActionProvider actionProvider, Intent intent) {
-				Analytics.logEvent(getActivity(), TAG, "share",""+mmsiReceived.size());
-                takeScreenShotWithCheck();
-				return false;
+            Analytics.getInstance().logEvent(TAG, "share","");
+            takeScreenShotWithCheck();
+            return false;
 			}
 		});
 	}
@@ -414,7 +397,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
 			final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new CalibrateFragment());
 			if (!switchToFragmentResult.isEmpty()){
-				Analytics.logEvent(getActivity(), TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
+				Analytics.getInstance().logEvent(TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
 				FragmentUtils.stopApplication(this);
 			}
 		break;
@@ -430,34 +413,22 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	/**** END ImagePopupListener ****/
 	
 	/**** START NmeaReceivedListener ****/
-	
 	@Override
-	public void onNmeaReceived(String nmea) {
-		final String tag="onNmeaReceived - ";
-		
-		final Ship ship = nmea2Ship.onMessage(nmea);
+	public void onShipReceived(final Ship ship) {
+		final String tag="onShipReceived - ";
 
-		if (ship != null && ship.isValid()) {
-			if (ship.isValid()){
-				final String json = new Gson().toJson(ship);
-				mmsiReceived.add(ship.getMmsi());
-				
-				final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
-				logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.parseFromPreferencesLoggingVerbose(getActivity()) ? "\n"+ship : ""));
+        final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
+        logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship : ""));
 
-				if (getActivity()!=null){
-					getActivity().runOnUiThread(new Runnable() {
-						public void run() {
-							webView.loadUrl("javascript:onShipReceived('" + json + "')");
-						}
-					});
-				} else {
-					Log.e(TAG,tag+"Huh?");
-				}
-			} else {
-				Log.w(TAG,tag+"Ship is invalid: "+ship.toString());
-			}
-		}
+        if (getActivity()!=null){
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
+                }
+            });
+        } else {
+            Log.e(TAG,tag+"Huh?");
+        }
 	}
 	
 	/**** END NmeaListener ****/
@@ -472,7 +443,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		if (getActivity()!=null){
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
-					webView.loadUrl("javascript:setCurrentPosition(" + location.getLongitude() + "," + location.getLatitude() + ")");
+                webView.loadUrl("javascript:setCurrentPosition(" + location.getLongitude() + "," + location.getLatitude() + ")");
 				}
 			});
 		} else {
@@ -506,9 +477,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	
 	private class NmeaUdpClientServiceConnection implements ServiceConnection {
 		private final String tag="NmeaUdpClientServiceConnection - ";
-		private final NmeaReceivedListener listener;
+		private final ShipReceivedListener listener;
 
-		NmeaUdpClientServiceConnection(NmeaReceivedListener listener) {
+		NmeaUdpClientServiceConnection(ShipReceivedListener listener) {
 			this.listener = listener;
 		}
 

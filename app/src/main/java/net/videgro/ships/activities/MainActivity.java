@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
+import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.fragments.ShowMapFragment;
 
 public class MainActivity extends Activity {
@@ -15,6 +18,10 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// FIXME: Observed exception "IllegalAccessException (@MainActivity:onCreate:16) {main}"
+
+        // Init some singletons which need the Context
+        Analytics.getInstance().init(this);
+        SettingsUtils.getInstance().init(this);
 
 		setContentView(R.layout.activity_main);
 	

@@ -62,10 +62,10 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	}
 
 	private void useOtherRtlSdrDevice(){
-		Analytics.logEvent(getActivity(), TAG, "useOtherRtlSdrDevice","");
+		Analytics.getInstance().logEvent(TAG, "useOtherRtlSdrDevice","");
 		
 		// Invalidate PPM setting
-		SettingsUtils.setToPreferencesPpm(getView().getContext(),Integer.MAX_VALUE);
+		SettingsUtils.getInstance().setToPreferencesPpm(Integer.MAX_VALUE);
 		
 		// Show popup and on closing popup, close application
 		Utils.showPopup(IMAGE_POPUP_ID_MUST_STOP,getActivity(),this,getString(R.string.popup_other_rtlsdr_device_title),getString(R.string.popup_other_rtlsdr_device_message),R.drawable.warning_icon,null);
@@ -123,9 +123,9 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 		
 		if (key.equals(SettingsUtils.KEY_PREF_RTL_SDR_PPM)){
 			// PPM changed, must effectuate this in RTL-SDR device
-			final int newPpm = SettingsUtils.parseFromPreferencesRtlSdrPpm(getView().getContext());
+			final int newPpm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
 			if (SettingsUtils.isValidPpm(newPpm) && FragmentUtils.rtlSdrRunning){
-				Analytics.logEvent(getActivity(), TAG, "onSharedPreferenceChanged - PPM",""+newPpm);
+				Analytics.getInstance().logEvent(TAG, "onSharedPreferenceChanged - PPM",""+newPpm);
 				FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_CHANGE_RTLSDR_PPM,newPpm);
 				// Will continue at onActivityResult (REQ_CODE_CHANGE_RTLSDR_PPM) (NOT IMPLEMENTED IN THIS CLASS)
 			}

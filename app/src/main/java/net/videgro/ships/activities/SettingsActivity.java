@@ -23,7 +23,7 @@ public class SettingsActivity extends Activity {
     }
     
 	public void onRequestRateClicked(View view){
-		Analytics.logEvent(view.getContext(), TAG, "onRequestRateClicked", "gotoGooglePlay");
+		Analytics.getInstance().logEvent(TAG, "onRequestRateClicked", "gotoGooglePlay");
 		view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(view.getContext().getString(R.string.app_market_url))))	;
 	}
 }

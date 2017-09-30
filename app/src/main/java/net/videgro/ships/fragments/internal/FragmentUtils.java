@@ -84,10 +84,10 @@ public final class FragmentUtils {
 		final String tag = "stopApplication - ";
 		final int waitTime = 5000;
 
+		Analytics.getInstance().logEvent(TAG, "stopApplication", "");
+
 		if (fragment != null && fragment.getActivity() != null) {
-			final Activity activity=fragment.getActivity();
-			Analytics.logEvent(activity, TAG, "stopApplication", "");
-			activity.finish();
+			fragment.getActivity().finish();
 
 			try {
 				Thread.sleep(waitTime);

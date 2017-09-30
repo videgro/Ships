@@ -8,51 +8,63 @@ import com.google.android.gms.analytics.Logger;
 import com.google.android.gms.analytics.Tracker;
 
 public final class Analytics {
-	private static Tracker analyticsTracker=null;
-
 	public static final String CATEGORY_STATISTICS="Statistics";
 	public static final String CATEGORY_ANDROID_DEVICE="Device (Android)";
 	public static final String CATEGORY_RTLSDR_DEVICE="Device (RTL-SDR)";
-	
+
+	private static Analytics instance=null;
+
+	private Tracker tracker=null;
+
 	private Analytics(){
-		// Utility class, no public constructor
+		// Singleton, no public constructor
 	}
 
-	private static synchronized Tracker getTracker(final Context context){		
-		if (analyticsTracker==null){
-			// Create new tracker
-			GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
-		    analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
-		    analyticsTracker =  analytics.newTracker(R.xml.analytics);
+	public static Analytics getInstance(){
+		if (instance==null){
+			instance=new Analytics();
 		}
-		return analyticsTracker;		    
+		return instance;
 	}
-	
-	public static synchronized void logScreenView(final Context context,final String screen){
-		Tracker t = getTracker(context);
-        t.setScreenName(screen);
-        t.send(new HitBuilders.AppViewBuilder().build());
-	}
-	
-	public static synchronized void logEvent(final Context context,final String category,final String action,final String label){
-		Tracker t = getTracker(context);
 
-		t.send(new HitBuilders.EventBuilder()
+	public void init(final Context context){
+		// Create new tracker
+		GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
+		analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
+		tracker =  analytics.newTracker(R.xml.analytics);
+	}
+
+	private void validateTracker(){
+		if (tracker==null){
+			throw new IllegalArgumentException("No tracker set, please init first.");
+		}
+	}
+	
+	public synchronized void logScreenView(final String screen){
+		validateTracker();
+
+		tracker.setScreenName(screen);
+		tracker.send(new HitBuilders.AppViewBuilder().build());
+	}
+	
+	public synchronized void logEvent(final String category,final String action,final String label){
+		validateTracker();
+
+		tracker.send(new HitBuilders.EventBuilder()
             .setCategory(category)
             .setAction(action)
             .setLabel(label)
             .build());
 	}
 
-	public static synchronized void logEvent(final Context context,final String category,final String action,final String label,final long value){
-		Tracker t = getTracker(context);
+	public synchronized void logEvent(final String category,final String action,final String label,final long value){
+		validateTracker();
 
-		t.send(new HitBuilders.EventBuilder()
+		tracker.send(new HitBuilders.EventBuilder()
 				.setCategory(category)
 				.setAction(action)
 				.setLabel(label)
 				.setValue(value)
 				.build());
 	}
-
 }

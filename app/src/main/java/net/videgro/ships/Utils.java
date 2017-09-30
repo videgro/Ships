@@ -98,7 +98,7 @@ public final class Utils {
 		int mId=0;
 		mNotificationManager.notify(mId, mBuilder.build());
 		
-		Analytics.logEvent(context,TAG,"sendNotification","message");
+		Analytics.getInstance().logEvent(TAG,"sendNotification","message");
 	}	
 	
 	public static void logStatus(final Activity activity,final TextView textView,final String status) {

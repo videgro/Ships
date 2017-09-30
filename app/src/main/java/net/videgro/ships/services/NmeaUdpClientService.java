@@ -10,7 +10,10 @@ import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.SettingsUtils;
-import net.videgro.ships.listeners.NmeaReceivedListener;
+import net.videgro.ships.Utils;
+import net.videgro.ships.listeners.ShipReceivedListener;
+import net.videgro.ships.nmea2ship.Nmea2Ship;
+import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
@@ -27,16 +30,32 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
     public static final String NMEA_UDP_HOST="127.0.0.1";
 
 	private final IBinder binder = new ServiceBinder();
-	private final Set<NmeaReceivedListener> listeners=new HashSet<NmeaReceivedListener>();
-	
+	private final Set<ShipReceivedListener> listeners=new HashSet<ShipReceivedListener>();
+
+    private Nmea2Ship nmea2Ship = new Nmea2Ship();
 	private NmeaUdpClientTask nmeaUdpClientTask;
+
+    /**
+     * Contains all received MMSIs. A set contains unique entries.
+     */
+    private Set<Integer> mmsiReceived = new HashSet<>();
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
 
-	@Override
+    @Override
+    public boolean onUnbind(Intent intent) {
+        if (mmsiReceived.size() == 0) {
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received",Utils.retrieveAbi());
+        } else {
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships", Utils.retrieveAbi(),mmsiReceived.size());
+        }
+        return super.onUnbind(intent);
+    }
+
+    @Override
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
@@ -52,7 +71,7 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 			nmeaUdpClientTask=null;
 		}
 		
-		Analytics.logEvent(this, TAG, "destroy", "");
+		Analytics.getInstance().logEvent(TAG, "destroy", "");
 	}
 
 	@Override
@@ -75,8 +94,8 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
         final String tag="createRepeaterConfig - ";
         DatagramSocketConfig result=null;
 
-        final String repeatHost = SettingsUtils.parseFromPreferencesAisMessagesDestinationHost(this);
-        final int repeatPort = SettingsUtils.parseFromPreferencesAisMessagesDestinationPort(this);
+        final String repeatHost = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationHost();
+        final int repeatPort = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationPort();
 
         String informText="Not repeating NMEA messages.";
         if (repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
@@ -84,7 +103,7 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
             if (validateDatagramSocketConfig(result)) {
                 informText="Repeating NMEA messages to UDP: " + result;
 				Toast.makeText(this,informText,Toast.LENGTH_LONG).show();
-                Analytics.logEvent(this, TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
+                Analytics.getInstance().logEvent(TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
             } else {
                 result=null;
             }
@@ -117,25 +136,34 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 		return result;
 	}
 
-	public boolean addListener(NmeaReceivedListener listener) {
+	public boolean addListener(ShipReceivedListener listener) {
 		synchronized(listeners){
 			return listeners.add(listener);
 		}	
 	}
 	
-	public boolean removeListener(NmeaReceivedListener listener) {
+	public boolean removeListener(ShipReceivedListener listener) {
 		synchronized(listeners){
 			return listeners.remove(listener);
 		}	
 	}
 
 	@Override
-	public void onNmeaReceived(String line) {
-		Log.d(TAG,"onNmeaReceived - "+line);
+	public void onNmeaReceived(String nmea) {
+		Log.d(TAG,"onNmeaReceived - "+nmea);
 		synchronized(listeners){
-			for (final NmeaReceivedListener listener:listeners){
-				listener.onNmeaReceived(line);
-			}
+            final Ship ship = nmea2Ship.onMessage(nmea);
+            if (ship != null && ship.isValid()) {
+				if (mmsiReceived.isEmpty()){
+					Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"First ship received", Utils.retrieveAbi());
+				}
+
+				mmsiReceived.add(ship.getMmsi());
+
+                for (final ShipReceivedListener listener : listeners) {
+                    listener.onShipReceived(ship);
+                }
+            }
 		}	
 	}
 
