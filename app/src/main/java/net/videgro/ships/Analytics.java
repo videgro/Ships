@@ -28,10 +28,15 @@ public final class Analytics {
 	}
 
 	public void init(final Context context){
-		// Create new tracker
-		GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
-		analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
-		tracker =  analytics.newTracker(R.xml.analytics);
+		if (tracker==null) {
+            if (context==null){
+                throw new IllegalArgumentException("No context set.");
+            }
+			// Create new tracker
+			final GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
+			analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
+			tracker = analytics.newTracker(R.xml.analytics);
+		}
 	}
 
 	private void validateTracker(){

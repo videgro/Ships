@@ -55,10 +55,12 @@ public final class SettingsUtils {
     }
 
 	public void init(final Context context){
-		if (context==null){
-			throw new IllegalArgumentException("No context set.");
+		if (sharedPreferences==null) {
+			if (context==null){
+				throw new IllegalArgumentException("No context set.");
+			}
+			sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		}
-		sharedPreferences=PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
 	private void validateSharedPreferences(){

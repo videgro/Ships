@@ -59,6 +59,10 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
+
+		// Init some singletons which need the Context
+		Analytics.getInstance().init(this);
+		SettingsUtils.getInstance().init(this);
 	}
 
 	@Override

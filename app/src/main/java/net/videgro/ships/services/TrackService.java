@@ -2,6 +2,7 @@ package net.videgro.ships.services;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
+import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import android.app.Service;
 import android.content.Context;
@@ -34,6 +35,10 @@ public class TrackService extends Service implements LocationListener {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
+
+		// Init some singletons which need the Context
+		Analytics.getInstance().init(this);
+		SettingsUtils.getInstance().init(this);
 
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
