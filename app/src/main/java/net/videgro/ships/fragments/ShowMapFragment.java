@@ -138,9 +138,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
         } else {
             // Start tiles caching server, will also load the OpenStreetMap after server has started
-            ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithCheck(this);
+            ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
 
-            ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithCheck(this);
+            ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
             startReceivingAisFromAntenna();
         }
     }
@@ -333,7 +333,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private void takeScreenShotWithCheck() {
-        ShowMapFragmentPermissionsDispatcher.takeScreenShotWithCheck(this);
+        ShowMapFragmentPermissionsDispatcher.takeScreenShotWithPermissionCheck(this);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
