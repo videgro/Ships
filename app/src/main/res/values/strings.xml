@@ -58,6 +58,8 @@
 	<string name="popup_receiving_ais_title">Receiving AIS</string>
 	<string name="popup_receiving_ais_message">Waiting for AIS data. Please be patient. After receiving data, the ship(s) will be plotted on the map.</string>
 
+    <string name="popup_select_device_title">Select device</string>
+
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
     <string name="permission_externalstorage_denied_title">Denied storage permission</string>
@@ -74,6 +76,8 @@
 
 	<!-- Status -->
 	<string name="connect_usb_device_status_ok">USB device is open.</string>
+    <string name="connect_usb_device_status_error_native_library_not_loaded">This application is not compatible with your device.</string>
+    <string name="connect_usb_device_status_error_no_rtlsdr_device_selected">You have not selected an RTL-SDR device.</string>
 	<string name="connect_usb_device_status_pending_permission_request">No permission to open device, while requesting permission - Not possible to run this application without the right permissions. Sorry!</string>
 	<string name="connect_usb_device_status_error_no_device_found">Not possible to connect to device. Is the device physically connected? Please insert RTL-SDR device before starting. Application will stop now.</string>
 	<string name="connect_usb_device_status_error_permission_denied">Permission denied to open device - Not possible to run this application without the right permissions. Sorry!</string>

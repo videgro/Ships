@@ -6,7 +6,7 @@ import android.os.Bundle;
 import net.videgro.ships.fragments.HelpFragment;
 
 public class HelpActivity extends Activity {
-	final String TAG="HelpActivity";
+	private static final String TAG="HelpActivity";
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {

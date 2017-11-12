@@ -1,12 +1,5 @@
 package net.videgro.ships.services;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import net.videgro.ships.StartRtlSdrRequest;
-import net.videgro.ships.Utils;
-import net.videgro.ships.bridge.NativeRtlSdr;
-import net.videgro.ships.bridge.NativeRtlSdr.NativeRtlSdrListener;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -14,6 +7,14 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
+
+import net.videgro.ships.StartRtlSdrRequest;
+import net.videgro.ships.Utils;
+import net.videgro.ships.bridge.NativeRtlSdr;
+import net.videgro.ships.bridge.NativeRtlSdr.NativeRtlSdrListener;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListener {
     private static final String TAG = "RtlSdrAisService";
@@ -54,12 +55,18 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 	}
     
     private void aquireWakeLock(){
-    	wakelock=((PowerManager)getSystemService(Context.POWER_SERVICE)).newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,TAG);
-    	wakelock.setReferenceCounted(false);
-    	if (!wakelock.isHeld()){
-	    	wakelock.acquire();
-	        Log.i(TAG,"Acquired wake lock. Will keep the screen on.");
-    	}
+		final Object powerManagerObj=getSystemService(Context.POWER_SERVICE);
+		if (powerManagerObj instanceof PowerManager) {
+            final PowerManager powerManager = (PowerManager) powerManagerObj;
+
+            wakelock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
+            wakelock.setReferenceCounted(false);
+            if (!wakelock.isHeld()) {
+                // Limit wakelock to one day
+                wakelock.acquire(1000 * 60 * 60 * 24);
+                Log.i(TAG, "Acquired wake lock. Will keep the screen on.");
+            }
+        }
     }
     
     private void releaseWakeLock(){    	

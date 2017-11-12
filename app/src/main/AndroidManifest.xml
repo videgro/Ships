@@ -16,27 +16,32 @@
 
     <uses-feature
         android:name="android.hardware.usb.host"
-        android:required="false" />
+        android:required="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name=".activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/supported_devices" />
+    </activity>
         <!-- android:screenOrientation="landscape" -->
 
         <activity
             android:name=".activities.OpenDeviceActivity"
-            android:exported="false"
+            android:theme="@android:style/Theme.Dialog"
+            android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <data android:scheme="@string/opendevice_intent_filter_schema" />

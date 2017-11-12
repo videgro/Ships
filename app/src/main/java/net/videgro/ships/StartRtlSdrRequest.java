@@ -1,9 +1,9 @@
 package net.videgro.ships;
 
 public class StartRtlSdrRequest {
-	final String args;
-	final int fd;
-	final String uspfsPath;
+	private final String args;
+	private final int fd;
+	private final String uspfsPath;
 
 	public StartRtlSdrRequest(String args, int fd, String uspfsPath) {
 		this.args = args;

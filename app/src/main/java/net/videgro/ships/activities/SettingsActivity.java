@@ -11,7 +11,7 @@ import net.videgro.ships.R;
 import net.videgro.ships.fragments.SettingsFragment;
 
 public class SettingsActivity extends Activity {
-	final String TAG="SettingsActivity";
+	private static final String TAG="SettingsActivity";
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
