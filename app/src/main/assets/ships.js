@@ -186,10 +186,10 @@ function autoZoom(){
 	} else {
 		ext=layerMyPosition.getDataExtent();
 	}
-	
+
 	if (ext!=null){
 		map.zoomToExtent(ext);
-		map.baseLayer.redraw();
+		//map.baseLayer.redraw();
 	}
 }
 
@@ -545,6 +545,10 @@ var lineLayer;
 var shipScaleFactor=DEFAULT_SHIP_SCALE_FACTOR;
 var ownLocationIcon=DEFAULT_OWN_LOCATION_ICON;
 
-
+window.onresize = function(){
+    setTimeout( function() {
+        map.updateSize();
+    }, 200);
+}
 
 
