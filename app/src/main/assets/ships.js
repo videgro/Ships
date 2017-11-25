@@ -19,7 +19,11 @@ function timestamp2prettyPrint(timestamp) {
 
 function addShip(ship) {
 	ship.lastUpdated=new Date().getTime(); // Add extra field
-	ships[mmsiKey(ship)]=ship;
+
+    // Select ships source
+    var dataShip=(ship.source=="SOCKET_IO") ? dataShips[1] : dataShips[0];
+
+	dataShip.ships[mmsiKey(ship)]=ship;
 	
 	// Create new marker
 	var lonLat = new OpenLayers.LonLat(ship.lon, ship.lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
@@ -127,14 +131,14 @@ function addShip(ship) {
 	shipFeature2.geometry.rotate(angle * -1, origin);
 
 	var shipFeatures = [ shipFeature2, shipFeature1 ];
-	shipVectors.addFeatures(shipFeatures);
+	dataShip.shipVectors.addFeatures(shipFeatures);
 
 	// We know this ship already. Put marker at new position and draw trace
-	var previousMarkers = markers[mmsiKey(ship)];
+	var previousMarkers = dataShip.markers[mmsiKey(ship)];
 	if (previousMarkers != null) {
 
 		// Remove previous marker
-		shipVectors.removeFeatures(previousMarkers);
+		dataShip.shipVectors.removeFeatures(previousMarkers);
 
 		// Create trace line from previous to new position
 		var points = new Array(previousMarkers[0].geometry.getCentroid(),new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
@@ -151,11 +155,11 @@ function addShip(ship) {
 			strokeWidth : 2
 		});
 		
-		lineLayer.addFeatures([ lineFeature ]);
-		traces[new Date().getTime()] = lineFeature;
+		dataShip.lineLayer.addFeatures([ lineFeature ]);
+		dataShip.traces[new Date().getTime()] = lineFeature;
 	}
 	
-	if (ship.name!="" && typeof shipsNamePlayed[mmsiKey(ship)] === 'undefined') {
+	if (ship.name!="" && typeof dataShip.shipsNamePlayed[mmsiKey(ship)] === 'undefined') {
 		// console.log("Play sound");
 
 		var gongListener = function(event) {
@@ -171,15 +175,21 @@ function addShip(ship) {
 		}
 		
 		audioGong.play();
-		shipsNamePlayed[mmsiKey(ship)] = true;
+		dataShip.shipsNamePlayed[mmsiKey(ship)] = true;
 	}
 
 	// Replace/add new marker to map of markers
-	markers[mmsiKey(ship)] = shipFeatures;
+	dataShip.markers[mmsiKey(ship)] = shipFeatures;
 }
 
 function autoZoom(){
-	var ext=shipVectors.getDataExtent();
+	var ext=dataShips[0].shipVectors.getDataExtent();
+
+    // No ships received via UDP, use data from peers to zoom to extent
+	if (Object.keys(dataShips[0].ships).length==0 && Object.keys(dataShips[1].ships).length>0){
+	    ext=dataShips[1].shipVectors.getDataExtent();
+	}
+
 	if (ext!=null){
 		// Extend data extent with layerMyPosition-data extent
 		ext.extend(layerMyPosition.getDataExtent());
@@ -200,62 +210,64 @@ function cleanup() {
 
 	var now = new Date().getTime();
 	var maxAge = (1000*60*20); // 20 minutes
-	
-	// Remove ships
-	for (keyMmsi in ships) {
-	    if (ships.hasOwnProperty(keyMmsi)) {	
-	    		var ship=ships[keyMmsi];
-	    		var timestamp=ship.lastUpdated;
-	    		
-	    		var age=(now-timestamp);
-	    		
-	    		if (age>(maxAge/2)){
-	    			// Indicating ship will be removed in the (near) future
-	    			// Change label color on second feature (index 1)
-		    		markers[keyMmsi][1].attributes.fontColor='#FF0000';	   
-		    		shipVectors.redraw();
-		    		
-		    		if (age>maxAge){
-		    			console.log("Removing ship: "+ship.mmsi+" ("+ship.name+"), Timestamp: "+timestamp+" (Age: "+age+")");
-		    			
-		    			// Remove ship markers
-		    			shipVectors.removeFeatures(markers[keyMmsi]);
-		    			
-		    			// Remove ship from administration	    			
-		    			delete markers[keyMmsi];
-		    			delete shipsNamePlayed[keyMmsi];
-		    			delete ships[keyMmsi];
-		    			
-		    			printStatistics();
-		    		}
-	    		}
-	    }
-	}	
-	  
-    // ^0$|^[1-9]\d*$/.test(keyTimestamp) &&    
-    // keyTimestamp <= 4294967294          
-	
-	// Remove traces
-	for (keyTimestamp in traces) {
-	    if (traces.hasOwnProperty(keyTimestamp)){	
-	    		if ((now-keyTimestamp)>maxAge){
-	    			//console.log("Removing trace - Timestamp: "+keyTimestamp+" (Age: "+(now-keyTimestamp)+")");
-	    			
-	    			// Remove trace
-	    			lineLayer.removeFeatures(traces[keyTimestamp]);
-	    			
-	    			// Remove trace from administration
-	    			delete traces[keyTimestamp];	    			
-	    		}
-	    	}
+
+	for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
+        // Remove ships
+        for (keyMmsi in dataShips[i].ships) {
+            if (dataShips[i].ships.hasOwnProperty(keyMmsi)) {
+                    var ship=dataShips[i].ships[keyMmsi];
+                    var timestamp=ship.lastUpdated;
+
+                    var age=(now-timestamp);
+
+                    if (age>(maxAge/2)){
+                        // Indicating ship will be removed in the (near) future
+                        // Change label color on second feature (index 1)
+                        dataShips[i].markers[keyMmsi][1].attributes.fontColor='#FF0000';
+                        dataShips[i].shipVectors.redraw();
+
+                        if (age>maxAge){
+                            console.log("Removing ship: "+ship.mmsi+" ("+ship.name+"), Timestamp: "+timestamp+" (Age: "+age+")");
+
+                            // Remove ship markers
+                            dataShips[i].shipVectors.removeFeatures(markers[keyMmsi]);
+
+                            // Remove ship from administration
+                            delete dataShips[i].markers[keyMmsi];
+                            delete dataShips[i].shipsNamePlayed[keyMmsi];
+                            delete dataShips[i].ships[keyMmsi];
+
+                            printStatistics(i);
+                        }
+                    }
+            }
+        }
+
+        // ^0$|^[1-9]\d*$/.test(keyTimestamp) &&
+        // keyTimestamp <= 4294967294
+
+        // Remove traces
+        for (keyTimestamp in dataShips[i].traces) {
+            if (dataShips[i].traces.hasOwnProperty(keyTimestamp)){
+                    if ((now-keyTimestamp)>maxAge){
+                        //console.log("Removing trace - Timestamp: "+keyTimestamp+" (Age: "+(now-keyTimestamp)+")");
+
+                        // Remove trace
+                        dataShips[i].lineLayer.removeFeatures(traces[keyTimestamp]);
+
+                        // Remove trace from administration
+                        delete dataShips[i].traces[keyTimestamp];
+                    }
+                }
+        }
 	}
 }
 
-function printStatistics(){
-	console.log("# Ships: "+Object.keys(ships).length);
-	console.log("# Markers: "+Object.keys(markers).length);
-	console.log("# Ships (name said): "+Object.keys(shipsNamePlayed).length);	
-	console.log("# Traces: "+Object.keys(traces).length);
+function printStatistics(i){
+	console.log("# Ships: "+Object.keys(dataShips[i].ships).length);
+	console.log("# Markers: "+Object.keys(dataShips[i].markers).length);
+	console.log("# Ships (name said): "+Object.keys(dataShips[i].shipsNamePlayed).length);
+	console.log("# Traces: "+Object.keys(dataShips[i].traces).length);
 }
 
 function calculateAndPrefetchTileUrl(bounds) {	
@@ -398,9 +410,9 @@ function createLayers(){
  	map.addLayers([ layerOsm, layerSeamark ]);
 }
 
-function createLayerShips(){
+function createLayerShips(layerName){
 	// Layer: Ships
-  	shipVectors = new OpenLayers.Layer.Vector("Ships", {
+  	var result=new OpenLayers.Layer.Vector(layerName, {
   		eventListeners : {
   			'featureclick' : function(evt) {
   				console.log("featureselected");
@@ -431,21 +443,25 @@ function createLayerShips(){
   		},
   		styleMap : styleMapShipSymbol
   	});
-  	
-  	map.addLayers([shipVectors]);
+
+    map.addLayers([result]);
+  	return result;
 }
 
 function createControls(){
-  	var selectControl = new OpenLayers.Control.SelectFeature(shipVectors, {hover : true});
-  	map.addControl(selectControl);
-  	selectControl.activate();
+    for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
+        var selectControl = new OpenLayers.Control.SelectFeature(dataShips[i].shipVectors, {hover : true});
+        map.addControl(selectControl);
+        selectControl.activate();
+    }
 }
 
-function createLayerTraces(){
+function createLayerTraces(layerName){
   	// Layer: Traces
-  	lineLayer = new OpenLayers.Layer.Vector("Ship traces");
-  	map.addLayer(lineLayer);
-  	map.addControl(new OpenLayers.Control.DrawFeature(lineLayer,OpenLayers.Handler.Path));
+  	var result=new OpenLayers.Layer.Vector(layerName);
+  	map.addLayer(result);
+  	map.addControl(new OpenLayers.Control.DrawFeature(result,OpenLayers.Handler.Path));
+  	return result;
 }
 
 function createZoomAction(){
@@ -527,21 +543,31 @@ const SPEED_FACTOR=25;
 const DEFAULT_SHIP_SCALE_FACTOR=8;
 const DEFAULT_SHIP_ICON="basic_turquoise.png";
 const DEFAULT_OWN_LOCATION_ICON="antenna.png";
+const NUMBER_OF_SHIPS_SOURCES=2;
 
-var ships = {};
-var shipsNamePlayed = {};
-var markers = {};
-var traces = {};
+// Array of dataShip
+// - at index 0: Ships received via UDP
+// - at index 1: Ships received via SocketIO
+var dataShips=[];
+for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
+ var dataShip=new Object();
+ dataShip.ships={};
+ dataShip.shipsNamePlayed = {};
+ dataShip.markers = {};
+ dataShip.traces = {};
+ //dataShip.shipVectors
+ //dataShip.lineLayer
+ dataShips.push(dataShip);
+}
+
 var prefetchedTiles=new Array(); // Array of images
 var zoomToExtent=false;
 var prefetchLowerZoomLevelsTiles=true;
 var init = false;
 var previousMyPositionMarker=null;
 var map;
-var shipVectors;
 var layerMyPosition;
 var styleMapShipSymbol;
-var lineLayer;
 var shipScaleFactor=DEFAULT_SHIP_SCALE_FACTOR;
 var ownLocationIcon=DEFAULT_OWN_LOCATION_ICON;
 
@@ -550,5 +576,3 @@ window.onresize = function(){
         map.updateSize();
     }, 200);
 }
-
-

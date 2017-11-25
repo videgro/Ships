@@ -10,7 +10,7 @@
   
 <body onload="init()">
   <audio id="audioGong">
-    <source src="file:///android_asset/audio/gong.mp3" type="audio/mpeg"></source>   	
+    <source src="file:///android_asset/audio/gong.mp3" type="audio/mpeg"/>
   </audio>
   
   <audio id="audioName"></audio>
@@ -22,9 +22,15 @@
 		createMap();
 		createStyleMapShipSymbol();
 		createLayers();
-		createLayerShips();  	
+
+        dataShips[0].shipVectors=createLayerShips("Ships");
+        dataShips[1].shipVectors=createLayerShips("Ships - Peers");
+
 		createControls();
-		createLayerTraces();
+
+        dataShips[0].lineLayer=createLayerTraces("Ship traces");
+        dataShips[1].lineLayer=createLayerTraces("Ship traces - Peers");
+
 		createZoomAction();
 		map.zoomToMaxExtent(); // Init view
 	}

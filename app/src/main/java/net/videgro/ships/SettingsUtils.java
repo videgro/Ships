@@ -21,6 +21,7 @@ public final class SettingsUtils {
 	private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST = "pref_aisMessagesDestinationHost";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT = "pref_aisMessagesDestinationPort";
+	private static final String KEY_PREF_NMEA_SHARE = "pref_nmeaShare";
 
 	private static final boolean DEFAULT_LOGGING_VERBOSE = true;
 	private static final boolean DEFAULT_MAP_ZOOM_TO_EXTEND = true;
@@ -34,6 +35,7 @@ public final class SettingsUtils {
 
 	private static final int RTL_SDR_PPM_VALID_OFFSET = 150;
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 8;
+	private static final boolean DEFAULT_NMEA_SHARE = true;
 
 	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
     private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
@@ -105,6 +107,11 @@ public final class SettingsUtils {
 		validateSharedPreferences();
         return sharedPreferences.getBoolean(KEY_PREF_MAP_ZOOM_TO_EXTEND, DEFAULT_MAP_ZOOM_TO_EXTEND);
 	}
+
+    public boolean parseFromPreferencesNmeaShare() {
+        validateSharedPreferences();
+        return sharedPreferences.getBoolean(KEY_PREF_NMEA_SHARE, DEFAULT_NMEA_SHARE);
+    }
 
 	public boolean parseFromPreferencesMapCacheLowerZoomlevels() {
 		validateSharedPreferences();

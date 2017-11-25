@@ -152,4 +152,8 @@ public final class UsbUtils {
     private static Integer parseInt(String number) {
         return (number.startsWith("0x") ? Integer.valueOf(number.substring(2), 16) : Integer.valueOf(number, 10));
     }
+
+    public static boolean isUsbSupported(){
+        return usbSupported;
+    }
 }

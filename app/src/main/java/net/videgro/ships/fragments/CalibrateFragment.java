@@ -178,7 +178,12 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	}
 	
 	private void switchToShowMapFragment(){
-		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new ShowMapFragment());
+        final Fragment fragment=new ShowMapFragment();
+        final Bundle args = new Bundle();
+        args.putString(FragmentUtils.BUNDLE_DATA_FRAGMENT_PREVIOUS,CalibrateFragment.class.getName());
+        fragment.setArguments(args);
+
+		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),fragment);
 		if (!switchToFragmentResult.isEmpty()){
 			Analytics.getInstance().logEvent(TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
 			FragmentUtils.stopApplication(this);
@@ -258,17 +263,12 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	public void onImagePopupDispose(int id) {
 		switch (id){
 			case IMAGE_POPUP_ID_CALIBRATE_READY:
+            case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
+            case IMAGE_POPUP_ID_CALIBRATE_FAILED:
+                // Always go back to showMapFragment, when not receiving own data, it will receive data from peers
 				switchToShowMapFragment();
 			break;
-			case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
-				// TODO: Currently all errors are fatal, because we can't stop and restart the RTL-SDR dongle correctly				
-				FragmentUtils.stopApplication(this);
-			break;
-			case IMAGE_POPUP_ID_CALIBRATE_FAILED:
-				// TODO: Not possible to stop RTL-SDR stick at the moment, so kill it the hard way by stopping the app
-				//FragmentUtils.stopReceivingAisFromAntenna(this,REQ_CODE_STOP_RTLSDR_AIS);
-				
-				FragmentUtils.stopApplication(this);				
+
 			default:
 				Log.d(TAG,"onImagePopupDispose - id: "+id);
 			break;		

@@ -11,7 +11,7 @@ import android.util.Log;
 import net.videgro.ships.listeners.CalibrateListener;
 import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.domain.Ship;
-import net.videgro.ships.services.NmeaUdpClientService;
+import net.videgro.ships.services.NmeaClientService;
 
 public class CalibrateTask extends AsyncTask<Void, Void, String> implements ShipReceivedListener {
 	private static final String TAG="CalibrateTask";
@@ -35,7 +35,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	private Context context;
 	private CalibrateListener listener;
 
-	private NmeaUdpClientService nmeaUdpClientService;
+	private NmeaClientService nmeaClientService;
 	private ServiceConnection nmeaUdpClientServiceConnection;
 	
 	private int ppm=PPM_UNDEFINED;
@@ -108,14 +108,14 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	
 	private void setupNmeaUdpClientService(){
 		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((ShipReceivedListener) this);
-		Intent serviceIntent = new Intent(context, NmeaUdpClientService.class);
+		Intent serviceIntent = new Intent(context, NmeaClientService.class);
 		context.startService(serviceIntent);
-		context.bindService(new Intent(context, NmeaUdpClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
+		context.bindService(new Intent(context, NmeaClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 	
 	private void destroyNmeaUdpClientService(){
-		if (nmeaUdpClientService!=null){
-			nmeaUdpClientService.removeListener(this);
+		if (nmeaClientService !=null){
+			nmeaClientService.removeListener(this);
 	    }
 	    
 	    if (nmeaUdpClientServiceConnection!=null){
@@ -168,12 +168,14 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	
 	@Override
 	public void onShipReceived(final Ship ship) {
-		Log.d(TAG, "onShipReceived: Ship: "+ship);
-		
-		// Test ppmIsValid ->Fire only once
-		if (!ppmIsValid){
-			ppmIsValid=true;
-			listener.onCalibrateReady(ppm);
+		if (ship.getSource() != null && ship.getSource().equals(Ship.Source.UDP)){
+			Log.d(TAG, "onShipReceived: Ship: " + ship);
+
+			// Test ppmIsValid ->Fire only once
+			if (!ppmIsValid) {
+				ppmIsValid = true;
+				listener.onCalibrateReady(ppm);
+			}
 		}
 	}
 	
@@ -186,15 +188,15 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 		}
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			if (service instanceof NmeaUdpClientService.ServiceBinder) {
+			if (service instanceof NmeaClientService.ServiceBinder) {
 				Log.d(TAG,tag+"onServiceConnected");
-				nmeaUdpClientService = ((NmeaUdpClientService.ServiceBinder) service).getService();
-				nmeaUdpClientService.addListener(listener);
+				nmeaClientService = ((NmeaClientService.ServiceBinder) service).getService();
+				nmeaClientService.addListener(listener);
 			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			nmeaUdpClientService = null;
+			nmeaClientService = null;
 		}
 	}
 }

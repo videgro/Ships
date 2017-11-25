@@ -1,30 +1,35 @@
 package net.videgro.ships.services;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
+import net.videgro.ships.NmeaTO;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.Nmea2Ship;
 import net.videgro.ships.nmea2ship.domain.Ship;
+import net.videgro.ships.services.internal.SocketIoClient;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
+import net.videgro.ships.tasks.domain.SocketIoConfig;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NmeaUdpClientService extends Service implements NmeaUdpClientListener {
-	private static final String TAG = "NmeaUdpClientService";
+public class NmeaClientService extends Service implements NmeaUdpClientListener, SocketIoClient.SocketIoListener {
+	private static final String TAG = "NmeaClientService";
 
 	public static final int NMEA_UDP_PORT=10109;
     public static final String NMEA_UDP_HOST="127.0.0.1";
@@ -35,10 +40,13 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
     private Nmea2Ship nmea2Ship = new Nmea2Ship();
 	private NmeaUdpClientTask nmeaUdpClientTask;
 
+	private SocketIoClient socketIoClient;
+
     /**
      * Contains all received MMSIs. A set contains unique entries.
      */
-    private Set<Integer> mmsiReceived = new HashSet<>();
+    private Set<Integer> mmsiReceivedViaUdp = new HashSet<>();
+    private Set<Integer> mmsiReceivedViaSocketIo = new HashSet<>();
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -47,10 +55,16 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 
     @Override
     public boolean onUnbind(Intent intent) {
-        if (mmsiReceived.size() == 0) {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received",Utils.retrieveAbi());
+        if (mmsiReceivedViaUdp.isEmpty()) {
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received - UDP",Utils.retrieveAbi());
         } else {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships", Utils.retrieveAbi(),mmsiReceived.size());
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships - UDP", Utils.retrieveAbi(),mmsiReceivedViaUdp.size());
+        }
+
+        if (mmsiReceivedViaSocketIo.isEmpty()) {
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received - SocketIO",Utils.retrieveAbi());
+        } else {
+            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships - SocketIO", Utils.retrieveAbi(),mmsiReceivedViaSocketIo.size());
         }
         return super.onUnbind(intent);
     }
@@ -66,33 +80,62 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		Log.d(TAG, "onDestroy");
-
-		if (nmeaUdpClientTask!=null && !nmeaUdpClientTask.isCancelled()){
-			nmeaUdpClientTask.cancel(true);
-			nmeaUdpClientTask=null;
-		}
-		
-		Analytics.getInstance().logEvent(TAG, "destroy", "");
-	}
-
-	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		final String tag="onStartCommand - ";
 		int result = super.onStartCommand(intent, flags, startId);
 		Log.d(TAG,tag);
 
+        @SuppressLint("HardwareIds")
+		final String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        final SocketIoConfig socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
+
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
-            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig());
+            nmeaUdpClientTask = new NmeaUdpClientTask(getResources(),this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoConfig);
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}
+
+		if (socketIoClient==null) {
+            socketIoClient=new SocketIoClient(getResources(),this,socketIoConfig);
+        } else {
+            Log.d(TAG,tag+"Using existing SocketIoClient");
+        }
+
+        if (socketIoClient.isConnected()){
+		    // Disconnect first when we are connected
+            socketIoClient.disconnect();
+        }
+
+        // On connect-event, the backend will also send the cached messages
+        final boolean socketIoClientConnectResult = socketIoClient.connect();
+        if (!socketIoClientConnectResult){
+            Log.e(TAG,"Not possible to connect to SocketIO server.");
+        } else {
+            Log.i(TAG,"Connected to SocketIO server.");
+        }
+
 		return result;
 	}
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+
+        if (nmeaUdpClientTask!=null && !nmeaUdpClientTask.isCancelled()){
+            nmeaUdpClientTask.cancel(true);
+            nmeaUdpClientTask=null;
+        }
+
+        if (socketIoClient!=null){
+            socketIoClient.disconnect();
+        }
+
+        Analytics.getInstance().logEvent(TAG, "destroy", "");
+    }
 
     private DatagramSocketConfig createRepeaterConfig(){
         final String tag="createRepeaterConfig - ";
@@ -152,28 +195,43 @@ public class NmeaUdpClientService extends Service implements NmeaUdpClientListen
 		}	
 	}
 
-	@Override
-	public void onNmeaReceived(String nmea) {
+	private void onNmeaReceived(final String nmea,final Nmea2Ship.NmeaSource nmeaSource) {
 		Log.d(TAG,"onNmeaReceived - "+nmea);
 		synchronized(listeners){
-            final Ship ship = nmea2Ship.onMessage(nmea);
-            if (ship != null && ship.isValid()) {
-				if (mmsiReceived.isEmpty()){
-					Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"First ship received", Utils.retrieveAbi());
+			final Ship ship = nmea2Ship.onMessage(nmea,nmeaSource);
+			if (ship != null && ship.isValid()) {
+                switch (nmeaSource) {
+                    case UDP:
+                        mmsiReceivedViaUdp.add(ship.getMmsi());
+                        break;
+                    case SOCKET_IO:
+                        mmsiReceivedViaSocketIo.add(ship.getMmsi());
+                        break;
+                    default:
+                        // Nothing to do
+                        break;
+                } // End switch
+
+				for (final ShipReceivedListener listener : listeners) {
+					listener.onShipReceived(ship);
 				}
-
-				mmsiReceived.add(ship.getMmsi());
-
-                for (final ShipReceivedListener listener : listeners) {
-                    listener.onShipReceived(ship);
-                }
-            }
-		}	
+			}
+		}
 	}
 
+	@Override
+	public void onNmeaViaUdpReceived(String nmea) {
+		onNmeaReceived(nmea,Nmea2Ship.NmeaSource.UDP);
+	}
+
+	@Override
+	public void onNmeaViaSocketIoReceived(String nmea) {
+		onNmeaReceived(nmea,Nmea2Ship.NmeaSource.SOCKET_IO);
+    }
+
 	public class ServiceBinder extends Binder {
-		public NmeaUdpClientService getService() {
-			return NmeaUdpClientService.this;
+		public NmeaClientService getService() {
+			return NmeaClientService.this;
 		}
 	}
 }

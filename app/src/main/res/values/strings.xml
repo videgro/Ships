@@ -49,7 +49,7 @@
     <string name="popup_no_ppm_set_message"><![CDATA[Now you have two options:<br/>- Enter the known PPM value of your RTL-SDR device in the Settings or<br/>- Let this app try to find it for you.<br/>For the latter you need to be in an area with (multiple) ships.]]></string>
 		
 	<string name="popup_calibration_cancelled_title">Calibration cancelled</string>
-	<string name="popup_calibration_cancelled_message">Cancelled calibration of RTL-SDR device. Will stop application now.</string>
+	<string name="popup_calibration_cancelled_message">Cancelled calibration of RTL-SDR device. You will only receive Ship data from fellow users.</string>
 	
 	<string name="popup_are_you_sure_title">Are you sure?</string>
 	<string name="popup_are_you_sure_yes">Yes</string>
@@ -59,6 +59,9 @@
 	<string name="popup_receiving_ais_message">Waiting for AIS data. Please be patient. After receiving data, the ship(s) will be plotted on the map.</string>
 
     <string name="popup_select_device_title">Select device</string>
+
+	<string name="popup_usb_host_mode_title">USB host mode / OTG</string>
+	<string name="popup_usb_host_mode_not_supported_message">USB host mode / OTG not supported at your device. You will only receive Ship data from fellow users.</string>
 
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
@@ -79,7 +82,7 @@
     <string name="connect_usb_device_status_error_native_library_not_loaded">This application is not compatible with your device.</string>
     <string name="connect_usb_device_status_error_no_rtlsdr_device_selected">You have not selected an RTL-SDR device.</string>
 	<string name="connect_usb_device_status_pending_permission_request">No permission to open device, while requesting permission - Not possible to run this application without the right permissions. Sorry!</string>
-	<string name="connect_usb_device_status_error_no_device_found">Not possible to connect to device. Is the device physically connected? Please insert RTL-SDR device before starting. Application will stop now.</string>
+	<string name="connect_usb_device_status_error_no_device_found">Not possible to connect to device. Is the device physically connected? Please insert RTL-SDR device before starting. You will only receive Ship data from fellow users.</string>
 	<string name="connect_usb_device_status_error_permission_denied">Permission denied to open device - Not possible to run this application without the right permissions. Sorry!</string>
 	<string name="connect_usb_device_status_error_security_exception">Security exception occurred while opening USB device.</string>
 	<string name="connect_usb_device_status_error_unknown">Unknown error while opening USB device.</string>
@@ -153,6 +156,10 @@
     <string name="pref_rtlSdrPpmInvalidate">pref_rtlSdrPpmInvalidate</string>
     <string name="pref_rtlSdrPpmInvalidate_summary">Invalidate the current PPM setting.</string>
     <string name="pref_rtlSdrPpmInvalidate_title">Use other RTL-SDR device</string>
+
+    <string name="pref_nmeaShare">pref_nmeaShare</string>
+    <string name="pref_nmeaShare_summary">Share received ship locations with fellow users. Setting will apply after restart of application.</string>
+    <string name="pref_nmeaShare_title">Share received ships</string>
 
     <string name="pref_ThirdPartyPlotter_title">Third party plotter</string>
     <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection in i.e. OpenCPN. Default: address 127.0.0.1 and port 10110.</string>

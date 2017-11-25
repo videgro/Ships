@@ -59,6 +59,11 @@
         <Preference android:title="@string/pref_rtlSdrPpmInvalidate_title"
             android:key="@string/pref_rtlSdrPpmInvalidate"
             android:summary="@string/pref_rtlSdrPpmInvalidate_summary"/>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_nmeaShare"
+            android:summary="@string/pref_nmeaShare_summary"
+            android:title="@string/pref_nmeaShare_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_ThirdPartyPlotter_title">
         <Preference android:summary="@string/pref_ThirdPartyPlotter_summary" />

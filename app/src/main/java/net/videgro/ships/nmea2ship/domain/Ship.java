@@ -1,14 +1,16 @@
 package net.videgro.ships.nmea2ship.domain;
 
-import java.util.Date;
-
 import android.util.Log;
 
-public class Ship {
-	private static final String TAG="Ship";
+import java.util.Date;
 
+public class Ship {
+	public enum Source { UDP, SOCKET_IO }
+
+	private static final String TAG="Ship";
 	private static final String UNKNOWN="UNKNOWN";
 
+	private Source source;
 	private final int mmsi;
 	private String countryName;
 	private String countryFlag;
@@ -67,6 +69,14 @@ public class Ship {
 			countryName=UNKNOWN;
 			countryFlag=UNKNOWN;
 		}
+	}
+
+	public Source getSource() {
+		return source;
+	}
+
+	public void setSource(Source source) {
+		this.source = source;
 	}
 
 	public int getMmsi() {
@@ -358,7 +368,7 @@ public class Ship {
 
 	@Override
 	public String toString() {
-		return "Ship [mmsi=" + mmsi + ", countryName=" + countryName + ", countryFlag=" + countryFlag + ", name=" + name
+		return "Ship [mmsi=" + mmsi + ", source=" + source +", countryName=" + countryName + ", countryFlag=" + countryFlag + ", name=" + name
 				+ ", lat=" + lat + ", lon=" + lon + ", heading=" + heading + ", timestamp=" + timestamp + ", cog=" + cog
 				+ ", navStatus=" + navStatus + ", raim=" + raim + ", rot=" + rot + ", sensorRot=" + sensorRot + ", sog="
 				+ sog + ", specialManIndicator=" + specialManIndicator + ", subMessage=" + subMessage + ", dest=" + dest

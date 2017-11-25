@@ -47,9 +47,10 @@ import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.domain.Ship;
-import net.videgro.ships.services.NmeaUdpClientService;
+import net.videgro.ships.services.NmeaClientService;
 import net.videgro.ships.services.TrackService;
 import net.videgro.ships.tools.HttpCacheTileServer;
+import net.videgro.usb.UsbUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -89,12 +90,14 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private WebView webView;
     private TextView logTextView;
     private TrackService trackService;
-    private NmeaUdpClientService nmeaUdpClientService;
+    private NmeaClientService nmeaClientService;
     private ServiceConnection locationServiceConnection;
-    private ServiceConnection nmeaUdpClientServiceConnection;
+    private ServiceConnection nmeaClientServiceConnection;
     private Location lastReceivedOwnLocation = null;
     private ToggleButton startStopButton;
     private File fileMap;
+
+    private boolean triedToReceiveFromAntenna=false;
 
     @SuppressLint("NewApi")
     @Override
@@ -111,7 +114,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         Utils.loadAd(rootView);
         setHasOptionsMenu(true);
         setupWebView(rootView);
-        setupNmeaUdpClientService();
 
         startStopButton = (ToggleButton) rootView.findViewById(R.id.startStopAisButton);
         startStopButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -133,15 +135,34 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onStart() {
         super.onStart();
 
-        final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
-        if (!SettingsUtils.isValidPpm(ppm)) {
-            Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
-        } else {
-            // Start tiles caching server, will also load the OpenStreetMap after server has started
-            ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
+        // Start tiles caching server, will also load the OpenStreetMap after server has started
+        ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
 
-            ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
-            startReceivingAisFromAntenna();
+        ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
+
+        String previousFragment=null;
+        final Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            previousFragment = bundle.getString(FragmentUtils.BUNDLE_DATA_FRAGMENT_PREVIOUS);
+        }
+
+        if (UsbUtils.isUsbSupported()) {
+            final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
+            if (!SettingsUtils.isValidPpm(ppm)) {
+                if (previousFragment==null || !previousFragment.equals(CalibrateFragment.class.getName())){
+                    Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
+                    // On dismiss: Will continue by switching to CalibrateFragment
+                } else {
+                    Log.d(TAG, "Just came from CalibrateFragment, don't start it again. Just receive data from peers.");
+                }
+            } else {
+                startReceivingAisFromAntenna();
+            }
+        } else {
+            final String msg = getString(R.string.popup_usb_host_mode_not_supported_message);
+            logStatus(msg);
+            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_usb_host_mode_title), msg, R.drawable.ic_information, IMAGE_POPUP_AUTOMATIC_DISMISS);
+            // On dismiss: Will continue onImagePopupDispose
         }
     }
 
@@ -161,7 +182,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     @Override
     public void onDestroy() {
-        destroyNmeaUdpClientService();
+        destroyNmeaClientService();
         destroyLocationService();
         super.onDestroy();
     }
@@ -231,6 +252,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");
                 }
+                setupNmeaClientService();
             }
 
             @Override
@@ -257,11 +279,11 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         getActivity().bindService(new Intent(getActivity(), TrackService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private void setupNmeaUdpClientService() {
-        nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((ShipReceivedListener) this);
-        Intent serviceIntent = new Intent(getActivity(), NmeaUdpClientService.class);
+    private void setupNmeaClientService() {
+        nmeaClientServiceConnection = new NmeaClientServiceConnection((ShipReceivedListener) this);
+        final Intent serviceIntent = new Intent(getActivity(), NmeaClientService.class);
         getActivity().startService(serviceIntent);
-        getActivity().bindService(new Intent(getActivity(), NmeaUdpClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
+        getActivity().bindService(new Intent(getActivity(), NmeaClientService.class), nmeaClientServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void destroyLocationService() {
@@ -275,22 +297,24 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
     }
 
-    private void destroyNmeaUdpClientService() {
-        if (nmeaUdpClientService != null) {
-            nmeaUdpClientService.removeListener(this);
+    private void destroyNmeaClientService() {
+        if (nmeaClientService != null) {
+            nmeaClientService.removeListener(this);
         }
 
-        if (nmeaUdpClientServiceConnection != null) {
-            getActivity().unbindService(nmeaUdpClientServiceConnection);
-            nmeaUdpClientServiceConnection = null;
+        if (nmeaClientServiceConnection != null) {
+            getActivity().unbindService(nmeaClientServiceConnection);
+            nmeaClientServiceConnection = null;
         }
     }
 
     private void startReceivingAisFromAntenna() {
         final String tag = "startReceivingAisFromAntenna - ";
-        if (!FragmentUtils.rtlSdrRunning) {
+
+        if (!triedToReceiveFromAntenna && !FragmentUtils.rtlSdrRunning) {
             final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
             if (SettingsUtils.isValidPpm(ppm)) {
+                triedToReceiveFromAntenna=true;
                 final boolean startResult = FragmentUtils.startReceivingAisFromAntenna(this, REQ_CODE_START_RTLSDR, ppm);
                 logStatus((startResult ? "Requested" : "Failed") + " to receive AIS from antenna (PPM: " + ppm + ").");
 
@@ -299,9 +323,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 Log.e(TAG, tag + "Invalid PPM: " + ppm);
             }
         } else {
-            final String msg=getString(R.string.popup_receiving_ais_message);
+            final String msg = getString(R.string.popup_receiving_ais_message);
             logStatus(msg);
-            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_receiving_ais_title),msg,R.drawable.ic_information,IMAGE_POPUP_AUTOMATIC_DISMISS);
+            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_receiving_ais_title), msg, R.drawable.ic_information, IMAGE_POPUP_AUTOMATIC_DISMISS);
             // On dismiss: Will continue onImagePopupDispose
         }
     }
@@ -395,7 +419,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	public void onImagePopupDispose(int id) {
 		switch (id) {
 		case IMAGE_POPUP_ID_CALIBRATE_WARNING:
-			final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new CalibrateFragment());
+            final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),new CalibrateFragment());
 			if (!switchToFragmentResult.isEmpty()){
 				Analytics.getInstance().logEvent(TAG,"onImagePopupDispose - IMAGE_POPUP_ID_CALIBRATE_WARNING - switchToFragment - Error",switchToFragmentResult);
 				FragmentUtils.stopApplication(this);
@@ -403,7 +427,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		break;
 		case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
 			// TODO: Currently all errors are fatal, because we can't stop and restart the RTL-SDR dongle correctly
-			FragmentUtils.stopApplication(this);
+			//FragmentUtils.stopApplication(this);
 		break;		
 		default:
 			Log.d(TAG,"onImagePopupDispose - id: "+id);
@@ -475,24 +499,24 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		}
 	}
 	
-	private class NmeaUdpClientServiceConnection implements ServiceConnection {
-		private final String tag="NmeaUdpClientServiceConnection - ";
+	private class NmeaClientServiceConnection implements ServiceConnection {
+		private final String tag="NmeaClientServiceConnection - ";
 		private final ShipReceivedListener listener;
 
-		NmeaUdpClientServiceConnection(ShipReceivedListener listener) {
+		NmeaClientServiceConnection(ShipReceivedListener listener) {
 			this.listener = listener;
 		}
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			if (service instanceof NmeaUdpClientService.ServiceBinder) {
+			if (service instanceof NmeaClientService.ServiceBinder) {
 				Log.d(TAG,tag+"onServiceConnected");
-				nmeaUdpClientService = ((NmeaUdpClientService.ServiceBinder) service).getService();
-				nmeaUdpClientService.addListener(listener);
+				nmeaClientService = ((NmeaClientService.ServiceBinder) service).getService();
+				nmeaClientService.addListener(listener);
 			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			nmeaUdpClientService = null;
+			nmeaClientService = null;
 		}
 	}
 

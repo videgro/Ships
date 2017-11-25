@@ -9,35 +9,47 @@ import dk.dma.ais.sentence.SentenceException;
 import net.videgro.ships.nmea2ship.domain.Ship;
 
 public class Nmea2Ship {
-	final String tag="Nmea2Ship - ";
-	
+	private static final String TAG="Nmea2Ship - ";
+
+	public enum NmeaSource { UDP, SOCKET_IO }
+
 	private AisPacketParser aisPacketParser=new AisPacketParser();
 	private final AisParser aisParser=new AisParser();
 	
 	public Nmea2Ship(){
-		Log.i(tag,"constructor");
+		Log.i(TAG,"constructor");
 	}
 	
-	public Ship onMessage(String line){
+	public Ship onMessage(final String line,final NmeaSource nmeaSource){
 		Ship result=null;
 		AisPacket aisPacket=null;
 		try {
 			aisPacket = aisPacketParser.readLine(line);
 		} catch (SentenceException e) {
-			Log.e(tag,"onMessage",e);
+			Log.e(TAG,"onMessage",e);
 		}
 		
 		if (aisPacket!=null){
 			try {
 				result=aisParser.parse(aisPacket.getAisMessage());
-			} catch (AisMessageException e) {
-				Log.e(tag,"onMessage",e);
-			} catch (SixbitException e) {
-				Log.e(tag,"onMessage",e);
-			}			
+
+                switch (nmeaSource) {
+                    case UDP:
+                        result.setSource(Ship.Source.UDP);
+                        break;
+                    case SOCKET_IO:
+                        result.setSource(Ship.Source.SOCKET_IO);
+                        break;
+                    default:
+                        // Nothing to do
+                        break;
+                } // End switch
+
+			} catch (AisMessageException | SixbitException e) {
+				Log.e(TAG,"onMessage",e);
+			}
 		}
 		
 		return result;		
 	}
-	
 }

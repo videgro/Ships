@@ -72,3 +72,6 @@ private.xml
 analytics.xml
 .idea
 
+# Crypto keys
+/app/src/main/res/raw/*_key
+

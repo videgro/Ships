@@ -11,10 +11,12 @@ import android.util.Log;
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.activities.OpenDeviceActivity;
-import net.videgro.ships.services.NmeaUdpClientService;
+import net.videgro.ships.services.NmeaClientService;
 
 public final class FragmentUtils {
 	private static final String TAG="FragmentUtils";
+
+	public static final String BUNDLE_DATA_FRAGMENT_PREVIOUS="previous_fragment";
 
 	/**
 	 * Shared across fragments
@@ -29,7 +31,7 @@ public final class FragmentUtils {
 		final String tag="startReceivingAisFromAntenna - ";
 		Log.d(TAG,tag);
 		boolean result=false;
-		final String arguments = "-p " + ppm + " -P "+NmeaUdpClientService.NMEA_UDP_PORT+" -h " + NmeaUdpClientService.NMEA_UDP_HOST + " -R -x -S 60 -n";
+		final String arguments = "-p " + ppm + " -P "+ NmeaClientService.NMEA_UDP_PORT+" -h " + NmeaClientService.NMEA_UDP_HOST + " -R -x -S 60 -n";
 		final Intent intent=createOpenDeviceIntent(fragment,arguments);
 		if (intent!=null){
 			fragment.startActivityForResult(intent, reqCode);
