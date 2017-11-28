@@ -40,6 +40,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
     private Nmea2Ship nmea2Ship = new Nmea2Ship();
 	private NmeaUdpClientTask nmeaUdpClientTask;
 
+    private SocketIoConfig socketIoConfig;
 	private SocketIoClient socketIoClient;
 
     /**
@@ -87,38 +88,43 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
         @SuppressLint("HardwareIds")
 		final String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        final SocketIoConfig socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
+        socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
-            nmeaUdpClientTask = new NmeaUdpClientTask(getResources(),this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoConfig);
+			final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
+            nmeaUdpClientTask = new NmeaUdpClientTask(getResources(),this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoConfig,getCacheDir(),hasNetworkConnection);
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}
 
-		if (socketIoClient==null) {
+        if (connectSocketIo()){
+            Log.i(TAG,"Connected to SocketIO server.");
+        } else {
+            Log.e(TAG,"Not possible to connect to SocketIO server.");
+        };
+
+		return result;
+	}
+
+	public boolean connectSocketIo(){
+	    final String tag="connectSocketIo - ";
+
+        if (socketIoClient==null) {
             socketIoClient=new SocketIoClient(getResources(),this,socketIoConfig);
         } else {
             Log.d(TAG,tag+"Using existing SocketIoClient");
         }
 
         if (socketIoClient.isConnected()){
-		    // Disconnect first when we are connected
+            // Disconnect first when we are connected
             socketIoClient.disconnect();
         }
 
         // On connect-event, the backend will also send the cached messages
-        final boolean socketIoClientConnectResult = socketIoClient.connect();
-        if (!socketIoClientConnectResult){
-            Log.e(TAG,"Not possible to connect to SocketIO server.");
-        } else {
-            Log.i(TAG,"Connected to SocketIO server.");
-        }
-
-		return result;
-	}
+        return socketIoClient.connect();
+    }
 
     @Override
     public void onDestroy() {

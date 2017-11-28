@@ -13,6 +13,11 @@ import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 import net.videgro.ships.tasks.domain.SocketIoConfig;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -32,14 +37,19 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
     private final NmeaUdpClientListener listener;
     private final DigitalSignature digitalSignature;
 
+    private final File cacheNmeaFile;
+    private final boolean hasDataConnection;
+
     private int repeatedNmeaMessages = 0;
 
-    public NmeaUdpClientTask(final Resources resources, final NmeaUdpClientListener listener, final DatagramSocketConfig datagramSocketConfigIn, final DatagramSocketConfig datagramSocketConfigRepeater, final SocketIoConfig socketIoConfig) {
+    public NmeaUdpClientTask(final Resources resources, final NmeaUdpClientListener listener, final DatagramSocketConfig datagramSocketConfigIn, final DatagramSocketConfig datagramSocketConfigRepeater, final SocketIoConfig socketIoConfig, final File cacheDirectory, final boolean hasDataConnection) {
         this.listener = listener;
         this.datagramSocketConfigIn = datagramSocketConfigIn;
         this.datagramSocketConfigRepeater = datagramSocketConfigRepeater;
         this.socketIoConfig = socketIoConfig;
         this.digitalSignature = new DigitalSignature(resources);
+        cacheNmeaFile = new File(cacheDirectory, "data.nmea");
+        this.hasDataConnection = hasDataConnection;
     }
 
     public String doInBackground(Void... params) {
@@ -47,7 +57,6 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
         Thread.currentThread().setName(TAG);
 
         DatagramSocket serverSocketIn = null;
-
         Socket socketIo = null;
 
         if (SettingsUtils.getInstance().parseFromPreferencesNmeaShare()) {
@@ -58,6 +67,10 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
                 socketIo = null;
                 Log.e(TAG, "Not possible to connect to SocketIO server", e);
                 Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Not connected", e.getMessage());
+            }
+
+            if (socketIo != null && hasDataConnection) {
+                processCachedMessages(socketIo);
             }
         } else {
             Log.i(TAG, "Not connected to repeat NMEA messages to SocketIO server (user request)");
@@ -91,27 +104,10 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
                     Log.d(TAG, tag + "NMEA received - " + line);
                     listener.onNmeaViaUdpReceived(line);
 
-                    // Repeat to SocketIO-server
-                    if (socketIo != null) {
-                        final String androidId = socketIoConfig.getAndroidId();
-                        final String timestamp = String.valueOf(System.currentTimeMillis());
-                        final String dataToSign = androidId + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + timestamp + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + line;
-                        final String signature = digitalSignature.sign(dataToSign);
-                        if (signature != null) {
-                            final NmeaTO nmeaTO = new NmeaTO();
-                            nmeaTO.setOrigin(androidId);
-                            nmeaTO.setTimestamp(timestamp);
-                            nmeaTO.setData(line);
-                            nmeaTO.setSignature(signature);
-
-                            final String json = new Gson().toJson(nmeaTO);
-                            socketIo.emit(socketIoConfig.getTopic(), json);
-                            repeatedNmeaMessages++;
-                        } else {
-                            Log.e(TAG, tag + "Not possible to sign data.");
-                        }
-                    } else {
-                        Log.e(TAG, tag + "SocketIO is not set.");
+                    final boolean repeatToSocketIoServerResult=repeatToSocketIoServer(socketIo, line);
+                    if (!hasDataConnection || !repeatToSocketIoServerResult) {
+                        // Cache message
+                        cacheMessage(line);
                     }
                 }
             }
@@ -129,11 +125,97 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
         return "FINISHED";
     }
 
+    private boolean repeatToSocketIoServer(final Socket socketIo, final String line) {
+        final String tag = "repeatToSocketIoServer - ";
+        boolean result = false;
+        if (socketIo != null) {
+            final String androidId = socketIoConfig.getAndroidId();
+            final String timestamp = String.valueOf(System.currentTimeMillis());
+            final String dataToSign = androidId + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + timestamp + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + line;
+            final String signature = digitalSignature.sign(dataToSign);
+            if (signature != null) {
+                final NmeaTO nmeaTO = new NmeaTO();
+                nmeaTO.setOrigin(androidId);
+                nmeaTO.setTimestamp(timestamp);
+                nmeaTO.setData(line);
+                nmeaTO.setSignature(signature);
+
+                final String json = new Gson().toJson(nmeaTO);
+                socketIo.emit(socketIoConfig.getTopic(), json);
+                repeatedNmeaMessages++;
+                result = true;
+            } else {
+                Log.e(TAG, tag + "Not possible to sign data.");
+            }
+        } else {
+            Log.e(TAG, tag + "SocketIO is not set.");
+        }
+        return result;
+    }
+
     public void onPostExecute(String result) {
         if (result != null) {
             Log.d(TAG, "Result: " + result);
         }
         Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Number of messages repeated", String.valueOf(repeatedNmeaMessages));
+    }
+
+    private void cacheMessage(final String line) {
+        final String tag = "cacheMessage - ";
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        try {
+            fw = new FileWriter(cacheNmeaFile, true);
+            bw = new BufferedWriter(fw);
+            bw.write(line + "\n");
+        } catch (IOException e) {
+            Log.e(TAG, tag, e);
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                } catch (IOException e) {
+                    Log.e(TAG, tag + "While closing BufferedWriter.", e);
+                }
+            }
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    Log.e(TAG, tag + "While closing FileWriter.", e);
+                }
+            }
+        }
+    }
+
+    private boolean processCachedMessages(final Socket socketIo) {
+        final String tag = "processCachedMessages - ";
+        boolean result = true;
+        if (cacheNmeaFile.exists()) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(cacheNmeaFile));
+                String line;
+
+                while ((line = reader.readLine()) != null && (result)) {
+                    result = repeatToSocketIoServer(socketIo, line);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, tag, e);
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, tag + "While closing reader.", e);
+                    }
+                }
+
+                //noinspection ResultOfMethodCallIgnored
+                cacheNmeaFile.delete();
+            }
+        }
+        return result;
     }
 
     public interface NmeaUdpClientListener {

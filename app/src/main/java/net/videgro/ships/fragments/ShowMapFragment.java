@@ -114,6 +114,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         Utils.loadAd(rootView);
         setHasOptionsMenu(true);
         setupWebView(rootView);
+        setupNmeaClientService();
 
         startStopButton = (ToggleButton) rootView.findViewById(R.id.startStopAisButton);
         startStopButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -252,7 +253,15 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");
                 }
-                setupNmeaClientService();
+
+                if (nmeaClientService!=null){
+                    // (Re-)connect SocketIO to receive cached messages from server
+                    if (nmeaClientService.connectSocketIo()){
+                        Log.i(TAG,"(re-)connected to SocketIO server.");
+                    } else {
+                        Log.e(TAG,"Not possible to (re-)connect to SocketIO server.");
+                    };
+                }
             }
 
             @Override
@@ -273,17 +282,33 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     // Must be public to use PermissionsDispatcher
     public void setupLocationService() {
-        locationServiceConnection = new LocationServiceConnection((OwnLocationReceivedListener) this);
-        Intent serviceIntent = new Intent(getActivity(), TrackService.class);
-        getActivity().startService(serviceIntent);
-        getActivity().bindService(new Intent(getActivity(), TrackService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
+        final String tag="setupLocationService - ";
+        if (isAdded()) {
+            final Activity activity=getActivity();
+            if (activity!=null){
+                locationServiceConnection = new LocationServiceConnection((OwnLocationReceivedListener) this);
+                Intent serviceIntent = new Intent(activity,TrackService.class);
+                activity.startService(serviceIntent);
+                activity.bindService(new Intent(activity,TrackService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
+            } else {
+                Log.e(TAG,tag+"Activity is null.");
+            }
+        }
     }
 
     private void setupNmeaClientService() {
-        nmeaClientServiceConnection = new NmeaClientServiceConnection((ShipReceivedListener) this);
-        final Intent serviceIntent = new Intent(getActivity(), NmeaClientService.class);
-        getActivity().startService(serviceIntent);
-        getActivity().bindService(new Intent(getActivity(), NmeaClientService.class), nmeaClientServiceConnection, Context.BIND_AUTO_CREATE);
+        final String tag="setupNmeaClientService - ";
+        if (isAdded()) {
+            final Activity activity=getActivity();
+            if (activity!=null) {
+                nmeaClientServiceConnection = new NmeaClientServiceConnection((ShipReceivedListener) this);
+                final Intent serviceIntent = new Intent(activity, NmeaClientService.class);
+                activity.startService(serviceIntent);
+                activity.bindService(new Intent(activity, NmeaClientService.class), nmeaClientServiceConnection, Context.BIND_AUTO_CREATE);
+            } else {
+                Log.e(TAG,tag+"Activity is null.");
+            }
+        }
     }
 
     private void destroyLocationService() {
