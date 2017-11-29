@@ -5,14 +5,17 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Picture;
+import android.hardware.usb.UsbManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -74,7 +77,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private static final int IMAGE_POPUP_ID_CALIBRATE_WARNING = 1101;
     private static final int IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR = 1102;
-    private static final int IMAGE_POPUP_ID_IGNORE = 1103;
+    private static final int IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING = 1104;
+    private static final int IMAGE_POPUP_ID_IGNORE = 1109;
 
     private static final int REQ_CODE_START_RTLSDR = 1201;
     private static final int REQ_CODE_STOP_RTLSDR = 1202;
@@ -99,6 +103,16 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private boolean triedToReceiveFromAntenna=false;
 
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            Log.d(TAG, "Received Broadcast: "+action);
+            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action) || UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
+                newUsbDeviceDetected();
+            }
+        }
+    };
+
     @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -115,6 +129,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         setHasOptionsMenu(true);
         setupWebView(rootView);
         setupNmeaClientService();
+
+        if (isAdded()) {
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+            getActivity().registerReceiver(usbReceiver, filter);
+        }
 
         startStopButton = (ToggleButton) rootView.findViewById(R.id.startStopAisButton);
         startStopButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -151,24 +171,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             previousFragment = bundle.getString(FragmentUtils.BUNDLE_DATA_FRAGMENT_PREVIOUS);
         }
 
-        if (UsbUtils.isUsbSupported()) {
-            final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
-            if (!SettingsUtils.isValidPpm(ppm)) {
-                if (previousFragment == null || !previousFragment.equals(CalibrateFragment.class.getName())) {
-                    Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
-                    // On dismiss: Will continue by switching to CalibrateFragment
-                } else {
-                    Log.d(TAG, "Just came from CalibrateFragment, don't start it again. Just receive data from peers.");
-                }
-            } else {
-                startReceivingAisFromAntenna();
-            }
-        } else {
-            final String msg = getString(R.string.popup_usb_host_mode_not_supported_message);
-            logStatus(msg);
-            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_usb_host_mode_title), msg, R.drawable.ic_information, IMAGE_POPUP_AUTOMATIC_DISMISS);
-            // On dismiss: Will continue onImagePopupDispose
-        }
+        activateAisReceiver(previousFragment);
     }
 
     @Override
@@ -190,6 +193,33 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         destroyNmeaClientService();
         destroyLocationService();
         super.onDestroy();
+    }
+
+    private void activateAisReceiver(String previousFragment){
+        if (UsbUtils.isUsbSupported()) {
+            final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
+            if (!SettingsUtils.isValidPpm(ppm)) {
+                if (previousFragment == null || !previousFragment.equals(CalibrateFragment.class.getName())) {
+                    Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
+                    // On dismiss: Will continue by switching to CalibrateFragment
+                } else {
+                    Log.d(TAG, "Just came from CalibrateFragment, don't start it again. Just receive data from peers.");
+                }
+            } else {
+                startReceivingAisFromAntenna();
+            }
+        } else {
+            final String msg = getString(R.string.popup_usb_host_mode_not_supported_message);
+            logStatus(msg);
+            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_usb_host_mode_title), msg, R.drawable.ic_information, IMAGE_POPUP_AUTOMATIC_DISMISS);
+            // On dismiss: Will continue onImagePopupDispose
+        }
+    }
+
+    private void newUsbDeviceDetected(){
+        Log.d(TAG, "USB Connected");
+        Utils.showPopup(IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING, getActivity(), this, getString(R.string.popup_usb_connected_runtime_title), getString(R.string.popup_usb_connected_runtime_message), R.drawable.warning_icon, null);
+        // On dismiss: Will continue onImagePopupDispose
     }
 
     @Override
@@ -439,7 +469,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     /************************** LISTENER IMPLEMENTATIONS ******************/
 
 	/**** START ImagePopupListener ****/
-	
+
 	@Override
 	public void onImagePopupDispose(int id) {
 		switch (id) {
@@ -453,14 +483,18 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
 			// TODO: Currently all errors are fatal, because we can't stop and restart the RTL-SDR dongle correctly
 			//FragmentUtils.stopApplication(this);
-		break;		
+		break;
+			case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
+                // TODO: Currently we can not restart RTL-SDR native code, so stop application
+                FragmentUtils.stopApplication(this);
+              break;
 		default:
 			Log.d(TAG,"onImagePopupDispose - id: "+id);
 		}
 	}
-	
+
 	/**** END ImagePopupListener ****/
-	
+
 	/**** START NmeaReceivedListener ****/
 	@Override
 	public void onShipReceived(final Ship ship) {
@@ -479,16 +513,16 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             Log.e(TAG,tag+"Huh?");
         }
 	}
-	
+
 	/**** END NmeaListener ****/
-	
+
 	/**** START OwnLocationReceivedListener ****/
-	
+
 	@Override
 	public void onOwnLocationReceived(final Location location) {
 		logStatus("Own location received: Lon: " + GPS_COORD_FORMAT.format(location.getLongitude()) + ", Lat: " + GPS_COORD_FORMAT.format(location.getLatitude()));
 		lastReceivedOwnLocation=location;
-				
+
 		if (getActivity()!=null){
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
@@ -499,12 +533,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			Log.e(TAG,"Huh?");
 		}
 	}
-	
+
 	/**** END OwnLocationReceivedListener ****/
-		
-	
+
+
 	/************************** PRIVATE CLASS IMPLEMENTATIONS ******************/
-	
+
 	private class LocationServiceConnection implements ServiceConnection {
 		private final OwnLocationReceivedListener listener;
 
@@ -523,7 +557,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 			trackService = null;
 		}
 	}
-	
+
 	private class NmeaClientServiceConnection implements ServiceConnection {
 		private final String tag="NmeaClientServiceConnection - ";
 		private final ShipReceivedListener listener;

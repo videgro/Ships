@@ -63,6 +63,9 @@
 	<string name="popup_usb_host_mode_title">USB host mode / OTG</string>
 	<string name="popup_usb_host_mode_not_supported_message">USB host mode / OTG not supported at your device. You will only receive Ship data from fellow users.</string>
 
+	<string name="popup_usb_connected_runtime_title">USB device connected</string>
+	<string name="popup_usb_connected_runtime_message">You connected a USB device while the application is running. Currently this is not supported. Please restart application to start using the USB device. Application will stop now.</string>
+
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
     <string name="permission_externalstorage_denied_title">Denied storage permission</string>
