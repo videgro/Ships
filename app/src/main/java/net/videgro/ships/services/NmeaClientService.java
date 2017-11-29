@@ -40,7 +40,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
     private Nmea2Ship nmea2Ship = new Nmea2Ship();
 	private NmeaUdpClientTask nmeaUdpClientTask;
 
-    private SocketIoConfig socketIoConfig;
 	private SocketIoClient socketIoClient;
 
     /**
@@ -88,42 +87,36 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
         @SuppressLint("HardwareIds")
 		final String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
+
+        final SocketIoConfig socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
+        connectSocketIo(socketIoConfig);
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
 			final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
-            nmeaUdpClientTask = new NmeaUdpClientTask(getResources(),this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoConfig,getCacheDir(),hasNetworkConnection);
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoClient,getCacheDir(),hasNetworkConnection);
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}
 
-        if (connectSocketIo()){
-            Log.i(TAG,"Connected to SocketIO server.");
-        } else {
-            Log.e(TAG,"Not possible to connect to SocketIO server.");
-        };
-
 		return result;
 	}
 
-	public boolean connectSocketIo(){
+	public void connectSocketIo(final SocketIoConfig socketIoConfig){
 	    final String tag="connectSocketIo - ";
-
         if (socketIoClient==null) {
             socketIoClient=new SocketIoClient(getResources(),this,socketIoConfig);
+
+            // On connect-event, the backend will also send the cached messages
+            if (socketIoClient.connect()){
+                Log.i(TAG, "Connected to SocketIO server.");
+            } else {
+                Log.e(TAG, "Not possible to connect to SocketIO server.");
+            }
         } else {
             Log.d(TAG,tag+"Using existing SocketIoClient");
         }
-
-        if (socketIoClient.isConnected()){
-            // Disconnect first when we are connected
-            socketIoClient.disconnect();
-        }
-
-        // On connect-event, the backend will also send the cached messages
-        return socketIoClient.connect();
     }
 
     @Override
@@ -138,6 +131,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
         if (socketIoClient!=null){
             socketIoClient.disconnect();
+            socketIoClient=null;
         }
 
         Analytics.getInstance().logEvent(TAG, "destroy", "");
@@ -189,6 +183,12 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 		return result;
 	}
 
+    public void requestSocketIoServerCachedMessages(){
+        if (socketIoClient!=null) {
+            socketIoClient.requestServerCachedMessages();
+        }
+    }
+
 	public boolean addListener(ShipReceivedListener listener) {
 		synchronized(listeners){
 			return listeners.add(listener);
@@ -231,7 +231,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 	}
 
 	@Override
-	public void onNmeaViaSocketIoReceived(String nmea) {
+	public void onNmeaViaSocketIoReceived(final String nmea) {
 		onNmeaReceived(nmea,Nmea2Ship.NmeaSource.SOCKET_IO);
     }
 

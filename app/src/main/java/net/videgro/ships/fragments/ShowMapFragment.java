@@ -255,12 +255,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 }
 
                 if (nmeaClientService!=null){
-                    // (Re-)connect SocketIO to receive cached messages from server
-                    if (nmeaClientService.connectSocketIo()){
-                        Log.i(TAG,"(re-)connected to SocketIO server.");
-                    } else {
-                        Log.e(TAG,"Not possible to (re-)connect to SocketIO server.");
-                    };
+                    // Ask SocketIO server to send cached messages
+                    nmeaClientService.requestSocketIoServerCachedMessages();
                 }
             }
 
