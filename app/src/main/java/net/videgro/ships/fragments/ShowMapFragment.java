@@ -136,12 +136,16 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onStart() {
         super.onStart();
 
-        // Start tiles caching server, will also load the OpenStreetMap after server has started
-        ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
+        if (isAdded()) {
+            // Can only perform these actions when Fragment is added to activity
 
-        ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
+            // Start tiles caching server, will also load the OpenStreetMap after server has started
+            ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
 
-        String previousFragment=null;
+            ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
+        }
+
+        String previousFragment = null;
         final Bundle bundle = this.getArguments();
         if (bundle != null) {
             previousFragment = bundle.getString(FragmentUtils.BUNDLE_DATA_FRAGMENT_PREVIOUS);
@@ -150,7 +154,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         if (UsbUtils.isUsbSupported()) {
             final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
             if (!SettingsUtils.isValidPpm(ppm)) {
-                if (previousFragment==null || !previousFragment.equals(CalibrateFragment.class.getName())){
+                if (previousFragment == null || !previousFragment.equals(CalibrateFragment.class.getName())) {
                     Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this.getActivity(), this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
                     // On dismiss: Will continue by switching to CalibrateFragment
                 } else {
