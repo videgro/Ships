@@ -3,7 +3,6 @@ package net.videgro.ships.fragments.internal;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
@@ -72,7 +71,9 @@ public final class FragmentUtils {
 		OpenDeviceResult result=null;
 		if (data!=null){
 			result=new OpenDeviceResult(data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_MESSAGE),data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_DEVICE_DESCRIPTION),data.getIntExtra(OpenDeviceActivity.EXTRA_RESULT_ERROR_REASON,-1));
-		}
+		} else {
+            result=new OpenDeviceResult("Unknown reason","Unknown device",OpenDeviceActivity.ERROR_REASON_MISC);
+        }
 		
 		return result;
 	}
@@ -100,37 +101,15 @@ public final class FragmentUtils {
 
 		System.exit(0);
 	}
-	
-	public static String switchToFragment(final Activity activity,final Fragment fragment){
-		String err="UNDEFINED";
-		
+
+	public static void returnFromFragment(final Fragment fragment){
+		final Activity activity=fragment.getActivity();
 		if (activity!=null){
 			final FragmentManager fragmentManager=activity.getFragmentManager();
-			if (fragmentManager!=null){
-				final FragmentTransaction transaction = fragmentManager.beginTransaction();
-				
-				if (transaction!=null){
-					if (fragment!=null){
-						final FragmentTransaction transaction2 = transaction.replace(R.id.container,fragment);
-						if (transaction2!=null){
-							transaction2.commit();
-							err="";						
-						} else {
-							err="Fragment transaction after REPLACE is NULL.";
-						}
-					} else {
-						err="Fragment is NULL.";
-					}
-				} else {
-					err="Fragment transaction is NULL.";
-				}
-			} else {
-				err="Fragment manager is NULL.";
+			if (fragmentManager!=null) {
+				fragmentManager.popBackStack();
 			}
-		} else {
-			err="Activity is NULL.";
 		}
-		return err;
 	}
 	
 	private static Intent createOpenDeviceIntent(final Fragment fragment,final String arguments){

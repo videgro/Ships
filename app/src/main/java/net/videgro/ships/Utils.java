@@ -30,9 +30,12 @@ import java.util.Locale;
 
 public final class Utils {
 	private static final String TAG = "Utils";
-	
+
+	public static final Long IMAGE_POPUP_AUTOMATIC_DISMISS=1000*5L;
+
 	private static final SimpleDateFormat LOG_TIME_FORMAT = new SimpleDateFormat("[HH:mm:ss] ", Locale.getDefault());
-	
+
+
 	private Utils(){
 		// Utility class, no public constructor
 	}

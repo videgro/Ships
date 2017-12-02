@@ -32,7 +32,8 @@ public final class SettingsUtils {
 	private static final int DEFAULT_AIS_MESSAGES_DESTINATION_PORT = 10110;
 
 //	private static final boolean DEFAULT_RTL_SDR_FORCE_ROOT = false;
-	private static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
+	public static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
+    public static final int RTL_SDR_PPM_CALIBRATION_FAILED = DEFAULT_RTL_SDR_PPM-1;
 
 	private static final int RTL_SDR_PPM_VALID_OFFSET = 150;
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;

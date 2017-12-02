@@ -91,12 +91,12 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	@Override
 	public void onResume() {
 		super.onResume();
-		final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
-		if (SettingsUtils.isValidPpm(ppm)) {
-			Log.d(TAG,"Valid PPM available, no need to calibrate. Switch to Show Map fragment.");
-			switchToShowMapFragment();
-		}
 		Analytics.getInstance().logScreenView(TAG);
+		final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
+		if (SettingsUtils.isValidPpm(ppm) && isAdded()) {
+			Log.d(TAG, "Valid PPM available, no need to calibrate. Return.");
+			FragmentUtils.returnFromFragment(this);
+		}
 	}
 
 	@Override
@@ -176,19 +176,6 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		startStopCalibrateButtonNormal.setChecked(false);
 		startStopCalibrateButtonThorough.setChecked(false);
 	}
-	
-	private void switchToShowMapFragment(){
-        final Fragment fragment=new ShowMapFragment();
-        final Bundle args = new Bundle();
-        args.putString(FragmentUtils.BUNDLE_DATA_FRAGMENT_PREVIOUS,CalibrateFragment.class.getName());
-        fragment.setArguments(args);
-
-		final String switchToFragmentResult = FragmentUtils.switchToFragment(getActivity(),fragment);
-		if (!switchToFragmentResult.isEmpty()){
-			Analytics.getInstance().logEvent(TAG,"switchToShowMapFragment - Error",switchToFragmentResult);
-			FragmentUtils.stopApplication(this);
-		}
-	}
 
 	private void logStatus(final String status){
 		Utils.logStatus(getActivity(),logTextView,status);
@@ -228,10 +215,10 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	
 	@Override
 	public void onCalibrateReady(final int ppm){
-		SettingsUtils.getInstance().setToPreferencesPpm(ppm);
         Analytics.getInstance().logEvent(TAG, "onCalibrateReady",""+ppm);
 
         if (isAdded()){
+            SettingsUtils.getInstance().setToPreferencesPpm(ppm);
 			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY, getActivity(), this, getString(R.string.popup_found_ppm_title), getString(R.string.popup_found_ppm_message) + " " + ppm, R.drawable.thumbs_up_circle, null);
 		}
 	}
@@ -241,7 +228,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		logStatus("Not possible to determine PPM.");
         Analytics.getInstance().logEvent(TAG, "onCalibrateFailed", "");
 		if (isAdded()) {
-			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED, getActivity(), this, getString(R.string.popup_not_found_ppm_title), getString(R.string.popup_not_found_ppm_message), R.drawable.thumbs_down_circle, null);
+            Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_FAILED, getActivity(), this, getString(R.string.popup_not_found_ppm_title), getString(R.string.popup_not_found_ppm_message), R.drawable.thumbs_down_circle, null);
 		}
 	}
 	
@@ -263,10 +250,18 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	public void onImagePopupDispose(int id) {
 		switch (id){
 			case IMAGE_POPUP_ID_CALIBRATE_READY:
+                // Once more 'changeRtlSdrPpm' with stored value, to trigger MainActivity.onResume()
+                final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
+                FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,ppm);
+
+                break;
             case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
             case IMAGE_POPUP_ID_CALIBRATE_FAILED:
-                // Always go back to showMapFragment, when not receiving own data, it will receive data from peers
-				switchToShowMapFragment();
+                // Set special value as PPM to communicate to dispatcher that calibration has failed
+                SettingsUtils.getInstance().setToPreferencesPpm(SettingsUtils.RTL_SDR_PPM_CALIBRATION_FAILED);
+
+                // Once more 'changeRtlSdrPpm' with stored value, to trigger MainActivity.onResume()
+                FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,SettingsUtils.RTL_SDR_PPM_CALIBRATION_FAILED);
 			break;
 
 			default:
