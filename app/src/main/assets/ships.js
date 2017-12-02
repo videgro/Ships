@@ -209,14 +209,13 @@ function cleanup() {
 	// - Old traces
 
 	var now = new Date().getTime();
-	var maxAge = (1000*60*20); // 20 minutes
 
 	for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
         // Remove ships
         for (keyMmsi in dataShips[i].ships) {
             if (dataShips[i].ships.hasOwnProperty(keyMmsi)) {
                     var ship=dataShips[i].ships[keyMmsi];
-                    var timestamp=ship.lastUpdated;
+                    var timestamp=ship.timestamp;
 
                     var age=(now-timestamp);
 
@@ -505,18 +504,39 @@ function setCurrentPosition(lon,lat){
 // Called from Java
 function onShipReceived(data){
     //$('#messages').append(data).append("<br />");
-	addShip(JSON.parse(data));
-	cleanup();
-		
-	if (!init || zoomToExtent) {
-		init = true;		
-		autoZoom();
-	}
+
+    var ship=null;
+
+    try {
+        ship=JSON.parse(data);
+    } catch (e){
+        console.log(e);
+    }
+
+    if (ship!=null){
+        var now = new Date().getTime();
+        var age=(now-ship.timestamp);
+
+        if (age<maxAge){
+            // Only add ship when it is not too old
+            addShip(ship);
+
+            cleanup();
+
+            if (!init || zoomToExtent) {
+                init = true;
+                autoZoom();
+            }
+        }
+    }
 }
 
 // Called from Java
 function setZoomToExtent(zoomToExtentIn){
 	zoomToExtent=zoomToExtentIn;
+
+	var but = $('#but_zoom_to_extent')[0];
+    but.innerText=((zoomToExtent) ? "DISABLE" : "ENABLE")+ " - Autozoom";
 }
 
 //Called from Java
@@ -534,16 +554,21 @@ function setOwnLocationIcon(ownLocationIconIn){
 	ownLocationIcon=ownLocationIconIn;
 }
 
+// Called from Java
+function setMaxAge(maxAgeIn){
+	maxAge=(1000*60*maxAgeIn);
+}
 
 /*************************************************************************************************************************** */
 
 const TILE_PROXY_URL="127.0.0.1:8181/";
 const ZOOM_LEVELS=18;
 const SPEED_FACTOR=25;
-const DEFAULT_SHIP_SCALE_FACTOR=8;
+const DEFAULT_SHIP_SCALE_FACTOR=5;
 const DEFAULT_SHIP_ICON="basic_turquoise.png";
 const DEFAULT_OWN_LOCATION_ICON="antenna.png";
 const NUMBER_OF_SHIPS_SOURCES=2;
+const DEFAULT_MAX_AGE=(1000*60*20); // 20 minutes
 
 // Array of dataShip
 // - at index 0: Ships received via UDP
@@ -570,6 +595,7 @@ var layerMyPosition;
 var styleMapShipSymbol;
 var shipScaleFactor=DEFAULT_SHIP_SCALE_FACTOR;
 var ownLocationIcon=DEFAULT_OWN_LOCATION_ICON;
+var maxAge = DEFAULT_MAX_AGE;
 
 window.onresize = function(){
     setTimeout( function() {

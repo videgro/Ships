@@ -157,8 +157,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         final List<RtlSdrDevice> devices = new ArrayList<>();
 
         for (final RtlSdrDeviceProvider deviceProvider : DEVICE_PROVIDERS) {
-            List<RtlSdrDevice> devicesForProvider = deviceProvider.retrieveDevices(this);
-            devices.addAll(devicesForProvider);
+            devices.addAll(deviceProvider.retrieveDevices(this));
         }
 
         switch (devices.size()) {

@@ -108,7 +108,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	
 	private void setupNmeaUdpClientService(){
 		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection((ShipReceivedListener) this);
-		Intent serviceIntent = new Intent(context, NmeaClientService.class);
+		final Intent serviceIntent = new Intent(context, NmeaClientService.class);
 		context.startService(serviceIntent);
 		context.bindService(new Intent(context, NmeaClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
 	}

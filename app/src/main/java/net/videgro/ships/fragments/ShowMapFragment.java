@@ -192,6 +192,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onDestroy() {
         destroyNmeaClientService();
         destroyLocationService();
+        getActivity().unregisterReceiver(usbReceiver);
         super.onDestroy();
     }
 
@@ -280,9 +281,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapZoomToExtend()) + ")");
+                webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapZoomToExtent()) + ")");
                 webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapCacheLowerZoomlevels()) + ")");
                 webView.loadUrl("javascript:setShipScaleFactor("+SettingsUtils.getInstance().parseFromPreferencesShipScaleFactor()+")");
+                webView.loadUrl("javascript:setMaxAge("+SettingsUtils.getInstance().parseFromPreferencesMaxAge()+")");
                 webView.loadUrl("javascript:setOwnLocationIcon('"+SettingsUtils.getInstance().parseFromPreferencesOwnLocationIcon()+"')");
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");

@@ -14,26 +14,31 @@
   </audio>
   
   <audio id="audioName"></audio>
-  <div id="mapdiv"></div>
-  <div id="messages"></div>  
-  
+
+  <div style="position:relative; z-index: 1;" id="mapdiv"></div>
+  <div id="messages"></div>
+
+  <div style="position: absolute; z-index: 2; top: 10px; left: 60px;" id="controls">
+      <button id="but_zoom_to_extent" onclick="javascript:setZoomToExtent(!zoomToExtent);"></button>
+  </div>
+
   <script type="text/javascript">	
-	function init() { 
-		createMap();
-		createStyleMapShipSymbol();
-		createLayers();
+    function init() {
+        createMap();
+        createStyleMapShipSymbol();
+        createLayers();
 
         dataShips[0].shipVectors=createLayerShips("Ships");
         dataShips[1].shipVectors=createLayerShips("Ships - Peers");
 
-		createControls();
+        createControls();
 
         dataShips[0].lineLayer=createLayerTraces("Ship traces");
         dataShips[1].lineLayer=createLayerTraces("Ship traces - Peers");
 
-		createZoomAction();
-		map.zoomToMaxExtent(); // Init view
-	}
+        createZoomAction();
+        map.zoomToMaxExtent(); // Init view
+    }
   </script>
 
 </body>

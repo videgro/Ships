@@ -118,7 +118,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 					}
 				} else {	
 					resetGuiToInitialState();
-					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,"Failed to start RTL-SDR",startRtlSdrResultAsString,R.drawable.thumbs_down_circle,null);
+					Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,getActivity(),this,getString(R.string.popup_start_device_failed_title),getString(R.string.popup_start_device_failed_message)+" "+startRtlSdrResultAsString,R.drawable.thumbs_down_circle,null);
 				}
 				break;
 			case REQ_CODE_STOP_RTLSDR:

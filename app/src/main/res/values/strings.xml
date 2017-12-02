@@ -105,9 +105,9 @@
   	<string name="pref_loggingVerbose_summary">Be verbose in displaying logging messages in the status bar.</string>
   	<string name="pref_loggingVerbose_title">Verbose logging</string>
   	<string name="pref_MapSettings_title">Map</string>
-  	<string name="pref_mapZoomToExtend">pref_mapZoomToExtend</string>
-  	<string name="pref_mapZoomToExtend_summary">On every update of a ship position, zoom the map so it will display all ships.</string>
-  	<string name="pref_mapZoomToExtend_title">Zoom to extend</string>
+  	<string name="pref_mapZoomToExtent">pref_mapZoomToExtent</string>
+  	<string name="pref_mapZoomToExtent_summary">On every update of a ship position, zoom the map so it will display all ships.</string>
+  	<string name="pref_mapZoomToExtent_title">Automatic zoom</string>
   	<string name="pref_mapFetchLowerZoomLevels">pref_mapFetchLowerZoomLevels</string>  	              
   	<string name="pref_mapFetchLowerZoomLevels_summary">Pre fetch map tiles for lower zoomlevels. Will speed up zooming in and out, but will download more data and uses more disk storage.</string>
   	<string name="pref_mapFetchLowerZoomLevels_title">Fetch lower zoomlevels</string>
@@ -118,10 +118,16 @@
   	<string name="pref_mapCacheMaxDiskUsage_title">Tiles cache: Maximum disk usage.</string>
 
 	<string name="pref_shipScaleFactor">pref_shipScaleFactor</string>
-	<string name="pref_shipScaleFactor_default">8</string>
-	<string name="pref_shipScaleFactor_dialog_title">Scale factor of ships on map. Default value: 8</string>
+	<string name="pref_shipScaleFactor_default">5</string>
+	<string name="pref_shipScaleFactor_dialog_title">Scale factor of ships on map. Default value: 5</string>
 	<string name="pref_shipScaleFactor_summary">Change this value to let ships appear bigger/smaller on the map. Higher value, bigger ships.</string>
 	<string name="pref_shipScaleFactor_title">Ship scale factor</string>
+
+	<string name="pref_maxAge">pref_maxAge</string>
+	<string name="pref_maxAge_default">20</string>
+	<string name="pref_maxAge_dialog_title">Maximum age of ships on map. Default value: 20 minutes</string>
+	<string name="pref_maxAge_summary">Change this value to change the maximum age of a ship and its traces on the map.</string>
+	<string name="pref_maxAge_title">Maximum age of Ships</string>
 
     <string name="pref_ownLocationIcon">pref_ownLocationIcon</string>
     <string name="pref_ownLocationIcon_title">Own location icon</string>
