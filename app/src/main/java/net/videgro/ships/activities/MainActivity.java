@@ -191,12 +191,12 @@ public class MainActivity extends Activity implements ImagePopupListener {
                 showMap();
             } else {
                 if (tryingToCalibrate) {
-                    if (SettingsUtils.RTL_SDR_PPM_CALIBRATION_FAILED==ppm){
+                    if (SettingsUtils.getInstance().parseFromPreferencesInternalIsCalibrationFailed()){
                         // Returned here after trying to calibrate, but this failed -> Show map
                         tryingToCalibrate=false;
 
-                        // Reset stored PPM back to default value
-                        SettingsUtils.getInstance().setToPreferencesPpm(SettingsUtils.DEFAULT_RTL_SDR_PPM);
+                        // Reset calibration failed
+                        SettingsUtils.getInstance().setToPreferencesInternalIsCalibrationFailed(false);
                         failedToCalibrate=true;
                         showMap();
                     } else {

@@ -257,11 +257,11 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
                 break;
             case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
             case IMAGE_POPUP_ID_CALIBRATE_FAILED:
-                // Set special value as PPM to communicate to dispatcher that calibration has failed
-                SettingsUtils.getInstance().setToPreferencesPpm(SettingsUtils.RTL_SDR_PPM_CALIBRATION_FAILED);
+                // Set to communicate to dispatcher that calibration has failed
+                SettingsUtils.getInstance().setToPreferencesInternalIsCalibrationFailed(true);
 
                 // Once more 'changeRtlSdrPpm' with stored value, to trigger MainActivity.onResume()
-                FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,SettingsUtils.RTL_SDR_PPM_CALIBRATION_FAILED);
+                FragmentUtils.changeRtlSdrPpm(this, REQ_CODE_START_RTLSDR,0);
 			break;
 
 			default:

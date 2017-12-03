@@ -200,7 +200,7 @@
 
         <h2>Minimal requirements</h2>
         <p>You can use this app on a device with OTG-support and a so called RTL-SDR dongle connected, in an area where AIS data is available in the air. You must be allowed by local law to receive and process AIS signals.</p>
-        <p>The Ships development team (VIDEGRO) will not be held responsible for any legal issues that might be caused by usage or possession of the app. It is your responsibility to comply with your local law(s) before using Ships. Besides of that we are also not responsible for any issues like financial, raised by using this app and receiving faulty, incomplete and/or delayed information.</p>
+        <p>The Ships development team (VIDEGRO) will not be held responsible for any legal issues that might be caused by usage or possession of the app. It is your responsibility to comply with your local law(s) before using Ships. Besides of that we are also not responsible for any issues like financial, raised by using this app and receiving faulty, incomplete and/or delayed information. We do not accept any claims of broken hardware (i.e. SDR-devices and Android devices) caused by this application.</p>
 
         <h2>Where could I buy a compatible RTL-SDR dongle?</h2>
         <p>Please search at eBay for \'<a href="http://www.ebay.com/sch/i.html?_nkw=RTL2832U">RTL2832U</a>\' price should be less than 10 euro. Besides of that you also need an OTG cable which is also not expensive at all.</p>
