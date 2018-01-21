@@ -65,7 +65,7 @@ function addShip(ship) {
      /*
      Strings copied from: dk.dma.ais.message.ShipTypeCargo
      */
-	var shipIcon=DEFAULT_SHIP_ICON;
+	var shipIcon;
 	switch (ship.shipType){
 	    case "CARGO":
     	case "TANKER":
@@ -96,7 +96,8 @@ function addShip(ship) {
 	        shipIcon="basic_blue.png";
 	    break;
 	    case "UNKNOWN":
-	        shipIcon="basic_yellow.png";
+	        // Speed > 0 : Default ship icon, otherwise a yellow dot
+	        shipIcon=(ship.sog>0) ? DEFAULT_SHIP_ICON : "yellow_dot.png";
 	    break;
 	    case "WIG":
 	    case "ANTI_POLLUTION":
@@ -337,15 +338,17 @@ function createMap(){
 					topInUnits : 'nmi',
 					bottomInUnits : 'km',
 					maxWidth : '40'
-				}), new OpenLayers.Control.LayerSwitcher(),
+				}),
+				new OpenLayers.Control.LayerSwitcher(),
 				new OpenLayers.Control.MousePosition(),
-				new OpenLayers.Control.PanZoomBar(),
+				// new OpenLayers.Control.PanZoomBar(),
 				new OpenLayers.Control.TouchNavigation()],
 		numZoomLevels : ZOOM_LEVELS,
 		maxResolution : 156543,
 		units : 'meters'
 	});
 }
+
 
 function createStyleMapShipSymbol(){
   	styleMapShipSymbol = new OpenLayers.StyleMap({
