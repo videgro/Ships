@@ -22,13 +22,12 @@ import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 import net.videgro.ships.tasks.domain.SocketIoConfig;
+import net.videgro.ships.tasks.ValidateDatagramSocketConfigTask;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NmeaClientService extends Service implements NmeaUdpClientListener, SocketIoClient.SocketIoListener {
+public class NmeaClientService extends Service implements NmeaUdpClientListener, SocketIoClient.SocketIoListener,ValidateDatagramSocketConfigTask.ValidateDatagramSocketConfigListener {
 	private static final String TAG = "NmeaClientService";
 
 	public static final int NMEA_UDP_PORT=10109;
@@ -93,9 +92,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
-			final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
-            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),createRepeaterConfig(),socketIoClient,getCacheDir(),hasNetworkConnection);
-            nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            createRepeaterConfig();
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}
@@ -137,51 +134,34 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
         Analytics.getInstance().logEvent(TAG, "destroy", "");
     }
 
-    private DatagramSocketConfig createRepeaterConfig(){
+    private void createRepeaterConfig(){
         final String tag="createRepeaterConfig - ";
-        DatagramSocketConfig result=null;
 
         final String repeatHost = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationHost();
         final int repeatPort = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationPort();
 
         String informText="Not repeating NMEA messages.";
         if (repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
-            result = new DatagramSocketConfig(repeatHost,repeatPort);
-            if (validateDatagramSocketConfig(result)) {
-                informText="Repeating NMEA messages to UDP: " + result;
-				Toast.makeText(this,informText,Toast.LENGTH_LONG).show();
-                Analytics.getInstance().logEvent(TAG,"NMEA Repeater","repeatHost: "+repeatHost+", repeatPort: "+repeatPort);
-            } else {
-                result=null;
-            }
+            ValidateDatagramSocketConfigTask validateDatagramSocketConfigTask = new ValidateDatagramSocketConfigTask(this,new DatagramSocketConfig(repeatHost,repeatPort));
+            validateDatagramSocketConfigTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         } else {
             informText="IGNORE NMEA repeat setting: Asked to repeat to build in address:port or invalid settings.";
         }
 
         Log.d(TAG,tag+informText);
-
-        return result;
     }
 
-	private static boolean validateDatagramSocketConfig(final DatagramSocketConfig datagramSocketConfig) {
-		final String tag = "validateDatagramSocketConfig - ";
+    public void onValidatedDatagramSocketConfig(final DatagramSocketConfig datagramSocketConfig){
+        if (datagramSocketConfig!=null) {
+          //  Toast.makeText(this, "Repeating NMEA messages to UDP: " + datagramSocketConfig, Toast.LENGTH_LONG).show();
+            Analytics.getInstance().logEvent(TAG, "NMEA Repeater", "repeatHost: " + datagramSocketConfig.getAddress() + ", repeatPort: " + datagramSocketConfig.getPort());
 
-		boolean result = false;
-
-		if (datagramSocketConfig!=null && datagramSocketConfig.getPort() > 0){
-			final String address=datagramSocketConfig.getAddress();
-			if (address != null && !address.isEmpty()) {
-				try {
-                    // Ignore result, only interested whether an UnknownHostException is thrown.
-					InetAddress.getByName(address);
-                    result = true;
-				} catch (UnknownHostException e) {
-					Log.w(TAG, tag + "Invalid host: "+address, e);
-				}
-			}
-		}
-		return result;
-	}
+            final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),datagramSocketConfig,socketIoClient,getCacheDir(),hasNetworkConnection);
+            nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+    }
 
     public void requestSocketIoServerCachedMessages(){
         if (socketIoClient!=null) {
