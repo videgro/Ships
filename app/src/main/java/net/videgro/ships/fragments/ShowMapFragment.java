@@ -34,7 +34,7 @@ import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
+import android.os.SystemClock;
 import com.google.gson.Gson;
 
 import net.videgro.ships.Analytics;
@@ -437,6 +437,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
                 }
             });
+
+            // Slow down a bit. Give the map time to draw the ship and tiles
+            SystemClock.sleep(250);
         } else {
             Log.e(TAG,tag+"Huh?");
         }
