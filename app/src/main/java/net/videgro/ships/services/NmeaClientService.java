@@ -8,7 +8,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.NmeaTO;
@@ -20,10 +19,14 @@ import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.services.internal.SocketIoClient;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
+import net.videgro.ships.tasks.ValidateDatagramSocketConfigTask;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 import net.videgro.ships.tasks.domain.SocketIoConfig;
-import net.videgro.ships.tasks.ValidateDatagramSocketConfigTask;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +43,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 	private NmeaUdpClientTask nmeaUdpClientTask;
 
 	private SocketIoClient socketIoClient;
+
+	private boolean relayNmeaFromPeers=true;
+    private DatagramSocketConfig datagramSocketConfigRepeater;
 
     /**
      * Contains all received MMSIs. A set contains unique entries.
@@ -86,13 +92,14 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
         @SuppressLint("HardwareIds")
 		final String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        connectSocketIo(new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA));
 
-        final SocketIoConfig socketIoConfig=new SocketIoConfig(androidId, NmeaTO.SERVER, NmeaTO.TOPIC_NMEA);
-        connectSocketIo(socketIoConfig);
+        relayNmeaFromPeers=SettingsUtils.getInstance().parseFromPreferencesRelayNmeaFromPeers();
 
 		if (nmeaUdpClientTask==null){
 			Log.d(TAG,tag+"Creating new NmeaUdpClient");
             createRepeaterConfig();
+            // Flow: ValidateDatagramSocketConfigTask->onValidatedDatagramSocketConfig and this function will create a new NmeaUdpClientTask
 		} else {
 			Log.d(TAG,tag+"Using existing NmeaUdpClient");
 		}
@@ -144,7 +151,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
         if (repeatHost!=null && !(repeatHost.equals(NMEA_UDP_HOST) && repeatPort==NMEA_UDP_PORT)) {
             ValidateDatagramSocketConfigTask validateDatagramSocketConfigTask = new ValidateDatagramSocketConfigTask(this,new DatagramSocketConfig(repeatHost,repeatPort));
             validateDatagramSocketConfigTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
         } else {
             informText="IGNORE NMEA repeat setting: Asked to repeat to build in address:port or invalid settings.";
         }
@@ -154,12 +160,15 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 
     public void onValidatedDatagramSocketConfig(final DatagramSocketConfig datagramSocketConfig){
         if (datagramSocketConfig!=null) {
-          //  Toast.makeText(this, "Repeating NMEA messages to UDP: " + datagramSocketConfig, Toast.LENGTH_LONG).show();
-            Analytics.getInstance().logEvent(TAG, "NMEA Repeater", "repeatHost: " + datagramSocketConfig.getAddress() + ", repeatPort: " + datagramSocketConfig.getPort());
+            datagramSocketConfigRepeater=datagramSocketConfig;
 
             final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
-            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),datagramSocketConfig,socketIoClient,getCacheDir(),hasNetworkConnection);
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),socketIoClient,getCacheDir(),hasNetworkConnection);
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            //  Toast.makeText(this, "Repeating NMEA messages to UDP: " + datagramSocketConfig, Toast.LENGTH_LONG).show();
+            Log.d(TAG, "Repeating on UDP: " + datagramSocketConfigRepeater);
+            Analytics.getInstance().logEvent(TAG, "NMEA Repeater", "repeatHost: " + datagramSocketConfig.getAddress() + ", repeatPort: " + datagramSocketConfig.getPort());
         }
     }
 
@@ -181,28 +190,48 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 		}	
 	}
 
+	private void repeatViaUdp(final String nmea){
+        final String tag="repeatViaUdp - ";
+        if (datagramSocketConfigRepeater != null) {
+            try {
+                final DatagramSocket serverSocketRepeater = new DatagramSocket();
+                final byte[] nmeaAsByteArray=nmea.getBytes();
+                final DatagramPacket packet = new DatagramPacket(nmeaAsByteArray, nmeaAsByteArray.length, InetAddress.getByName(datagramSocketConfigRepeater.getAddress()), datagramSocketConfigRepeater.getPort());
+                serverSocketRepeater.send(packet);
+            } catch (IOException e){
+                Log.e(TAG,tag,e);
+            }
+        }
+    }
+
 	private void onNmeaReceived(final String nmea,final Nmea2Ship.NmeaSource nmeaSource) {
 		Log.d(TAG,"onNmeaReceived - "+nmea);
-		synchronized(listeners){
-			final Ship ship = nmea2Ship.onMessage(nmea,nmeaSource);
-			if (ship != null && ship.isValid()) {
-                switch (nmeaSource) {
-                    case UDP:
-                        mmsiReceivedViaUdp.add(ship.getMmsi());
-                        break;
-                    case SOCKET_IO:
-                        mmsiReceivedViaSocketIo.add(ship.getMmsi());
-                        break;
-                    default:
-                        // Nothing to do
-                        break;
-                } // End switch
 
-				for (final ShipReceivedListener listener : listeners) {
-					listener.onShipReceived(ship);
-				}
-			}
-		}
+		// Convert NMEA to Ship
+        final Ship ship = nmea2Ship.onMessage(nmea,nmeaSource);
+        if (ship != null && ship.isValid()) {
+            switch (nmeaSource) {
+                case UDP:
+                    mmsiReceivedViaUdp.add(ship.getMmsi());
+                    repeatViaUdp(nmea);
+                    break;
+                case SOCKET_IO:
+                    mmsiReceivedViaSocketIo.add(ship.getMmsi());
+                    if (relayNmeaFromPeers){
+                        repeatViaUdp(nmea);
+                    }
+                    break;
+                default:
+                    // Nothing to do
+                    break;
+            } // End switch
+
+            synchronized (listeners) {
+                for (final ShipReceivedListener listener : listeners) {
+                    listener.onShipReceived(ship);
+                }
+            }
+        }
 	}
 
 	@Override

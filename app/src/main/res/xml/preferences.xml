@@ -88,6 +88,11 @@
             android:key="@string/pref_aisMessagesDestinationPort"
             android:summary="@string/pref_aisMessagesDestinationPort_summary"
             android:title="@string/pref_aisMessagesDestinationPort_title" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_nmeaRelay"
+            android:summary="@string/pref_nmeaRelay_summary"
+            android:title="@string/pref_nmeaRelay_title" />
     </PreferenceCategory>  
 
     <net.videgro.ships.preferences.PromoPreferenceRateMe android:key="rate" />

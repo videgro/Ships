@@ -26,6 +26,7 @@ public final class SettingsUtils {
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST = "pref_aisMessagesDestinationHost";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT = "pref_aisMessagesDestinationPort";
 	private static final String KEY_PREF_NMEA_SHARE = "pref_nmeaShare";
+    private static final String KEY_PREF_NMEA_RELAY_FROM_PEERS = "pref_nmeaRelay";
 
 	private static final boolean DEFAULT_LOGGING_VERBOSE = true;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
@@ -43,6 +44,7 @@ public final class SettingsUtils {
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;
     private static final int DEFAULT_MAX_AGE = 20;
 	private static final boolean DEFAULT_NMEA_SHARE = true;
+    private static final boolean DEFAULT_NMEA_RELAY_FROM_PEERS = true;
 
 	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
     private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
@@ -132,6 +134,11 @@ public final class SettingsUtils {
         validateSharedPreferences();
         return sharedPreferences.getBoolean(KEY_PREF_NMEA_SHARE, DEFAULT_NMEA_SHARE);
     }
+
+	public boolean parseFromPreferencesRelayNmeaFromPeers() {
+		validateSharedPreferences();
+		return sharedPreferences.getBoolean(KEY_PREF_NMEA_RELAY_FROM_PEERS, DEFAULT_NMEA_RELAY_FROM_PEERS);
+	}
 
 	public boolean parseFromPreferencesMapCacheLowerZoomlevels() {
 		validateSharedPreferences();

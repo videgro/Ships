@@ -24,6 +24,8 @@ public class SocketIoClient {
     private final SocketIoConfig config;
     private final DigitalSignature digitalSignature;
 
+    private final boolean ignoreInvalidSignature=true;
+
     private int repeatedNmeaMessages = 0;
 
     private Socket socket;
@@ -123,7 +125,7 @@ public class SocketIoClient {
 
                         final String dataToVerify = nmeaTO.getOrigin() + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + nmeaTO.getTimestamp() + NmeaTO.TOPIC_NMEA_SIGN_SEPARATOR + nmeaTO.getData();
 
-                        if (digitalSignature.verify(dataToVerify, nmeaTO.getSignature())) {
+                        if (ignoreInvalidSignature || digitalSignature.verify(dataToVerify, nmeaTO.getSignature())) {
                             listener.onNmeaViaSocketIoReceived(nmeaTO.getData());
                         } else {
                             Log.w(TAG, tag + "Invalid data received via SocketIO (invalid signature).");

@@ -185,6 +185,10 @@
     <string name="pref_aisMessagesDestinationPort_summary">The UDP port to send received AIS messages to.</string>
     <string name="pref_aisMessagesDestinationPort_title">AIS Messages destination port</string>
 
+	<string name="pref_nmeaRelay">pref_nmeaRelay</string>
+	<string name="pref_nmeaRelay_summary">Relay received AIS messages from fellow users to this third party plotter. Setting will apply after restart of application.</string>
+	<string name="pref_nmeaRelay_title">Relay received AIS messages from fellow users</string>
+
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_calibrate">Calibrate</string>
 	<string name="title_help_information">Help / Information / Terms and Conditions</string>
