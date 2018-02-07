@@ -54,13 +54,13 @@ function addShip(ship) {
 	// subMessage
 	// "draught":0,
 
-	var angle = Math.round(ship.cog / 10);
+	var angle = Math.round((ship.heading!=0) ? ship.heading : (ship.cog / 10));
 	var origin = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
-	var name=(ship.name=="")?ship.mmsi:ship.name;
+	var name=(ship.name=="") ? ship.mmsi : ship.name;
 
 	// Default: 55 x 5 m
-	var width=   ((ship.dimBow!="" && ship.dimStern!="")?parseInt(ship.dimBow)+parseInt(ship.dimStern):55)/10*shipScaleFactor; // = real length
-	var height=  ((ship.dimStarboard!="" && ship.dimPort!="")?parseInt(ship.dimStarboard)+parseInt(ship.dimPort):5)*shipScaleFactor; // = real width
+	var width=   ((ship.dimBow!="" && ship.dimStern!="") ? parseInt(ship.dimBow)+parseInt(ship.dimStern) : 55)/10*shipScaleFactor; // = real length
+	var height=  ((ship.dimStarboard!="" && ship.dimPort!="") ? parseInt(ship.dimStarboard)+parseInt(ship.dimPort) : 5)*shipScaleFactor; // = real width
 
      /*
      Strings copied from: dk.dma.ais.message.ShipTypeCargo
