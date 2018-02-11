@@ -33,7 +33,7 @@ android {
 }
 
 ext {
-    permissionsdispatcherVersion="3.0.1"
+    permissionsdispatcherVersion="3.1.0"
 }
 
 dependencies {
