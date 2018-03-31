@@ -34,6 +34,7 @@ public class ValidateDatagramSocketConfigTask extends AsyncTask<Void, Void, Data
             if (address != null && !address.isEmpty()) {
                 try {
                     // Ignore result, only interested whether an UnknownHostException is thrown.
+                    //noinspection ResultOfMethodCallIgnored
                     InetAddress.getByName(address);
                     result = true;
                 } catch (UnknownHostException e) {

@@ -37,7 +37,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
     public static final String NMEA_UDP_HOST="127.0.0.1";
 
 	private final IBinder binder = new ServiceBinder();
-	private final Set<ShipReceivedListener> listeners=new HashSet<ShipReceivedListener>();
+	private final Set<ShipReceivedListener> listeners=new HashSet<>();
 
     private Nmea2Ship nmea2Ship = new Nmea2Ship();
 	private NmeaUdpClientTask nmeaUdpClientTask;

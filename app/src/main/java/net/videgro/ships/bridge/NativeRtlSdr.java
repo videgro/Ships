@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class NativeRtlSdr {
     private static final String TAG = "NativeRtlSdr";
-    private static final Set<NativeRtlSdrListener> LISTENERS = new HashSet<NativeRtlSdrListener>();
+    private static final Set<NativeRtlSdrListener> LISTENERS = new HashSet<>();
 
     public boolean addListener(final NativeRtlSdrListener callback) {
         synchronized (LISTENERS) {
@@ -85,8 +85,6 @@ public class NativeRtlSdr {
                     c.onRtlSdrStopped();
                 }
             }
-
-            ;
         }.start();
     }
 

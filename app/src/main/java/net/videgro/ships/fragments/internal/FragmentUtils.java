@@ -15,8 +15,6 @@ import net.videgro.ships.services.NmeaClientService;
 public final class FragmentUtils {
 	private static final String TAG="FragmentUtils";
 
-	public static final String BUNDLE_DATA_FRAGMENT_PREVIOUS="previous_fragment";
-
 	/**
 	 * Shared across fragments
 	 */
@@ -68,7 +66,7 @@ public final class FragmentUtils {
 	}
 	
 	private static OpenDeviceResult parseOpenCloseDeviceActivityResult(final Intent data){
-		OpenDeviceResult result=null;
+		OpenDeviceResult result;
 		if (data!=null){
 			result=new OpenDeviceResult(data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_MESSAGE),data.getStringExtra(OpenDeviceActivity.EXTRA_RESULT_DEVICE_DESCRIPTION),data.getIntExtra(OpenDeviceActivity.EXTRA_RESULT_ERROR_REASON,-1));
 		} else {

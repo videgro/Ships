@@ -1,12 +1,14 @@
 package net.videgro.ships.nmea2ship;
 
 import android.util.Log;
+
+import net.videgro.ships.nmea2ship.domain.Ship;
+
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketParser;
 import dk.dma.ais.sentence.SentenceException;
-import net.videgro.ships.nmea2ship.domain.Ship;
 
 public class Nmea2Ship {
 	private static final String TAG="Nmea2Ship - ";

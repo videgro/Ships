@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 
 import net.videgro.ships.R;
 import net.videgro.usb.rtlsdr.RtlSdrDevice;
@@ -43,42 +44,52 @@ public class DeviceDialogFragment extends DialogFragment {
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog result=null;
         final DeviceDialogListener callback = (DeviceDialogListener) getActivity();
         final Bundle b = getArguments();
-        final int devicesCount = b.getInt(RTL_SDR_DEVICES_COUNT);
-        final RtlSdrDevice[] devices = new RtlSdrDevice[devicesCount];
-        final String[] options = new String[devicesCount];
-        for (int id = 0; id < devicesCount; id++) {
-            final Parcelable parcelable = b.getParcelable(String.format(Locale.getDefault(), RTL_SDR_DEVICE, id));
-            if (parcelable instanceof RtlSdrDevice) {
-                final RtlSdrDevice rtlSdrDevice = (RtlSdrDevice) parcelable;
-                devices[id] = rtlSdrDevice;
-                options[id] = rtlSdrDevice.getFriendlyName();
+        if (b!=null) {
+            final int devicesCount = b.getInt(RTL_SDR_DEVICES_COUNT);
+            final RtlSdrDevice[] devices = new RtlSdrDevice[devicesCount];
+            final String[] options = new String[devicesCount];
+            for (int id = 0; id < devicesCount; id++) {
+                final Parcelable parcelable = b.getParcelable(String.format(Locale.getDefault(), RTL_SDR_DEVICE, id));
+                if (parcelable instanceof RtlSdrDevice) {
+                    final RtlSdrDevice rtlSdrDevice = (RtlSdrDevice) parcelable;
+                    devices[id] = rtlSdrDevice;
+                    options[id] = rtlSdrDevice.getFriendlyName();
+                }
             }
-        }
 
-        return new AlertDialog.Builder(getActivity())
-                .setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        final RtlSdrDevice selected = devices[which];
-                        callback.onDeviceDialogDeviceChosen(selected);
-                    }
-                })
-                .setIcon(R.drawable.ic_stat_usb)
-                .setTitle(getString(R.string.popup_select_device_title))
-                .create();
+            result= new AlertDialog.Builder(getActivity())
+                    .setItems(options, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (callback != null) {
+                                final RtlSdrDevice selected = devices[which];
+                                callback.onDeviceDialogDeviceChosen(selected);
+                            }
+                        }
+                    })
+                    .setIcon(R.drawable.ic_stat_usb)
+                    .setTitle(getString(R.string.popup_select_device_title))
+                    .create();
+        }
+        return result;
     }
 
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
-        ((DeviceDialogListener) getActivity()).onDeviceDialogCanceled();
+        if (isAdded()) {
+            final FragmentActivity fragmentActivity=getActivity();
+            if (fragmentActivity instanceof DeviceDialogListener) {
+                ((DeviceDialogListener) fragmentActivity).onDeviceDialogCanceled();
+            }
+        }
     }
 
     public interface DeviceDialogListener {
         void onDeviceDialogDeviceChosen(RtlSdrDevice selected);
-
         void onDeviceDialogCanceled();
     }
 }

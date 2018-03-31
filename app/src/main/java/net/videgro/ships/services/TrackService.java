@@ -1,9 +1,5 @@
 package net.videgro.ships.services;
 
-import net.videgro.ships.Analytics;
-import net.videgro.ships.R;
-import net.videgro.ships.SettingsUtils;
-import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +12,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+
+import net.videgro.ships.Analytics;
+import net.videgro.ships.R;
+import net.videgro.ships.SettingsUtils;
+import net.videgro.ships.listeners.OwnLocationReceivedListener;
 
 public class TrackService extends Service implements LocationListener {
 	private static final String TAG = "TrackService";
@@ -72,7 +73,7 @@ public class TrackService extends Service implements LocationListener {
 					onLocationChanged(location);
 				}
 
-				/**
+				/*
 				 * Minimum time: 1000 ms Minimum distance: 8 meters
 				 *
 				 */

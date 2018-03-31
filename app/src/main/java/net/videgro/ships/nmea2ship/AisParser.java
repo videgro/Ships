@@ -1,13 +1,13 @@
 package net.videgro.ships.nmea2ship;
 
+import android.util.Log;
+
+import net.videgro.ships.nmea2ship.domain.Ship;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.util.Log;
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
-//import com.google.gson.Gson;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage21;
 import dk.dma.ais.message.AisMessage24;
@@ -19,14 +19,13 @@ import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.geometry.Position;
-import net.videgro.ships.nmea2ship.domain.Ship;
 
 public class AisParser {
 	private static final String TAG="AisParser";
 	
 	private static final int AIS_CONSTANT_HEADING_UNKNOWN=511;	
 	
-	private Map<String,Ship> ships=new HashMap<String,Ship>();
+	private Map<String,Ship> ships=new HashMap<>();
 	
 	public Ship parse(final AisMessage aisMessage){
 		Ship ship=ships.get(""+aisMessage.getUserId());

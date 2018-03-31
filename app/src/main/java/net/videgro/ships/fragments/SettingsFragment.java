@@ -10,6 +10,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.util.Log;
+
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
@@ -73,10 +74,12 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 
 	private String getAppVersion() {
 		String result = "UNDEFINED";
-		try {
-			result = getView().getContext().getPackageManager().getPackageInfo(getView().getContext().getPackageName(), 0).versionName;
-		} catch (NameNotFoundException e) {
-			Log.e(TAG, "getAppVersion", e);
+		if (getView()!=null && getView().getContext()!=null) {
+			try {
+				result = getView().getContext().getPackageManager().getPackageInfo(getView().getContext().getPackageName(), 0).versionName;
+			} catch (NameNotFoundException e) {
+				Log.e(TAG, "getAppVersion", e);
+			}
 		}
 		return result;
 	}

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Logger;
 import com.google.android.gms.analytics.Tracker;
 
 public final class Analytics {
@@ -35,7 +34,6 @@ public final class Analytics {
             }
 			// Create new tracker
 			final GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
-			analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
 			tracker = analytics.newTracker(R.xml.analytics);
 		}
 	}
@@ -50,7 +48,7 @@ public final class Analytics {
 		validateTracker();
 
 		tracker.setScreenName(screen);
-		tracker.send(new HitBuilders.AppViewBuilder().build());
+		tracker.send(new HitBuilders.ScreenViewBuilder().build());
 	}
 	
 	public synchronized void logEvent(final String category,final String action,final String label){

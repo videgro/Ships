@@ -40,14 +40,15 @@ public class HttpCacheFifoTask implements Callable<String> {
 			}
 						
 			int victimId=0;
-			while (dirSize > maxDiskUsageInBytes && victimId<files.length) {			
+
+			while (files!=null && dirSize > maxDiskUsageInBytes && victimId < files.length) {
 				final File victim = files[victimId++];
-				final long fileSize=victim.length();
+				final long fileSize = victim.length();
 				//Log.d(TAG,"Deleting file: "+victim+", Last modified: "+victim.lastModified()+", Size: "+fileSize+" bytes.");
-				
-				if (victim.delete()){
-					dirSize-=fileSize;
-					totalDeletedBytes+=fileSize;			
+
+				if (victim.delete()) {
+					dirSize -= fileSize;
+					totalDeletedBytes += fileSize;
 					totalDeletedFiles++;
 				}
 			}

@@ -286,7 +286,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	private void applyFifo(){
 		if (httpCacheFifoTask==null || httpCacheFifoTask.isDone() || httpCacheFifoTask.isCancelled()){
 			// Just cue one at a time
-			httpCacheFifoTask = new FutureTask<String>(new HttpCacheFifoTask(dirCache,maxDiskUsageInBytes));
+			httpCacheFifoTask = new FutureTask<>(new HttpCacheFifoTask(dirCache,maxDiskUsageInBytes));
 			executor.execute(httpCacheFifoTask);
 		}
 	}

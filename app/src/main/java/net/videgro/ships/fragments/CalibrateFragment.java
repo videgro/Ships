@@ -241,10 +241,10 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		}
 	}	
 	
-	/**** END CalibrateListener ****/
+	/* END CalibrateListener */
 
 
-	/**** START ImagePopupListener ****/
+	/* START ImagePopupListener */
 	
 	@Override
 	public void onImagePopupDispose(int id) {
@@ -270,5 +270,5 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		}
 	}
 	
-	/**** END ImagePopupListener ****/
+	/* END ImagePopupListener */
 }

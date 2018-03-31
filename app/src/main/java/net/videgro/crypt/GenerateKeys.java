@@ -19,7 +19,7 @@ public class GenerateKeys {
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
-    private GenerateKeys(int keylength) throws NoSuchAlgorithmException,NoSuchProviderException {
+    private GenerateKeys(int keylength) throws NoSuchAlgorithmException {
         this.keyGen = KeyPairGenerator.getInstance(CryptConstants.ALGORITHM_KEYS);
         this.keyGen.initialize(keylength);
     }
@@ -56,7 +56,7 @@ public class GenerateKeys {
             gk.createKeys();
             gk.writeToFile(KEY_PUBLIC, gk.getPublicKey().getEncoded());
             gk.writeToFile(KEY_PRIVATE, gk.getPrivateKey().getEncoded());
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
+        } catch (NoSuchAlgorithmException | IOException e) {
             System.err.println(e.getMessage());
         }
     }

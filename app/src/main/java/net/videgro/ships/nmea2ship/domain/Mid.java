@@ -295,7 +295,7 @@ public enum Mid {
 	private final String friendlyName;
 	private final String flagCode;
 
-	private Mid(String friendlyName,String flagCode){
+	Mid(String friendlyName,String flagCode){
 		this.friendlyName=friendlyName;
 		this.flagCode=flagCode;
 	}

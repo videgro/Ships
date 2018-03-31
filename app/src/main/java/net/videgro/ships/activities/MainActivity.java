@@ -149,7 +149,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean result = false;
+		boolean result;
 		// Handle presses on the action bar items
 		switch (item.getItemId()) {
 			case R.id.action_help:

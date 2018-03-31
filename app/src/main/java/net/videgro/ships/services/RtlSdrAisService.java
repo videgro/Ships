@@ -19,7 +19,7 @@ import java.util.Set;
 public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListener {
     private static final String TAG = "RtlSdrAisService";
 
-    private final Set<RtlSdrServiceListener> listeners = new HashSet<RtlSdrServiceListener>();
+    private final Set<RtlSdrServiceListener> listeners = new HashSet<>();
     private final NativeRtlSdr nativeRtlSdr=new NativeRtlSdr();
     
     private WakeLock wakelock;

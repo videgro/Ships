@@ -104,7 +104,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
     private void setupRtlsdrServiceConnection(final RtlSdrDevice rtlSdrDevice) {
         Log.d(TAG, "setupRtlsdrServiceConnection");
         this.rtlSdrDevice = rtlSdrDevice;
-        rtlsdrServiceConnection = new RtlsdrServiceConnection((RtlSdrServiceListener) this);
+        rtlsdrServiceConnection = new RtlsdrServiceConnection(this);
         Intent serviceIntent = new Intent(this, RtlSdrAisService.class);
         startService(serviceIntent);
         bindService(new Intent(this, RtlSdrAisService.class), rtlsdrServiceConnection, Context.BIND_AUTO_CREATE);
