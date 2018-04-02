@@ -73,10 +73,11 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
                         }
 
                         // Cache message when there was no network connection when starting Task or when repeatToSocketIoServer failed.
-                        if (!hasDataConnection || !repeatToSocketIoServerResult) {
+                        //if (!hasDataConnection || !repeatToSocketIoServerResult) {
+                        // TODO: Experimental - Network connection can change when Task has started. To be safe cache all messages. Cached messages will be processed, next time app starts and there is a network connection available.
                             // Cache message
                             nmeaMessagesCache.cacheMessage(line);
-                        }
+                        //}
                     }
                 }
             }
