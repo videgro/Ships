@@ -39,13 +39,12 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
 
         DatagramSocket serverSocketIn = null;
 
-        if (SettingsUtils.getInstance().parseFromPreferencesNmeaShare()) {
-            if (socketIoClient != null && hasDataConnection) {
-                nmeaMessagesCache.processCachedMessages();
-            }
-        } else {
-            Log.i(TAG, "Not connected to repeat NMEA messages to SocketIO server (user request)");
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Not connected", "User request (settings)");
+        final boolean shareNmea=SettingsUtils.getInstance().parseFromPreferencesNmeaShare();
+        Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - User preferences",String.valueOf(shareNmea));
+        Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - Has data connection",String.valueOf(hasDataConnection));
+
+        if (shareNmea && (socketIoClient != null && hasDataConnection)) {
+            nmeaMessagesCache.processCachedMessages();
         }
 
         try {
@@ -66,16 +65,18 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
                     Log.d(TAG, tag + "NMEA received - " + line);
                     listener.onNmeaViaUdpReceived(line);
 
-                    // Repeat: Send data of received UDP-packet to Socket.IO server
-                    boolean repeatToSocketIoServerResult=false;
-                    if (socketIoClient!=null) {
-                        repeatToSocketIoServerResult = socketIoClient.repeatToSocketIoServer(line);
-                    }
+                    if (shareNmea) {
+                        // Repeat: Send data of received UDP-packet to Socket.IO server, when user selected to share NMEA message.
+                        boolean repeatToSocketIoServerResult = false;
+                        if (socketIoClient != null) {
+                            repeatToSocketIoServerResult = socketIoClient.repeatToSocketIoServer(line);
+                        }
 
-                    // When not possible to send data directly to Socket.IO server, cache is for future transmission.
-                    if (!hasDataConnection || !repeatToSocketIoServerResult) {
-                        // Cache message
-                        nmeaMessagesCache.cacheMessage(line);
+                        // Cache message when there was no network connection when starting Task or when repeatToSocketIoServer failed.
+                        if (!hasDataConnection || !repeatToSocketIoServerResult) {
+                            // Cache message
+                            nmeaMessagesCache.cacheMessage(line);
+                        }
                     }
                 }
             }
