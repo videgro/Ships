@@ -16,7 +16,7 @@ public class RtlSdrDevice implements Parcelable {
             new Parcelable.Creator<RtlSdrDevice>() {
                 public RtlSdrDevice createFromParcel(Parcel in) {
                     final Parcelable usbDevice=in.readParcelable(UsbDevice.class.getClassLoader());
-                    if (usbDevice!=null){
+                    if (usbDevice==null){
                         throw new IllegalArgumentException("parcelable is null");
                     }
 
