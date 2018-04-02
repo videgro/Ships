@@ -7,7 +7,9 @@ android {
     defaultConfig {
         applicationId "net.videgro.ships"
         minSdkVersion 16
-        targetSdkVersion 27
+
+        // TODO: Update this when there is a real Android 8+ device available for development and testing.
+        targetSdkVersion 25
     }
 
     buildTypes {
