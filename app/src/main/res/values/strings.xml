@@ -189,6 +189,10 @@
 	<string name="pref_nmeaRelay_summary">Relay received AIS messages from fellow users to this third party plotter. Setting will apply after restart of application.</string>
 	<string name="pref_nmeaRelay_title">Relay received AIS messages from fellow users</string>
 
+	<string name="pref_PrivacyPolicyCredits_title">Privacy policy / Credits</string>
+	<string name="pref_PrivacyPolicyCredits_link">http://blog.videgro.net/contact/privacy-policy-credits-android-apps#ships</string>
+
+
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_calibrate">Calibrate</string>
 	<string name="title_help_information">Help / Information / Terms and Conditions</string>

@@ -93,7 +93,11 @@
             android:key="@string/pref_nmeaRelay"
             android:summary="@string/pref_nmeaRelay_summary"
             android:title="@string/pref_nmeaRelay_title" />
-    </PreferenceCategory>  
+    </PreferenceCategory>
+
+    <Preference android:title="@string/pref_PrivacyPolicyCredits_title" >
+        <intent android:action="android.intent.action.VIEW" android:data="@string/pref_PrivacyPolicyCredits_link" />
+    </Preference>
 
     <net.videgro.ships.preferences.PromoPreferenceRateMe android:key="rate" />
 </PreferenceScreen>
