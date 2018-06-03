@@ -11,12 +11,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdRequest.Builder;
 import com.google.android.gms.ads.AdView;
@@ -64,14 +66,19 @@ public final class Utils {
 	}
 
 	public static void loadAd(final View view){
-		final Builder builder = new AdRequest.Builder();		
+
+		// Create bundle to set non-personalized ads
+		final Bundle extras = new Bundle();
+		extras.putString("npa", "1");
+
+		final Builder builder = new AdRequest.Builder();
+		builder.addNetworkExtrasBundle(AdMobAdapter.class, extras); // Add bundle to builder
 		builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR); // Emulator
-		
+
 		// Add test devices
 		final String[] testDevices = view.getContext().getString(R.string.testDevices).split(",");		
-	    for (String testDevice:testDevices){
+	    for (final String testDevice:testDevices){
 	    	builder.addTestDevice(testDevice);
-	    	
 	    }
 	    
 	    final AdView adView = (AdView) view.findViewById(R.id.adView);
@@ -172,7 +179,6 @@ public final class Utils {
 		    }
 		});		
 	}
-
 
 	public static boolean is64bit(){
 		final String VAL_64="64";
