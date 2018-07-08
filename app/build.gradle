@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    buildToolsVersion "28.0.1"
 
     defaultConfig {
         applicationId "net.videgro.ships"
         minSdkVersion 16
 
         // TODO: Update this when there is a real Android 8+ device available for development and testing.
-        targetSdkVersion 25
+        targetSdkVersion 27
     }
 
     buildTypes {
@@ -35,16 +35,19 @@ android {
 }
 
 ext {
-    permissionsdispatcherVersion="3.2.0"
+    permissionsdispatcher_version="3.3.1"
+    com_android_support_version="27.1.1" // Major version must match compile SDK version
 }
 
 dependencies {
-    implementation "com.google.android.gms:play-services-analytics:12.0.1"
-    implementation "com.google.android.gms:play-services-ads:12.0.1"
-    implementation "com.google.code.gson:gson:2.8.2"
+    implementation "com.google.android.gms:play-services-analytics:16.0.1"
+    implementation "com.google.android.gms:play-services-ads:15.0.1"
+    implementation "com.google.code.gson:gson:2.8.5"
     implementation "org.nanohttpd:nanohttpd:2.3.1"
     implementation "io.socket:socket.io-client:1.0.0"
-    implementation "com.android.support:support-v13:27.1.1"
-    implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcherVersion}"
-    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsdispatcherVersion}"
+    implementation "com.android.support:support-v4:${com_android_support_version}"
+    implementation "com.android.support:support-v13:${com_android_support_version}"
+    implementation "com.android.support:customtabs:${com_android_support_version}"
+    implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsdispatcher_version}"
 }
