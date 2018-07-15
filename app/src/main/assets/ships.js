@@ -62,56 +62,6 @@ function addShip(ship) {
 	var width=   ((ship.dimBow!="" && ship.dimStern!="") ? parseInt(ship.dimBow)+parseInt(ship.dimStern) : 55)/10*shipScaleFactor; // = real length
 	var height=  ((ship.dimStarboard!="" && ship.dimPort!="") ? parseInt(ship.dimStarboard)+parseInt(ship.dimPort) : 5)*shipScaleFactor; // = real width
 
-     /*
-     Strings copied from: dk.dma.ais.message.ShipTypeCargo
-     */
-	var shipIcon;
-	switch (ship.shipType){
-	    case "CARGO":
-    	case "TANKER":
-            shipIcon="container-ship-top.png";
-        break;
-	    case "PILOT":
-	    case "SAR":
-	    case "PORT_TENDER":
-	    case "LAW_ENFORCEMENT":
-	    case "TOWING":
-        case "TOWING_LONG_WIDE":
-        case "TUG":
-	        shipIcon="basic_red.png";
-	    break;
-	    case "MILITARY":
-	        shipIcon="basic_green.png";
-        break;
-	    case "SAILING":
-            shipIcon="sailing-yacht_1.png";
-        break;
-        case "PLEASURE":
-            shipIcon="yacht_4.png";
-        break;
-	    case "PASSENGER":
-	        shipIcon="passenger.png";
-	    break;
-	    case "FISHING":
-	        shipIcon="basic_blue.png";
-	    break;
-	    case "UNKNOWN":
-	        // Speed > 0 : Default ship icon, otherwise a yellow dot
-	        shipIcon=(ship.sog>0) ? DEFAULT_SHIP_ICON : "yellow_dot.png";
-	    break;
-	    case "WIG":
-	    case "ANTI_POLLUTION":
-	    case "MEDICAL":
-	    case "DREDGING":
-	    case "DIVING":
-	    case "HSC":
-	    case "SHIPS_ACCORDING_TO_RR":
-	    case "UNDEFINED":
-	    default:
-	        shipIcon=DEFAULT_SHIP_ICON;
-	    break;
-	}
-
 	var shipFeature1 = new OpenLayers.Feature.Vector(
 		// +90 degrees because icon is pointing to the left instead of top
 		origin, {
@@ -121,7 +71,7 @@ function addShip(ship) {
 			width: width,
 			height: height,
 			fontColor: 0,
-			shipIcon: shipIcon,
+			shipIcon: ship.shipTypeIcon,
 			message : popupText
 	})
 	
@@ -568,7 +518,6 @@ const TILE_PROXY_URL="127.0.0.1:8181/";
 const ZOOM_LEVELS=18;
 const SPEED_FACTOR=25;
 const DEFAULT_SHIP_SCALE_FACTOR=5;
-const DEFAULT_SHIP_ICON="basic_turquoise.png";
 const DEFAULT_OWN_LOCATION_ICON="antenna.png";
 const NUMBER_OF_SHIPS_SOURCES=2;
 const DEFAULT_MAX_AGE=(1000*60*20); // 20 minutes

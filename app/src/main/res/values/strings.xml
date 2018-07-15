@@ -31,6 +31,7 @@
 	<string name="toggle_turn_off_ais">STOP</string>
 
     <string name="sliding_drawer_logging">Show logging</string>
+	<string name="sliding_drawer_ships">Show ships</string>
 		
 	<!--- Popups -->
 	<string name="popup_found_ppm_title">Found PPM</string>
@@ -66,6 +67,8 @@
 	<string name="popup_usb_connected_runtime_title">USB device connected</string>
 	<string name="popup_usb_connected_runtime_message">You connected a USB device while the application is running. Currently this is not supported. Please restart application to start using the USB device. Application will stop now.</string>
 
+    <string name="popup_ship_info_title">Ship information</string>
+
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
     <string name="permission_externalstorage_denied_title">Denied storage permission</string>
@@ -98,7 +101,41 @@
 	
 	<string name="connect_usb_device_status_started">RTL-SDR device started.</string>
 	<string name="connect_usb_device_status_stopped">RTL-SDR device stopped.</string>
-	
+
+    <string name="indicator_ship_received_udp">Ship data received from dongle</string>
+    <string name="indicator_ship_received_socket_io">Ship data received from peer </string>
+
+    <!-- Ships table / info box -->
+
+    <string name="ships_table_col_country">Country</string>
+    <string name="ships_table_col_type">Type</string>
+    <string name="ships_table_col_mmsi">MMSI</string>
+    <string name="ships_table_col_name_callsign">Name/Callsign</string>
+    <string name="ships_table_col_destination">Destination</string>
+    <string name="ships_table_col_navigation_status">Navigation status</string>
+    <string name="ships_table_col_updated">Updated</string>
+
+    <string name="ships_table_head_dimensions">Dimensions</string>
+    <string name="ships_table_head_position">Position</string>
+
+    <string name="ships_table_country">Country: </string>
+    <string name="ships_table_type">Type: </string>
+	<string name="ships_table_mmsi">MMSI: </string>
+    <string name="ships_table_callsign">Callsign: </string>
+    <string name="ships_table_destination">Destination: </string>
+    <string name="ships_table_navigation_status">Navigation status: </string>
+    <string name="ships_table_speed">Speed: </string>
+    <string name="ships_table_heading">Heading: </string>
+    <string name="ships_table_course">Course: </string>
+    <string name="ships_table_draught">Draught: </string>
+    <string name="ships_table_latitude">Latitude: </string>
+    <string name="ships_table_longitude">Longitude: </string>
+    <string name="ships_table_dim_bow">Bow: </string>
+    <string name="ships_table_dim_port">Port: </string>
+    <string name="ships_table_dim_starboard">Starboard: </string>
+    <string name="ships_table_dim_stern">Stern: </string>
+    <string name="ships_table_updated">Updated: </string>
+
 	<!-- Preferences -->
 	<string name="pref_GeneralSettings">General</string>
 	<string name="pref_loggingVerbose">pref_loggingVerbose</string>

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    
+
 	<WebView
 	    android:id="@+id/webview"
         android:layout_width="fill_parent"
@@ -17,17 +17,46 @@
 	        android:textOff="@string/toggle_turn_on_ais"
 	        android:textOn="@string/toggle_turn_off_ais" />
 
+    <SlidingDrawer
+        android:id="@+id/slidingDrawer2"
+        android:layout_above="@id/slidingDrawer1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:content="@+id/shipsTable"
+        android:handle="@+id/handle2"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/handle2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/sliding_drawer_ships"
+            android:src="@drawable/ic_information_ships" />
+
+            <de.codecrafters.tableview.SortableTableView
+                xmlns:table="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/shipsTable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@color/ships_table_row_separator"
+                android:dividerHeight="1dip"
+                android:textColor="@color/ships_table_text"
+                table:tableView_headerColor="@color/ships_table_text"
+                table:tableView_headerElevation="10"
+                table:tableView_columnCount="7" />
+    </SlidingDrawer>
+
 	<SlidingDrawer
 		android:id="@+id/slidingDrawer1"
         android:layout_above="@id/promo"
 		android:layout_width="match_parent"
 		android:layout_height="150dp"
 		android:content="@+id/loggingScrollView"
-		android:handle="@+id/handle"
+		android:handle="@+id/handle1"
 		android:orientation="horizontal">
 
 		<ImageView
-			android:id="@+id/handle"
+			android:id="@+id/handle1"
 			android:layout_width="40dp"
 			android:layout_height="40dp"
 			android:contentDescription="@string/sliding_drawer_logging"
@@ -47,7 +76,7 @@
 		</ScrollView>
 
 	</SlidingDrawer>
-	
+
     <include android:id="@+id/promo" android:layout_alignParentBottom="true" android:layout_width="match_parent" android:layout_height="wrap_content" layout="@layout/promo" />
 
 </RelativeLayout>

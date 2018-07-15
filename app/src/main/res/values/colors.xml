@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ships_table_text">#FFFFFF</color>
+    <color name="ships_table_header">#000000</color>
+    <color name="ships_table_row_odd">#111111</color>
+    <color name="ships_table_row_even">#555555</color>
+    <color name="ships_table_row_separator">#AAAAAA</color>
+</resources>

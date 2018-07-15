@@ -8,7 +8,7 @@ android {
         applicationId "net.videgro.ships"
         minSdkVersion 16
 
-        // TODO: Update this when there is a real Android 8+ device available for development and testing.
+        // TODO: Update this only when you have a real device available for development and testing.
         targetSdkVersion 27
     }
 
@@ -40,14 +40,16 @@ ext {
 }
 
 dependencies {
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsdispatcher_version}"
+    implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
     implementation "com.google.android.gms:play-services-analytics:16.0.1"
     implementation "com.google.android.gms:play-services-ads:15.0.1"
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "org.nanohttpd:nanohttpd:2.3.1"
     implementation "io.socket:socket.io-client:1.0.0"
-    implementation "com.android.support:support-v4:${com_android_support_version}"
+    implementation "de.codecrafters.tableview:tableview:2.8.0"
+    implementation "com.android.support:appcompat-v7:${com_android_support_version}"
     implementation "com.android.support:support-v13:${com_android_support_version}"
     implementation "com.android.support:customtabs:${com_android_support_version}"
-    implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
-    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsdispatcher_version}"
+    implementation "com.android.support:support-media-compat:${com_android_support_version}"
 }

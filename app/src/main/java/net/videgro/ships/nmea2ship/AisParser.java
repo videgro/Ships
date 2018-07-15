@@ -23,8 +23,9 @@ import dk.dma.enav.model.geometry.Position;
 public class AisParser {
 	private static final String TAG="AisParser";
 	
-	private static final int AIS_CONSTANT_HEADING_UNKNOWN=511;	
-	
+	private static final int AIS_CONSTANT_HEADING_UNKNOWN=511;
+    private static final String DEFAULT_SHIP_ICON="basic_turquoise.png";
+
 	private Map<String,Ship> ships=new HashMap<>();
 	
 	public Ship parse(final AisMessage aisMessage){
@@ -120,6 +121,8 @@ public class AisParser {
             IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
         }
 
+        ship.setShipTypeIcon(determineShipIcon(ship.getShipType(),ship.getSog()));
+
 	    Log.d(TAG,ship.toString()); 
 		return ship;
 	}
@@ -130,5 +133,58 @@ public class AisParser {
 			result=str.replace("@","").trim();
 		}
 		return result;
+	}
+
+	private static String determineShipIcon(final String type,final int sog) {
+		// Strings copied from: dk.dma.ais.message.ShipTypeCargo
+		String shipIcon;
+
+		switch (type) {
+			case "CARGO":
+			case "TANKER":
+				shipIcon = "container-ship-top.png";
+				break;
+			case "PILOT":
+			case "SAR":
+			case "PORT_TENDER":
+			case "LAW_ENFORCEMENT":
+			case "TOWING":
+			case "TOWING_LONG_WIDE":
+			case "TUG":
+				shipIcon = "basic_red.png";
+				break;
+			case "MILITARY":
+				shipIcon = "basic_green.png";
+				break;
+			case "SAILING":
+				shipIcon = "sailing-yacht_1.png";
+				break;
+			case "PLEASURE":
+				shipIcon = "yacht_4.png";
+				break;
+			case "PASSENGER":
+				shipIcon = "passenger.png";
+				break;
+			case "FISHING":
+				shipIcon = "basic_blue.png";
+				break;
+			case "UNKNOWN":
+				// Speed > 0 : Default ship icon, otherwise a yellow dot
+				shipIcon = (sog > 0) ? DEFAULT_SHIP_ICON : "yellow_dot.png";
+				break;
+			case "WIG":
+			case "ANTI_POLLUTION":
+			case "MEDICAL":
+			case "DREDGING":
+			case "DIVING":
+			case "HSC":
+			case "SHIPS_ACCORDING_TO_RR":
+			case "UNDEFINED":
+			default:
+				shipIcon = DEFAULT_SHIP_ICON;
+				break;
+		}
+
+		return shipIcon;
 	}
 }

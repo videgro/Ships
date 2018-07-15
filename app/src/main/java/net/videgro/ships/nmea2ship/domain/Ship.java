@@ -8,7 +8,7 @@ public class Ship {
 	public enum Source { UDP, SOCKET_IO }
 
 	private static final String TAG="Ship";
-	private static final String UNKNOWN="UNKNOWN";
+	public static final String UNKNOWN="UNKNOWN";
 
 	private Source source;
 	private final int mmsi;
@@ -49,6 +49,7 @@ public class Ship {
 	private Date etaDate;
 	private long imo;
 	private String shipType=UNKNOWN;
+	private String shipTypeIcon=UNKNOWN;
 	private int version;
 	private int altitude;
 	private int commStateSelectorFlag;
@@ -347,7 +348,15 @@ public class Ship {
 		return countryFlag;
 	}
 
-	public boolean isValid(){
+    public String getShipTypeIcon() {
+        return shipTypeIcon;
+    }
+
+    public void setShipTypeIcon(String shipTypeIcon) {
+        this.shipTypeIcon = shipTypeIcon;
+    }
+
+    public boolean isValid(){
 		return (lat<0.0d || lat>0.0d) && (lon<0.0d || lon>0.0d);		
 	}
 	
@@ -379,4 +388,6 @@ public class Ship {
 				+ regionalReserved + ", syncState=" + syncState + ", vendorId=" + vendorId + ", audioAvailable="
 				+ audioAvailable + "]";
 	}
+
+
 }

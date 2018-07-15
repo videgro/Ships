@@ -18,6 +18,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,13 +36,14 @@ import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import android.os.SystemClock;
+
 import com.google.gson.Gson;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
+import net.videgro.ships.adapters.ShipsTableDataAdapter;
 import net.videgro.ships.fragments.internal.FragmentUtils;
 import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.ImagePopupListener;
@@ -56,13 +59,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
+import de.codecrafters.tableview.SortableTableView;
+import de.codecrafters.tableview.SortingOrder;
+import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
+import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
+
+import static java.text.DateFormat.getDateTimeInstance;
 
 @RuntimePermissions
 public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, ShipReceivedListener, ImagePopupListener {
@@ -83,7 +94,18 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
      */
     private static final String PLACEHOLDER_MMSI = "PLACEHOLDER_MMSI";
 
+    private static final int[] TABLE_HEADERS = {
+        R.string.ships_table_col_country,
+        R.string.ships_table_col_type,
+        R.string.ships_table_col_mmsi,
+        R.string.ships_table_col_name_callsign,
+        R.string.ships_table_col_destination,
+        R.string.ships_table_col_navigation_status,
+        R.string.ships_table_col_updated
+    };
+
     private WebView webView;
+    private SortableTableView<Ship> shipsTable;
     private TextView logTextView;
     private TrackService trackService;
     private NmeaClientService nmeaClientService;
@@ -101,7 +123,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         super.onCreate(savedInstanceState);
 
         final View rootView = inflater.inflate(R.layout.fragment_map, container, false);
-
+        createShipsTable(rootView.findViewById(R.id.shipsTable));
         logTextView = (TextView) rootView.findViewById(R.id.textView1);
 
         final File filesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -204,6 +226,54 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 webView.loadUrl("file:///android_asset/index.html");
                 // Flow will resume at: onPageFinished
             }
+        }
+    }
+
+    private void createShipsTable(final Object shipsTableObj){
+        if (shipsTableObj instanceof SortableTableView<?>) {
+            shipsTable = (SortableTableView<Ship>)shipsTableObj;
+            shipsTable.setHeaderAdapter(new SimpleTableHeaderAdapter(getActivity(), TABLE_HEADERS));
+            shipsTable.setDataAdapter(new ShipsTableDataAdapter(getActivity(), new ArrayList<>()));
+            //shipsTable.sort(ShipsTableDataAdapter.COL_UPDATED, SortingOrder.DESCENDING);
+
+            shipsTable.addDataClickListener((int rowIndex, Ship ship) -> {
+                if (isAdded()) {
+                    String msg = "<h3>" + ship.getName() + " " + ship.getMmsi() + "</h3>";
+                    msg += getString(R.string.ships_table_country) + ship.getCountryName() + "<br />";
+                    msg += getString(R.string.ships_table_callsign) + ship.getCallsign() + "<br />";
+                    msg += getString(R.string.ships_table_type) + ship.getShipType() + "<br />";
+                    msg += getString(R.string.ships_table_destination) + ship.getDest() + "<br />";
+                    msg += getString(R.string.ships_table_navigation_status) + ship.getNavStatus() + "<br />";
+                    msg += getString(R.string.ships_table_speed) + ship.getSog() + " knots<br />";
+                    msg += getString(R.string.ships_table_draught) + ship.getDraught() + " meters/10<br />";
+                    msg += getString(R.string.ships_table_heading) + ship.getHeading() + " degrees<br />";
+                    msg += getString(R.string.ships_table_course) + new DecimalFormat("#.#").format(ship.getCog() / 10) + " degrees<br />";
+                    msg += "<h3>"+getString(R.string.ships_table_head_position)+"</h3>";
+                    msg += " - "+getString(R.string.ships_table_latitude) + new DecimalFormat("#.###").format(ship.getLat()) + "<br />";
+                    msg += " - "+getString(R.string.ships_table_longitude) + new DecimalFormat("#.###").format(ship.getLon()) + "<br />";
+                    msg += "<h3>"+getString(R.string.ships_table_head_dimensions)+"</h3>";
+                    msg += " - "+getString(R.string.ships_table_dim_bow) + ship.getDimBow() + " meters<br />";
+                    msg += " - "+getString(R.string.ships_table_dim_port) + ship.getDimPort() + " meters<br />";
+                    msg += " - "+getString(R.string.ships_table_dim_starboard) + ship.getDimStarboard() + " meters<br />";
+                    msg += " - "+getString(R.string.ships_table_dim_stern) + ship.getDimStern() + " meters<br /><br />";
+                    msg += getString(R.string.ships_table_updated) + getDateTimeInstance().format(ship.getTimestamp()) + " (age: " + (Calendar.getInstance().getTimeInMillis() - ship.getTimestamp()) + " ms)";
+
+                    Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(),this,getString(R.string.popup_ship_info_title), msg, R.drawable.ic_information, null);
+                    // On dismiss: Will continue onImagePopupDispose
+                }
+            });
+
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_COUNTRY, (ship1, ship2) -> ship1.getCountryName().compareTo(ship2.getCountryName()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_TYPE, (ship1, ship2) -> ship1.getShipType().compareTo(ship2.getShipType()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_MMSI, (ship1, ship2) -> ship1.getMmsi() - (ship2.getMmsi()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_NAME_CALLSIGN, (ship1, ship2) -> (ship1.getName()+ship1.getCallsign()).compareTo(ship2.getName()+ship2.getCallsign()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_DESTINATION, (ship1, ship2) -> ship1.getDest().compareTo(ship2.getDest()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_NAV_STATUS, (ship1, ship2) -> ship1.getNavStatus().compareTo(ship2.getNavStatus()));
+            shipsTable.setColumnComparator(ShipsTableDataAdapter.COL_UPDATED, (ship1, ship2) -> (int) (ship1.getTimestamp() - ship2.getTimestamp()));
+
+            final int colorEvenRows = ContextCompat.getColor(getActivity(), R.color.ships_table_row_even);
+            final int colorOddRows = ContextCompat.getColor(getActivity(), R.color.ships_table_row_odd);
+            shipsTable.setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(colorEvenRows, colorOddRows));
         }
     }
 
@@ -423,6 +493,29 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 	/**** END ImagePopupListener ****/
 
+	private static int findShipInShipsTableData(final List<Ship> data,final Ship ship){
+	    int result=-1;
+	    for (int i=0;i<data.size() && result==-1; i++){
+	        if (data.get(i).getMmsi()==ship.getMmsi()){
+	            result=i;
+            }
+        }
+        return result;
+    }
+
+	private void updateShipsTable(final Ship ship){
+        final List<Ship> ships=shipsTable.getDataAdapter().getData();
+        final int index=findShipInShipsTableData(ships,ship);
+        if (index==-1){
+            // Not found, create entry
+            ships.add(ship);
+        } else {
+            // Found, update entry
+            ships.set(index,ship);
+        }
+        shipsTable.getDataAdapter().notifyDataSetChanged();
+    }
+
 	/**** START NmeaReceivedListener ****/
 	@Override
 	public void onShipReceived(final Ship ship) {
@@ -434,7 +527,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         if (getActivity()!=null){
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
-                webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
+                    updateShipsTable(ship);
+                    webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
                 }
             });
 
