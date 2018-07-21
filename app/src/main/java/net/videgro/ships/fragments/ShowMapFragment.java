@@ -32,6 +32,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
@@ -45,6 +46,7 @@ import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
 import net.videgro.ships.adapters.ShipsTableDataAdapter;
 import net.videgro.ships.fragments.internal.FragmentUtils;
+import net.videgro.ships.fragments.internal.IndicatorAnimation;
 import net.videgro.ships.fragments.internal.OpenDeviceResult;
 import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
@@ -105,6 +107,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     };
 
     private WebView webView;
+    private ImageView indicatorReceivingUdp;
+    private ImageView indicatorReceivingSocketIo;
     private SortableTableView<Ship> shipsTable;
     private TextView logTextView;
     private TrackService trackService;
@@ -123,6 +127,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         super.onCreate(savedInstanceState);
 
         final View rootView = inflater.inflate(R.layout.fragment_map, container, false);
+
+        indicatorReceivingUdp = (ImageView)rootView.findViewById(R.id.indicatorReceivingUdp);
+        indicatorReceivingSocketIo = (ImageView)rootView.findViewById(R.id.indicatorReceivingSocketIo);
+
         createShipsTable(rootView.findViewById(R.id.shipsTable));
         logTextView = (TextView) rootView.findViewById(R.id.textView1);
 
@@ -147,6 +155,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         // TODO: Not possible to stop. Will start automatically when valid PPM exists and hide (stop) button for now
         startStopButton.setVisibility(View.GONE);
+
         return rootView;
     }
 
@@ -524,10 +533,16 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
         logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship : ""));
 
-        if (getActivity()!=null){
+        if (isAdded() && getActivity()!=null){
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     updateShipsTable(ship);
+
+                    // Show indicator (animation)
+                    final ImageView indicator=(Ship.Source.SOCKET_IO.equals(ship.getSource())) ? indicatorReceivingSocketIo : indicatorReceivingUdp;
+                    indicator.setVisibility(View.VISIBLE);
+                    indicator.startAnimation(new IndicatorAnimation(false));
+
                     webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
                 }
             });

@@ -10,6 +10,28 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/promo" />
 
+    <ImageView
+        android:id="@+id/indicatorReceivingSocketIo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:visibility="invisible"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/promo"
+        android:contentDescription="@string/indicator_ship_received_socket_io"
+        android:src="@drawable/ic_green_sphere" />
+
+    <ImageView
+        android:id="@+id/indicatorReceivingUdp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:visibility="invisible"
+        android:layout_toStartOf="@+id/indicatorReceivingSocketIo"
+        android:layout_toLeftOf="@+id/indicatorReceivingSocketIo"
+        android:layout_above="@+id/promo"
+        android:contentDescription="@string/indicator_ship_received_udp"
+        android:src="@drawable/ic_green_sphere" />
+
 	<ToggleButton
 	        android:id="@+id/startStopAisButton"
 	        android:layout_width="match_parent"
