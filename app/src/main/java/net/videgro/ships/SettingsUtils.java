@@ -21,8 +21,9 @@ public final class SettingsUtils {
 
 	private static final String KEY_PREF_LOGGING_VERBOSE = "pref_loggingVerbose";
 	private static final String KEY_PREF_MAP_ZOOM_TO_EXTENT = "pref_mapZoomToExtent";
+    private static final String KEY_PREF_MAP_DISABLE_SOUND = "pref_mapDisableSound";
 	private static final String KEY_PREF_MAP_CACHE_ZOOM_LOWER_LEVELS = "pref_mapFetchLowerZoomLevels";
-	private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
+    private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST = "pref_aisMessagesDestinationHost";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT = "pref_aisMessagesDestinationPort";
 	private static final String KEY_PREF_NMEA_SHARE = "pref_nmeaShare";
@@ -32,6 +33,7 @@ public final class SettingsUtils {
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
 
     private static final boolean DEFAULT_MAP_ZOOM_TO_EXTENT = true;
+    private static final boolean DEFAULT_MAP_DISABLE_SOUND = false;
 	private static final int DEFAULT_MAP_CACHE_DISK_USAGE_MAX = 5;
 	private static final boolean DEFAULT_MAP_CACHE_ZOOM_LOWER_LEVELS = true;
 	private static final String DEFAULT_AIS_MESSAGES_DESTINATION_HOST = "127.0.0.1";
@@ -129,6 +131,11 @@ public final class SettingsUtils {
 		validateSharedPreferences();
         return sharedPreferences.getBoolean(KEY_PREF_MAP_ZOOM_TO_EXTENT, DEFAULT_MAP_ZOOM_TO_EXTENT);
 	}
+
+    public boolean parseFromPreferencesMapDisableSound() {
+        validateSharedPreferences();
+        return sharedPreferences.getBoolean(KEY_PREF_MAP_DISABLE_SOUND, DEFAULT_MAP_DISABLE_SOUND);
+    }
 
     public boolean parseFromPreferencesNmeaShare() {
         validateSharedPreferences();

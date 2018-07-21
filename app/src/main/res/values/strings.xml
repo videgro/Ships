@@ -142,9 +142,12 @@
   	<string name="pref_loggingVerbose_summary">Be verbose in displaying logging messages in the status bar.</string>
   	<string name="pref_loggingVerbose_title">Verbose logging</string>
   	<string name="pref_MapSettings_title">Map</string>
-  	<string name="pref_mapZoomToExtent">pref_mapZoomToExtent</string>
+    <string name="pref_mapZoomToExtent">pref_mapZoomToExtent</string>
   	<string name="pref_mapZoomToExtent_summary">On every update of a ship position, zoom the map so it will display all ships.</string>
   	<string name="pref_mapZoomToExtent_title">Automatic zoom</string>
+    <string name="pref_mapDisableSound">pref_mapDisableSound</string>
+    <string name="pref_mapDisableSound_summary">Don\'t make sound when a name of a ship is received the first time.</string>
+    <string name="pref_mapDisableSound_title">Disable sound</string>
   	<string name="pref_mapFetchLowerZoomLevels">pref_mapFetchLowerZoomLevels</string>  	              
   	<string name="pref_mapFetchLowerZoomLevels_summary">Pre fetch map tiles for lower zoomlevels. Will speed up zooming in and out, but will download more data and uses more disk storage.</string>
   	<string name="pref_mapFetchLowerZoomLevels_title">Fetch lower zoomlevels</string>

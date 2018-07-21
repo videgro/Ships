@@ -28,6 +28,11 @@
             android:key="@string/pref_mapZoomToExtent"
             android:summary="@string/pref_mapZoomToExtent_summary"
             android:title="@string/pref_mapZoomToExtent_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_mapDisableSound"
+            android:summary="@string/pref_mapDisableSound_summary"
+            android:title="@string/pref_mapDisableSound_title" />
         <ListPreference
             android:key="@string/pref_ownLocationIcon"
             android:title="@string/pref_ownLocationIcon_title"

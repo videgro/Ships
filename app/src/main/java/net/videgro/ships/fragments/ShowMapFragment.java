@@ -300,6 +300,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             public void onPageFinished(WebView view, String url) {
                 webView.loadUrl("javascript:setZoomToExtent(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapZoomToExtent()) + ")");
                 webView.loadUrl("javascript:setPrefetchLowerZoomLevelsTiles(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapCacheLowerZoomlevels()) + ")");
+                webView.loadUrl("javascript:setDisableSound(" + Boolean.toString(SettingsUtils.getInstance().parseFromPreferencesMapDisableSound()) + ")");
                 webView.loadUrl("javascript:setShipScaleFactor("+SettingsUtils.getInstance().parseFromPreferencesShipScaleFactor()+")");
                 webView.loadUrl("javascript:setMaxAge("+SettingsUtils.getInstance().parseFromPreferencesMaxAge()+")");
                 webView.loadUrl("javascript:setOwnLocationIcon('"+SettingsUtils.getInstance().parseFromPreferencesOwnLocationIcon()+"')");

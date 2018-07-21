@@ -110,7 +110,7 @@ function addShip(ship) {
 		dataShip.traces[new Date().getTime()] = lineFeature;
 	}
 	
-	if (ship.name!="" && typeof dataShip.shipsNamePlayed[mmsiKey(ship)] === 'undefined') {
+	if (!disableSound && ship.name!="" && typeof dataShip.shipsNamePlayed[mmsiKey(ship)] === 'undefined') {
 		// console.log("Play sound");
 
 		var gongListener = function(event) {
@@ -492,6 +492,11 @@ function setZoomToExtent(zoomToExtentIn){
     but.innerText=((zoomToExtent) ? "DISABLE" : "ENABLE")+ " - Autozoom";
 }
 
+// Called from Java
+function setDisableSound(disableSoundIn){
+	disableSound=disableSoundIn;
+}
+
 //Called from Java
 function setPrefetchLowerZoomLevelsTiles(prefetchLowerZoomLevelsTilesIn){
 	prefetchLowerZoomLevelsTiles=prefetchLowerZoomLevelsTilesIn;
@@ -539,6 +544,7 @@ for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
 
 var prefetchedTiles=new Array(); // Array of images
 var zoomToExtent=false;
+var disableSound=false;
 var prefetchLowerZoomLevelsTiles=true;
 var init = false;
 var previousMyPositionMarker=null;
