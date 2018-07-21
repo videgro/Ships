@@ -11,7 +11,11 @@
     <string name="opendevice_intent_filter_schema">opendevice</string>
 	<string name="action_help">Help</string>
     <string name="action_settings">Settings</string>
-       
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Ships</string>
+    <string name="notification_channel_description">Ships notifications.</string>
+
     <!-- Pages -->
     <string name="page_show_map">Show map</string>
 
@@ -106,7 +110,6 @@
     <string name="indicator_ship_received_socket_io">Ship data received from peer </string>
 
     <!-- Ships table / info box -->
-
     <string name="ships_table_col_country">Country</string>
     <string name="ships_table_col_type">Type</string>
     <string name="ships_table_col_mmsi">MMSI</string>
