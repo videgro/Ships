@@ -48,6 +48,7 @@ import net.videgro.ships.adapters.ShipsTableDataAdapter;
 import net.videgro.ships.fragments.internal.FragmentUtils;
 import net.videgro.ships.fragments.internal.IndicatorAnimation;
 import net.videgro.ships.fragments.internal.OpenDeviceResult;
+import net.videgro.ships.fragments.internal.ShipsTableManager;
 import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 import net.videgro.ships.listeners.ShipReceivedListener;
@@ -62,10 +63,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import de.codecrafters.tableview.SortableTableView;
-import de.codecrafters.tableview.SortingOrder;
 import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
 import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 import permissions.dispatcher.NeedsPermission;
@@ -109,7 +108,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private WebView webView;
     private ImageView indicatorReceivingUdp;
     private ImageView indicatorReceivingSocketIo;
-    private SortableTableView<Ship> shipsTable;
     private TextView logTextView;
     private TrackService trackService;
     private NmeaClientService nmeaClientService;
@@ -118,6 +116,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private Location lastReceivedOwnLocation = null;
     private ToggleButton startStopButton;
     private File fileMap;
+    private ShipsTableManager shipsTableManager;
 
     private boolean triedToReceiveFromAntenna=false;
 
@@ -240,9 +239,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private void createShipsTable(final Object shipsTableObj){
         if (shipsTableObj instanceof SortableTableView<?>) {
-            shipsTable = (SortableTableView<Ship>)shipsTableObj;
+            final ShipsTableDataAdapter shipsTableDataAdapter=new ShipsTableDataAdapter(getActivity(), new ArrayList<>());
+            final SortableTableView<Ship> shipsTable = (SortableTableView<Ship>)shipsTableObj;
             shipsTable.setHeaderAdapter(new SimpleTableHeaderAdapter(getActivity(), TABLE_HEADERS));
-            shipsTable.setDataAdapter(new ShipsTableDataAdapter(getActivity(), new ArrayList<>()));
+            shipsTable.setDataAdapter(shipsTableDataAdapter);
             //shipsTable.sort(ShipsTableDataAdapter.COL_UPDATED, SortingOrder.DESCENDING);
 
             shipsTable.addDataClickListener((int rowIndex, Ship ship) -> {
@@ -283,6 +283,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             final int colorEvenRows = ContextCompat.getColor(getActivity(), R.color.ships_table_row_even);
             final int colorOddRows = ContextCompat.getColor(getActivity(), R.color.ships_table_row_odd);
             shipsTable.setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(colorEvenRows, colorOddRows));
+
+            shipsTableManager=new ShipsTableManager(shipsTableDataAdapter,SettingsUtils.getInstance().parseFromPreferencesMaxAge());
         }
     }
 
@@ -503,28 +505,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 	/**** END ImagePopupListener ****/
 
-	private static int findShipInShipsTableData(final List<Ship> data,final Ship ship){
-	    int result=-1;
-	    for (int i=0;i<data.size() && result==-1; i++){
-	        if (data.get(i).getMmsi()==ship.getMmsi()){
-	            result=i;
-            }
-        }
-        return result;
-    }
-
-	private void updateShipsTable(final Ship ship){
-        final List<Ship> ships=shipsTable.getDataAdapter().getData();
-        final int index=findShipInShipsTableData(ships,ship);
-        if (index==-1){
-            // Not found, create entry
-            ships.add(ship);
-        } else {
-            // Found, update entry
-            ships.set(index,ship);
-        }
-        shipsTable.getDataAdapter().notifyDataSetChanged();
-    }
 
 	/**** START NmeaReceivedListener ****/
 	@Override
@@ -537,7 +517,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         if (isAdded() && getActivity()!=null){
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
-                    updateShipsTable(ship);
+                    shipsTableManager.update(ship);
 
                     // Show indicator (animation)
                     final ImageView indicator=(Ship.Source.SOCKET_IO.equals(ship.getSource())) ? indicatorReceivingSocketIo : indicatorReceivingUdp;
