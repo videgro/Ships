@@ -10,3 +10,15 @@ body {
     margin:     0;
     padding:    0;
 }
+
+/**
+ * Layer switcher
+ */
+.olControlLayerSwitcher {
+    font-size:  larger;
+}
+.olAlphaImg{
+    width:      30px;
+    height:     30px;
+    right:      10px;
+}
