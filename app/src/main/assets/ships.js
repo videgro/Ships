@@ -317,7 +317,7 @@ function createStyleMapShipSymbol(){
   			fontWeight : "bold",
   			labelAlign : "left",
   			labelXOffset : "0",
-  			labelYOffset : "-50",
+  			labelYOffset : "-20",
   			labelOutlineColor : "white",
   			labelOutlineWidth : 3,
   			strokeColor : "#00FF00",
