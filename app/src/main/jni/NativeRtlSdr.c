@@ -4,6 +4,7 @@
 #include <string.h>
 #include <jni.h>
 #include "rtl-ais/main.h"
+#include "NativeRtlSdr.h"
 
 #define MAX_CHARS_IN_CLI_SEND_STRF (512)
 

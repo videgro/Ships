@@ -10,6 +10,14 @@ android {
 
         // TODO: Update this only when you have a real device available for development and testing.
         targetSdkVersion 27
+
+
+        externalNativeBuild {
+            cmake {
+                /* Supported ABIs are [armeabi-v7a, arm64-v8a, x86, x86_64] */
+                abiFilters "armeabi-v7a", "x86"
+            }
+        }
     }
 
     buildTypes {
