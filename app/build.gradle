@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "28.0.1"
+    buildToolsVersion "28.0.2"
 
     defaultConfig {
         applicationId "net.videgro.ships"
@@ -42,7 +42,7 @@ ext {
 dependencies {
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsdispatcher_version}"
     implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
-    implementation "com.google.android.gms:play-services-analytics:16.0.1"
+    implementation "com.google.android.gms:play-services-analytics:16.0.3"
     implementation "com.google.android.gms:play-services-ads:15.0.1"
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "org.nanohttpd:nanohttpd:2.3.1"
