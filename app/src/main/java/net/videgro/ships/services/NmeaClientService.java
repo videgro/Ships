@@ -195,9 +195,11 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
         if (datagramSocketConfigRepeater != null) {
             try {
                 final DatagramSocket serverSocketRepeater = new DatagramSocket();
-                final byte[] nmeaAsByteArray=nmea.getBytes();
+                final byte[] nmeaAsByteArray = nmea.getBytes();
                 final DatagramPacket packet = new DatagramPacket(nmeaAsByteArray, nmeaAsByteArray.length, InetAddress.getByName(datagramSocketConfigRepeater.getAddress()), datagramSocketConfigRepeater.getPort());
                 serverSocketRepeater.send(packet);
+            } catch (IllegalArgumentException e){
+                Analytics.getInstance().logEvent(Analytics.CATEGORY_ERRORS,tag,e.getMessage());
             } catch (IOException e){
                 Log.e(TAG,tag,e);
             }
