@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "28.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
         applicationId "net.videgro.ships"
@@ -44,7 +44,7 @@ android {
 
 ext {
     permissionsdispatcher_version="3.3.1"
-    com_android_support_version="27.1.1" // Major version must match compile SDK version
+    com_android_support_version="28.0.0" // Major version must match compile SDK version
 }
 
 dependencies {
