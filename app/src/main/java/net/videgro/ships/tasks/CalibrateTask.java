@@ -37,6 +37,11 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 
 	private NmeaClientService nmeaClientService;
 	private ServiceConnection nmeaUdpClientServiceConnection;
+
+	/* Use this variable to solve the IllegalArgumentException: Service not registered
+	 * More info: https://stackoverflow.com/questions/22079909/android-java-lang-illegalargumentexception-service-not-registered
+	 */
+    private boolean isBound = false;
 	
 	private int ppm=PPM_UNDEFINED;
 	private boolean ppmIsValid=false;
@@ -110,7 +115,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection(this);
 		final Intent serviceIntent = new Intent(context, NmeaClientService.class);
 		context.startService(serviceIntent);
-		context.bindService(new Intent(context, NmeaClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
+        doBindService();
 	}
 	
 	private void destroyNmeaUdpClientService(){
@@ -119,9 +124,21 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	    }
 	    
 	    if (nmeaUdpClientServiceConnection!=null){
-	    	context.unbindService(nmeaUdpClientServiceConnection);
+            doUnbindService();
 	    	nmeaUdpClientServiceConnection=null;
 	    }
+	}
+
+	private void doBindService(){
+        context.bindService(new Intent(context, NmeaClientService.class), nmeaUdpClientServiceConnection, Context.BIND_AUTO_CREATE);
+		isBound = true;
+	}
+
+	private void doUnbindService() {
+        if (isBound) {
+            context.unbindService(nmeaUdpClientServiceConnection);
+            isBound = false;
+        }
 	}
 	
 	private boolean tryNextPpm(){
