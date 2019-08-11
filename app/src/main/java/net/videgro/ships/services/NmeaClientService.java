@@ -61,15 +61,15 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
     @Override
     public boolean onUnbind(Intent intent) {
         if (mmsiReceivedViaUdp.isEmpty()) {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received - UDP",Utils.retrieveAbi());
+            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"No ships received - UDP",Utils.retrieveAbi());
         } else {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships - UDP", Utils.retrieveAbi(),mmsiReceivedViaUdp.size());
+            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"Number of received ships - UDP", Utils.retrieveAbi(),mmsiReceivedViaUdp.size());
         }
 
         if (mmsiReceivedViaSocketIo.isEmpty()) {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"No ships received - SocketIO",Utils.retrieveAbi());
+            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"No ships received - SocketIO",Utils.retrieveAbi());
         } else {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS,"Number of received ships - SocketIO", Utils.retrieveAbi(),mmsiReceivedViaSocketIo.size());
+            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"Number of received ships - SocketIO", Utils.retrieveAbi(),mmsiReceivedViaSocketIo.size());
         }
         return super.onUnbind(intent);
     }
@@ -79,8 +79,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 		super.onCreate();
 		Log.d(TAG, "onCreate");
 
-		// Init some singletons which need the Context
-		Analytics.getInstance().init(this);
 		SettingsUtils.getInstance().init(this);
 	}
 
@@ -110,7 +108,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
 	public void connectSocketIo(final SocketIoConfig socketIoConfig){
 	    final String tag="connectSocketIo - ";
         if (socketIoClient==null) {
-            socketIoClient=new SocketIoClient(getResources(),this,socketIoConfig);
+            socketIoClient=new SocketIoClient(this,getResources(),this,socketIoConfig);
 
             // On connect-event, the backend will also send the cached messages
             if (socketIoClient.connect()){
@@ -138,7 +136,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
             socketIoClient=null;
         }
 
-        Analytics.getInstance().logEvent(TAG, "destroy", "");
+        Analytics.logEvent(this,TAG, "destroy", "");
     }
 
     private void createRepeaterConfig(){
@@ -163,12 +161,12 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
             datagramSocketConfigRepeater=datagramSocketConfig;
 
             final boolean hasNetworkConnection=Utils.haveNetworkConnection(this);
-            nmeaUdpClientTask = new NmeaUdpClientTask(this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),socketIoClient,getCacheDir(),hasNetworkConnection);
+            nmeaUdpClientTask = new NmeaUdpClientTask(this,this,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT),socketIoClient,getCacheDir(),hasNetworkConnection);
             nmeaUdpClientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             //  Toast.makeText(this, "Repeating NMEA messages to UDP: " + datagramSocketConfig, Toast.LENGTH_LONG).show();
             Log.d(TAG, "Repeating on UDP: " + datagramSocketConfigRepeater);
-            Analytics.getInstance().logEvent(TAG, "NMEA Repeater", "repeatHost: " + datagramSocketConfig.getAddress() + ", repeatPort: " + datagramSocketConfig.getPort());
+            Analytics.logEvent(this,TAG, "NMEA Repeater", "repeatHost: " + datagramSocketConfig.getAddress() + ", repeatPort: " + datagramSocketConfig.getPort());
         }
     }
 
@@ -199,7 +197,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener,
                 final DatagramPacket packet = new DatagramPacket(nmeaAsByteArray, nmeaAsByteArray.length, InetAddress.getByName(datagramSocketConfigRepeater.getAddress()), datagramSocketConfigRepeater.getPort());
                 serverSocketRepeater.send(packet);
             } catch (IllegalArgumentException e){
-                Analytics.getInstance().logEvent(Analytics.CATEGORY_ERRORS,tag,e.getMessage());
+                Analytics.logEvent(this,Analytics.CATEGORY_ERRORS,tag,e.getMessage());
             } catch (IOException e){
                 Log.e(TAG,tag,e);
             }

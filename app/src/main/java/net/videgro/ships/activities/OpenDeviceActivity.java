@@ -116,7 +116,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
 
         if (!MainActivity.isNativeLibraryLoaded()) {
             final String msg=getString(R.string.connect_usb_device_status_error_native_library_not_loaded);
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_ANDROID_DEVICE,msg, "");
+            Analytics.logEvent(this,Analytics.CATEGORY_ANDROID_DEVICE,msg, "");
             finish(ERROR_REASON_NATIVE_LIBRARY_NOT_LOADED,msg);
             return;
         }
@@ -211,7 +211,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         int result;
 
         if (Utils.is64bit()) {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_ANDROID_DEVICE, "64 bit device", "");
+            Analytics.logEvent(this,Analytics.CATEGORY_ANDROID_DEVICE, "64 bit device", "");
         }
 
         UsbDevice device = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -246,7 +246,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
                 result = R.string.connect_usb_device_status_pending_permission_request;
             } catch (SecurityException e) {
                 Log.e(TAG, tag, e);
-                Analytics.getInstance().logEvent(Analytics.CATEGORY_ANDROID_DEVICE, tag, e.getMessage());
+                Analytics.logEvent(this,Analytics.CATEGORY_ANDROID_DEVICE, tag, e.getMessage());
                 result = R.string.connect_usb_device_status_error_security_exception;
             }
         } else {

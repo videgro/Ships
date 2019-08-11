@@ -138,9 +138,9 @@ public final class Utils {
             // mId allows you to update the notification later on.
             int mId = 0;
             mNotificationManager.notify(mId, mBuilder.build());
-            Analytics.getInstance().logEvent(TAG, tag,message);
+            Analytics.logEvent(context,TAG, tag,message);
         } else {
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_WARNINGS, tag,"NotificationManager == NULL");
+            Analytics.logEvent(context,Analytics.CATEGORY_WARNINGS, tag,"NotificationManager == NULL");
         }
     }
 

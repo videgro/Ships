@@ -62,14 +62,14 @@ public class MainActivity extends Activity implements ImagePopupListener {
                         final UsbDevice detDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                         final String detMsg="Device DEtached";
                         Log.v(TAG,detMsg+" "+detDevice);
-                        Analytics.getInstance().logEvent(Analytics.CATEGORY_RTLSDR_DEVICE,detMsg,detDevice.toString());
+                        //Analytics.logEvent(this,Analytics.CATEGORY_RTLSDR_DEVICE,detMsg,detDevice.toString());
                         break;
                     case UsbManager.ACTION_USB_DEVICE_ATTACHED:
                     case UsbManager.ACTION_USB_ACCESSORY_ATTACHED:
                         final UsbDevice attDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                         final String attMsg="Device atached";
                         Log.v(TAG,attMsg+" "+attDevice);
-                        Analytics.getInstance().logEvent(Analytics.CATEGORY_RTLSDR_DEVICE,attMsg,attDevice.toString());
+                        //Analytics.logEvent(this,Analytics.CATEGORY_RTLSDR_DEVICE,attMsg,attDevice.toString());
                         deviceAttached();
                     break;
                     default:
@@ -90,8 +90,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		super.onCreate(savedInstanceState);
 		// FIXME: Observed exception "IllegalAccessException (@MainActivity:onCreate:16) {main}"
 
-        // Init some singletons which need the Context
-        Analytics.getInstance().init(this);
+        // Init singleton which need the Context
         SettingsUtils.getInstance().init(this);
 
 		setContentView(R.layout.activity_main);
@@ -121,7 +120,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
          */
         if (active){
             // Active already, stop this instance
-            Analytics.getInstance().logEvent(TAG, "stopApplication", "MULTIPLE_INSTANCES Stop this instance");
+            Analytics.logEvent(this,TAG, "stopApplication", "MULTIPLE_INSTANCES Stop this instance");
             finish();
         } else {
             active = true;
@@ -245,7 +244,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
                 break;
             case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
                 // TODO: Currently we can not restart RTL-SDR native code, so stop application
-                Analytics.getInstance().logEvent(TAG, "stopApplication", "IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING");
+                Analytics.logEvent(this,TAG, "stopApplication", "IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING");
                 finish();
                 break;
             case IMAGE_POPUP_ID_IGNORE:

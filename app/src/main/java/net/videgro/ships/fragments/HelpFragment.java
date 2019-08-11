@@ -35,6 +35,6 @@ public class HelpFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		Analytics.getInstance().logScreenView(TAG);
+		Analytics.logScreenView(getActivity(),TAG);
 	}
 }

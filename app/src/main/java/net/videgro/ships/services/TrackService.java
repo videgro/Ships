@@ -37,8 +37,6 @@ public class TrackService extends Service implements LocationListener {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
 
-		// Init some singletons which need the Context
-		Analytics.getInstance().init(this);
 		SettingsUtils.getInstance().init(this);
 
 		// Get the location manager
@@ -53,7 +51,7 @@ public class TrackService extends Service implements LocationListener {
 		if (locationManager != null) {
 			locationManager.removeUpdates(this);
 		}
-		Analytics.getInstance().logEvent(TAG, "destroy", "");
+		Analytics.logEvent(this,TAG, "destroy", "");
 	}
 
 	private void askLocationManagerForLocationUpdates() {
@@ -64,7 +62,7 @@ public class TrackService extends Service implements LocationListener {
 
 		final String provider = locationManager.getBestProvider(criteria, true);
 		Log.i(TAG, "Provider " + provider + " has been selected.");
-		Analytics.getInstance().logEvent(TAG, "Selected provider", provider);
+		Analytics.logEvent(this,TAG, "Selected provider", provider);
 
 		if (provider != null) {
 			try {
@@ -78,10 +76,10 @@ public class TrackService extends Service implements LocationListener {
 				 *
 				 */
 				locationManager.requestLocationUpdates(provider, 1000, 8, this);
-				Analytics.getInstance().logEvent(TAG, tag, "");
+				Analytics.logEvent(this,TAG, tag, "");
 			} catch (SecurityException e){
 				Log.e(TAG,tag+"SecurityException",e);
-				Analytics.getInstance().logEvent(TAG, tag, e.getMessage());
+				Analytics.logEvent(this,TAG, tag, e.getMessage());
 			}
 
 		} else {

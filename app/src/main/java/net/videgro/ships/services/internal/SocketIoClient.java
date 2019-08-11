@@ -1,5 +1,6 @@
 package net.videgro.ships.services.internal;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
@@ -20,6 +21,7 @@ import io.socket.emitter.Emitter;
 public class SocketIoClient {
     private static final String TAG = "SocketIoClient";
 
+    private final Context context;
     private final SocketIoListener listener;
     private final SocketIoConfig config;
     private final DigitalSignature digitalSignature;
@@ -30,7 +32,9 @@ public class SocketIoClient {
 
     private Socket socket;
 
-    public SocketIoClient(final Resources resources, final SocketIoListener listener, final SocketIoConfig config) {
+    public SocketIoClient(final Context context,final Resources resources, final SocketIoListener listener, final SocketIoConfig config) {
+        this.context=context;
+
         if (listener == null) {
             throw new IllegalArgumentException("Listener can not be null.");
         }
@@ -66,7 +70,7 @@ public class SocketIoClient {
             socket.disconnect();
             socket.off(config.getTopic(), onNewMessage);
             socket = null;
-            Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Number of messages repeated", String.valueOf(repeatedNmeaMessages));
+            Analytics.logEvent(context,Analytics.CATEGORY_NMEA_REPEAT, "Number of messages repeated", String.valueOf(repeatedNmeaMessages));
         } else {
             throw new IllegalArgumentException("Disconnect - Socket is already/still null.");
         }

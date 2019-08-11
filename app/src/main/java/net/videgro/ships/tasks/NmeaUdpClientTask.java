@@ -1,5 +1,6 @@
 package net.videgro.ships.tasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -20,12 +21,14 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
 
     private final DatagramSocketConfig datagramSocketConfigIn;
 
+    private final Context context;
     private final NmeaUdpClientListener listener;
     private final SocketIoClient socketIoClient;
     private final boolean hasDataConnection;
     private final NmeaMessagesCache nmeaMessagesCache;
 
-    public NmeaUdpClientTask(final NmeaUdpClientListener listener, final DatagramSocketConfig datagramSocketConfigIn, final SocketIoClient socketIoClient, final File cacheDirectory, final boolean hasDataConnection) {
+    public NmeaUdpClientTask(final Context context,final NmeaUdpClientListener listener, final DatagramSocketConfig datagramSocketConfigIn, final SocketIoClient socketIoClient, final File cacheDirectory, final boolean hasDataConnection) {
+        this.context = context;
         this.listener = listener;
         this.datagramSocketConfigIn = datagramSocketConfigIn;
         this.socketIoClient = socketIoClient;
@@ -40,8 +43,8 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
         DatagramSocket serverSocketIn = null;
 
         final boolean shareNmea=SettingsUtils.getInstance().parseFromPreferencesNmeaShare();
-        Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - User preferences",String.valueOf(shareNmea));
-        Analytics.getInstance().logEvent(Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - Has data connection",String.valueOf(hasDataConnection));
+        Analytics.logEvent(context,Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - User preferences",String.valueOf(shareNmea));
+        Analytics.logEvent(context,Analytics.CATEGORY_NMEA_REPEAT, "Share NMEA - Has data connection",String.valueOf(hasDataConnection));
 
         if (shareNmea && (socketIoClient != null && hasDataConnection)) {
             nmeaMessagesCache.processCachedMessages();

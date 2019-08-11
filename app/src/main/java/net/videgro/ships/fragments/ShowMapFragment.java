@@ -174,13 +174,13 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        Analytics.getInstance().logScreenView(TAG);
+        Analytics.logScreenView(getActivity(),TAG);
     }
 
     @Override
     public void onPause() {
         final String tag = "onPause";
-        Analytics.getInstance().logEvent(Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
+        Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
         super.onPause();
     }
 
@@ -199,7 +199,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         switch (requestCode) {
             case REQ_CODE_START_RTLSDR:
                 final String startRtlSdrResultAsString = FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data);
-                Analytics.getInstance().logEvent(Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
+                Analytics.logEvent(getActivity(),Analytics.CATEGORY_RTLSDR_DEVICE, OpenDeviceResult.TAG, startRtlSdrResultAsString+" - "+Utils.retrieveAbi());
                 logStatus(startRtlSdrResultAsString);
 
                 if (resultCode != Activity.RESULT_OK) {
@@ -323,7 +323,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (url != null && url.contains(PLACEHOLDER_MMSI)) {
                     final String mmsi = url.split(PLACEHOLDER_MMSI)[1];
                     final String newUrl = getString(R.string.url_mmsi_info).replace(PLACEHOLDER_MMSI, mmsi);
-                    Analytics.getInstance().logEvent(TAG, "shipinfo", mmsi);
+                    Analytics.logEvent(getActivity(),TAG, "shipinfo", mmsi);
                     view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(newUrl)));
                     result = true;
                 }
@@ -463,7 +463,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 Log.e(TAG,tag, e);
             }
         } else {
-            Analytics.getInstance().logEvent(TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
+            Analytics.logEvent(getActivity(),TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
         }
 	}
 
@@ -476,7 +476,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		shareActionProvider.setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
 			@Override
 			public boolean onShareTargetSelected(ShareActionProvider actionProvider, Intent intent) {
-            Analytics.getInstance().logEvent(TAG, "share","");
+            Analytics.logEvent(getActivity(),TAG, "share","");
             takeScreenShotWithCheck();
             return false;
 			}
