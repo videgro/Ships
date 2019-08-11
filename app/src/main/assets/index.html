@@ -8,7 +8,7 @@
  	<link rel="stylesheet" href="file:///android_asset/openstreetmap/extra.css" type="text/css" />	
   </head>
   
-<body onload="init()">
+<body>
   <audio id="audioGong">
     <source src="file:///android_asset/audio/gong.mp3" type="audio/mpeg"/>
   </audio>
@@ -22,7 +22,8 @@
       <button id="but_zoom_to_extent" onclick="javascript:setZoomToExtent(!zoomToExtent);"></button>
   </div>
 
-  <script type="text/javascript">	
+  <script type="text/javascript">
+    // Called from ShowMapFragment->setupWebView->onPageFinished
     function init() {
         createMap();
         createStyleMapShipSymbol();
