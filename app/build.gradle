@@ -10,7 +10,7 @@ android {
         multiDexEnabled true
 
         // TODO: Update this only when you have a real device available for development and testing.
-        targetSdkVersion 27
+        targetSdkVersion 28
 
         externalNativeBuild {
             cmake {
