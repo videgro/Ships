@@ -14,9 +14,8 @@ android {
 
         externalNativeBuild {
             cmake {
-                /* Supported ABIs are [armeabi-v7a, arm64-v8a, x86, x86_64] */
-                abiFilters "armeabi-v7a", "x86"
-                version "3.10.2.4988404"
+                // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
             }
         }
     }

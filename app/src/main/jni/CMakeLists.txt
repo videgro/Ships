@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.6.0)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall -DLIBUSB_DESCRIBE=\"\" -O3 -fno-builtin-printf -fno-builtin-fprintf")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -DLIBUSB_DESCRIBE=\"\" -O3 -fno-builtin-printf -fno-builtin-fprintf")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=pointer-to-int-cast -Werror=int-to-pointer-cast -Werror=shorten-64-to-32 -Werror=implicit-function-declaration")
 
 find_library(
     log-lib
