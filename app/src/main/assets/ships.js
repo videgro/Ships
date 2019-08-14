@@ -180,7 +180,7 @@ function cleanup() {
                             console.log("Removing ship: "+ship.mmsi+" ("+ship.name+"), Timestamp: "+timestamp+" (Age: "+age+")");
 
                             // Remove ship markers
-                            dataShips[i].shipVectors.removeFeatures(markers[keyMmsi]);
+                            dataShips[i].shipVectors.removeFeatures(dataShips[i].markers[keyMmsi]);
 
                             // Remove ship from administration
                             delete dataShips[i].markers[keyMmsi];
@@ -203,7 +203,7 @@ function cleanup() {
                         //console.log("Removing trace - Timestamp: "+keyTimestamp+" (Age: "+(now-keyTimestamp)+")");
 
                         // Remove trace
-                        dataShips[i].lineLayer.removeFeatures(traces[keyTimestamp]);
+                        dataShips[i].lineLayer.removeFeatures(dataShips[i].traces[keyTimestamp]);
 
                         // Remove trace from administration
                         delete dataShips[i].traces[keyTimestamp];
