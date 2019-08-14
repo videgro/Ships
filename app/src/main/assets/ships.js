@@ -391,7 +391,12 @@ function createLayerShips(layerName){
   					feature.popup.destroy();
   					feature.popup = null;
   				}
-  			}
+  			},
+            'visibilitychanged': function(evt) {
+                console.log("visibilitychanged");
+                var layer = evt.object;
+                android.showLayerVisibilityChanged(layer.name,layer.visibility);
+            }
   		},
   		styleMap : styleMapShipSymbol
   	});

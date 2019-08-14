@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -36,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.gson.Gson;
@@ -296,6 +298,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAllowFileAccessFromFileURLs(true);
+        webView.addJavascriptInterface(new JavaScriptInterface(getActivity()), "android");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -315,6 +318,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     // Ask SocketIO server to send cached messages
                     nmeaClientService.requestSocketIoServerCachedMessages();
                 }
+
             }
 
             @Override
@@ -330,6 +334,30 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 return result;
             }
         });
+    }
+
+    private class JavaScriptInterface {
+        private Context context;
+
+        JavaScriptInterface(Context context) {
+            this.context = context;
+        }
+
+        @JavascriptInterface
+        public void showLayerVisibilityChanged(String layerName,boolean visibility) {
+            // Use ase case labels literally the layer names specified in assets/index.html
+            switch (layerName){
+                case "Ships":
+                    shipsTableManager.updateEnabledSource(Ship.Source.UDP,visibility);
+                break;
+                case "Ships - Peers":
+                    shipsTableManager.updateEnabledSource(Ship.Source.SOCKET_IO,visibility);
+                break;
+                default:
+                    // Nothing to do
+                    break;
+            } // END SWITCH
+        }
     }
 
     @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
