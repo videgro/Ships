@@ -21,4 +21,28 @@ public class DatagramSocketConfig{
     public String toString() {
         return address+":"+port;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DatagramSocketConfig that = (DatagramSocketConfig) o;
+
+        if (port != that.port) {
+            return false;
+        }
+        return address.equals(that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = address.hashCode();
+        result = 31 * result + port;
+        return result;
+    }
 }

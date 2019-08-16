@@ -8,6 +8,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
+import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
 import net.videgro.ships.Utils;
 import net.videgro.ships.bridge.NativeRtlSdr;
@@ -59,7 +60,7 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 		if (powerManagerObj instanceof PowerManager) {
             final PowerManager powerManager = (PowerManager) powerManagerObj;
 
-            wakelock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
+            wakelock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, getText(R.string.app_name)+":"+TAG);
             wakelock.setReferenceCounted(false);
             if (!wakelock.isHeld()) {
                 // Limit wakelock to one day

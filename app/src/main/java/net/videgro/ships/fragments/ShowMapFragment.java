@@ -19,8 +19,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,8 +35,10 @@ import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
 
@@ -108,8 +108,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     };
 
     private WebView webView;
-    private ImageView indicatorReceivingUdp;
-    private ImageView indicatorReceivingSocketIo;
+    private ImageView indicatorReceivingInternal;
+    private ImageView indicatorReceivingExternal;
     private TextView logTextView;
     private TrackService trackService;
     private NmeaClientService nmeaClientService;
@@ -129,8 +129,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         final View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
-        indicatorReceivingUdp = (ImageView)rootView.findViewById(R.id.indicatorReceivingUdp);
-        indicatorReceivingSocketIo = (ImageView)rootView.findViewById(R.id.indicatorReceivingSocketIo);
+        indicatorReceivingInternal = (ImageView)rootView.findViewById(R.id.indicatorReceivingInternal);
+        indicatorReceivingExternal = (ImageView)rootView.findViewById(R.id.indicatorReceivingExternal);
 
         createShipsTable(rootView.findViewById(R.id.shipsTable));
         logTextView = (TextView) rootView.findViewById(R.id.textView1);
@@ -241,8 +241,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private void createShipsTable(final Object shipsTableObj){
         if (shipsTableObj instanceof SortableTableView<?>) {
-            final ShipsTableDataAdapter shipsTableDataAdapter=new ShipsTableDataAdapter(getActivity(), new ArrayList<>());
             final SortableTableView<Ship> shipsTable = (SortableTableView<Ship>)shipsTableObj;
+            final ShipsTableDataAdapter shipsTableDataAdapter=new ShipsTableDataAdapter(getActivity(), new ArrayList<>());
             shipsTable.setHeaderAdapter(new SimpleTableHeaderAdapter(getActivity(), TABLE_HEADERS));
             shipsTable.setDataAdapter(shipsTableDataAdapter);
             //shipsTable.sort(ShipsTableDataAdapter.COL_UPDATED, SortingOrder.DESCENDING);
@@ -313,12 +313,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (lastReceivedOwnLocation != null) {
                     webView.loadUrl("javascript:setCurrentPosition(" + lastReceivedOwnLocation.getLongitude() + "," + lastReceivedOwnLocation.getLatitude() + ")");
                 }
-
-                if (nmeaClientService!=null){
-                    // Ask SocketIO server to send cached messages
-                    nmeaClientService.requestSocketIoServerCachedMessages();
-                }
-
             }
 
             @Override
@@ -348,10 +342,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             // Use ase case labels literally the layer names specified in assets/index.html
             switch (layerName){
                 case "Ships":
-                    shipsTableManager.updateEnabledSource(Ship.Source.UDP,visibility);
+                    shipsTableManager.updateEnabledSource(Ship.Source.INTERNAL,visibility);
                 break;
                 case "Ships - Peers":
-                    shipsTableManager.updateEnabledSource(Ship.Source.SOCKET_IO,visibility);
+                    shipsTableManager.updateEnabledSource(Ship.Source.EXTERNAL,visibility);
                 break;
                 default:
                     // Nothing to do
@@ -549,7 +543,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     shipsTableManager.update(ship);
 
                     // Show indicator (animation)
-                    final ImageView indicator=(Ship.Source.SOCKET_IO.equals(ship.getSource())) ? indicatorReceivingSocketIo : indicatorReceivingUdp;
+                    final ImageView indicator=(Ship.Source.EXTERNAL.equals(ship.getSource())) ? indicatorReceivingExternal : indicatorReceivingInternal;
                     indicator.setVisibility(View.VISIBLE);
                     indicator.startAnimation(new IndicatorAnimation(false));
 

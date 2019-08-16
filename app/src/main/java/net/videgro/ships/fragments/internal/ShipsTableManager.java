@@ -22,8 +22,8 @@ public class ShipsTableManager {
     public ShipsTableManager(final ShipsTableDataAdapter shipsTableDataAdapter,final int maxAge){
         this.shipsTableDataAdapter=shipsTableDataAdapter;
         this.maxAgeInMs=1000*60*maxAge;
-        enabledSources.put(Ship.Source.UDP,true);
-        enabledSources.put(Ship.Source.SOCKET_IO,true);
+        enabledSources.put(Ship.Source.INTERNAL,true);
+        enabledSources.put(Ship.Source.EXTERNAL,true);
     }
 
     public void updateEnabledSource(Ship.Source source,boolean newValuie){

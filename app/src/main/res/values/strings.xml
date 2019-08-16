@@ -106,8 +106,8 @@
 	<string name="connect_usb_device_status_started">RTL-SDR device started.</string>
 	<string name="connect_usb_device_status_stopped">RTL-SDR device stopped.</string>
 
-    <string name="indicator_ship_received_udp">Ship data received from dongle</string>
-    <string name="indicator_ship_received_socket_io">Ship data received from peer </string>
+    <string name="indicator_ship_received_internal">Ship data received from dongle</string>
+    <string name="indicator_ship_received_external">Ship data received from peer</string>
 
     <!-- Ships table / info box -->
     <string name="ships_table_col_country">Country</string>
@@ -191,6 +191,7 @@
         <item>container-ship-top_1.png</item>
     </string-array>
 
+    <!-- RTL-SDR receiver -->
     <string name="pref_AisReceiverSettings_title">AIS Receiver</string>
 
 	<!--
@@ -209,32 +210,59 @@
     <string name="pref_rtlSdrPpmInvalidate_summary">Invalidate the current PPM setting.</string>
     <string name="pref_rtlSdrPpmInvalidate_title">Use other RTL-SDR device</string>
 
-    <string name="pref_nmeaShare">pref_nmeaShare</string>
-    <string name="pref_nmeaShare_summary">Share received ship locations with fellow users. Setting will apply after restart of application.</string>
-    <string name="pref_nmeaShare_title">Share received ships</string>
+    <!-- External source -->
+    <string name="pref_AisReceiveExternal_title">Receive from external source (peers)</string>
+    <string name="pref_AisReceiveExternal_summary">Let another (instance of) application send messages to this address. Generic NMEA format/UDP protocol.\nSettings will apply after restart of application.</string>
 
-    <string name="pref_ThirdPartyPlotter_title">Third party plotter</string>
+    <string name="pref_ownIp">pref_ownIp</string>
+    <string name="pref_ownIp_summary">Click to see local IP address</string>
+
+    <string name="pref_aisMessagesClientPort">pref_aisMessagesClientPort</string>
+    <string name="pref_aisMessagesClientPort_default">10111</string>
+    <string name="pref_aisMessagesClientPort_dialog_title">AIS messages client port (UDP port)</string>
+    <string name="pref_aisMessagesClientPort_summary">The UDP port this application is listeing for NMEA..</string>
+    <string name="pref_aisMessagesClientPort_title">AIS Messages client port</string>
+
+    <!-- Repeater -->
+    <string name="pref_repeater_title">Repeater</string>
+    <string name="pref_repeater_summary">Repeat received messages to third party plotter like OpenCPN, to other instance of this app or other interested party like MarineTraffic.\nYou can add up to 2 repeaters.\nWARNING: It is not in all regions allowed to repeat received messages to third parties!\nSettings will apply after restart of application.</string>
+
+    <string name="pref_repeatInternal">pref_repeatInternal</string>
+    <string name="pref_repeatInternal_summary">Repeat received ship locations from dongle (RTL-SDR).</string>
+    <string name="pref_repeatInternal_title">Repeat ships from dongle</string>
+
+    <string name="pref_repeatExternal">pref_repeatExternal</string>
+    <string name="pref_repeatExternal_summary">Repeat received AIS messages from external source.</string>
+    <string name="pref_repeatExternal_title">Repeat ships from external source</string>
+
     <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection in i.e. OpenCPN. Default: address 127.0.0.1 and port 10110.</string>
+    <string name="pref_aisMessagesDestinationHost1">pref_aisMessagesDestinationHost1</string>
+    <string name="pref_aisMessagesDestinationHost1_default">127.0.0.1</string>
+    <string name="pref_aisMessagesDestinationHost1_dialog_title">AIS messages destination host 1 (IP address)</string>
+    <string name="pref_aisMessagesDestinationHost1_summary">The IP address to send received AIS messages to. </string>
+    <string name="pref_aisMessagesDestinationHost1_title">AIS Messages destination host 1</string>
 
-    <string name="pref_aisMessagesDestinationHost">pref_aisMessagesDestinationHost</string>
-    <string name="pref_aisMessagesDestinationHost_default">127.0.0.1</string>
-    <string name="pref_aisMessagesDestinationHost_dialog_title">AIS messages destination host (IP address)</string>
-    <string name="pref_aisMessagesDestinationHost_summary">The IP address to send received AIS messages to. </string>
-    <string name="pref_aisMessagesDestinationHost_title">AIS Messages destination host</string>
+    <string name="pref_aisMessagesDestinationPort1">pref_aisMessagesDestinationPort1</string>
+    <string name="pref_aisMessagesDestinationPort1_default">10110</string>
+    <string name="pref_aisMessagesDestinationPort1_dialog_title">AIS messages destination port 1 (UDP port)</string>
+    <string name="pref_aisMessagesDestinationPort1_summary">The UDP port to send received AIS messages to. To disable this repeater, enter 0 as value.</string>
+    <string name="pref_aisMessagesDestinationPort1_title">AIS Messages destination port 1</string>
 
-    <string name="pref_aisMessagesDestinationPort">pref_aisMessagesDestinationPort</string>
-    <string name="pref_aisMessagesDestinationPort_default">10110</string>
-    <string name="pref_aisMessagesDestinationPort_dialog_title">AIS messages destination port (UDP port)</string>
-    <string name="pref_aisMessagesDestinationPort_summary">The UDP port to send received AIS messages to.</string>
-    <string name="pref_aisMessagesDestinationPort_title">AIS Messages destination port</string>
+    <string name="pref_aisMessagesDestinationHost2">pref_aisMessagesDestinationHost2</string>
+    <string name="pref_aisMessagesDestinationHost2_default">5.9.207.224</string>
+    <string name="pref_aisMessagesDestinationHost2_dialog_title">AIS messages destination host 2 (IP address)</string>
+    <string name="pref_aisMessagesDestinationHost2_summary">The IP address to send received AIS messages to. </string>
+    <string name="pref_aisMessagesDestinationHost2_title">AIS Messages destination host 2</string>
 
-	<string name="pref_nmeaRelay">pref_nmeaRelay</string>
-	<string name="pref_nmeaRelay_summary">Relay received AIS messages from fellow users to this third party plotter. Setting will apply after restart of application.</string>
-	<string name="pref_nmeaRelay_title">Relay received AIS messages from fellow users</string>
+    <string name="pref_aisMessagesDestinationPort2">pref_aisMessagesDestinationPort2</string>
+    <string name="pref_aisMessagesDestinationPort2_default">8098</string>
+    <string name="pref_aisMessagesDestinationPort2_dialog_title">AIS messages destination port 2 (UDP port)</string>
+    <string name="pref_aisMessagesDestinationPort2_summary">The UDP port to send received AIS messages to. To disable this repeater, enter 0 as value.</string>
+    <string name="pref_aisMessagesDestinationPort2_title">AIS Messages destination port 2</string>
 
+    <!-- Privacy policy / Credits -->
 	<string name="pref_PrivacyPolicyCredits_title">Privacy policy / Credits</string>
 	<string name="pref_PrivacyPolicyCredits_link">http://blog.videgro.net/contact/privacy-policy-credits-android-apps#ships</string>
-
 
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_calibrate">Calibrate</string>

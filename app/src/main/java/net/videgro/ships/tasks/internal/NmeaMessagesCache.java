@@ -2,7 +2,7 @@ package net.videgro.ships.tasks.internal;
 
 import android.util.Log;
 
-import net.videgro.ships.services.internal.SocketIoClient;
+import net.videgro.ships.Repeater;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,69 +14,43 @@ import java.io.IOException;
 public class NmeaMessagesCache {
     private static final String TAG = "NmeaMessagesCache";
 
-    private final File cacheNmeaFile;
-    private final SocketIoClient socketIoClient;
+    private final File cacheFile;
+    private final Repeater repeater;
 
-    public NmeaMessagesCache(final File cacheDirectory,final SocketIoClient socketIoClient){
-        cacheNmeaFile = new File(cacheDirectory, "data.nmea");
-        this.socketIoClient=socketIoClient;
+    public NmeaMessagesCache(final File cacheDirectory, final Repeater repeater){
+        cacheFile = new File(cacheDirectory, "nmea.cache");
+        this.repeater=repeater;
     }
 
-    public void cacheMessage(final String line) {
-        final String tag = "cacheMessage - ";
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        try {
-            fw = new FileWriter(cacheNmeaFile, true);
-            bw = new BufferedWriter(fw);
-            bw.write(line + "\n");
+    public void add(final String nmea) {
+        final String tag = "cacheDatagramPacket - ";
+        try (final FileWriter fw = new FileWriter(cacheFile, true);final BufferedWriter bw = new BufferedWriter(fw)) {
+            bw.write(nmea + "\n");
         } catch (IOException e) {
             Log.e(TAG, tag, e);
-        } finally {
-            if (bw != null) {
-                try {
-                    bw.close();
-                } catch (IOException e) {
-                    Log.e(TAG, tag + "While closing BufferedWriter.", e);
-                }
-            }
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    Log.e(TAG, tag + "While closing FileWriter.", e);
-                }
-            }
         }
     }
 
-    public boolean processCachedMessages() {
+    public int processCachedMessages() {
         final String tag = "processCachedMessages - ";
-        boolean result = true;
-        if (cacheNmeaFile.exists()) {
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(cacheNmeaFile));
+
+        int numLines=0;
+
+        if (cacheFile.exists()) {
+            try (final BufferedReader reader = new BufferedReader(new FileReader(cacheFile))) {
                 String line;
 
-                while ((line = reader.readLine()) != null && (result)) {
-                    result = socketIoClient.repeatToSocketIoServer(line);
+                while ((line = reader.readLine()) != null) {
+                    repeater.repeat(line);
+                    numLines++;
                 }
             } catch (IOException e) {
                 Log.e(TAG, tag, e);
             } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        Log.e(TAG, tag + "While closing reader.", e);
-                    }
-                }
-
                 //noinspection ResultOfMethodCallIgnored
-                cacheNmeaFile.delete();
+                cacheFile.delete();
             }
         }
-        return result;
+        return numLines;
     }
 }

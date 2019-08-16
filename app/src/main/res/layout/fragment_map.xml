@@ -11,25 +11,25 @@
         android:layout_above="@+id/promo" />
 
     <ImageView
-        android:id="@+id/indicatorReceivingSocketIo"
+        android:id="@+id/indicatorReceivingExternal"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:visibility="invisible"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_above="@+id/promo"
-        android:contentDescription="@string/indicator_ship_received_socket_io"
+        android:contentDescription="@string/indicator_ship_received_external"
         android:src="@drawable/ic_green_sphere" />
 
     <ImageView
-        android:id="@+id/indicatorReceivingUdp"
+        android:id="@+id/indicatorReceivingInternal"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:visibility="invisible"
-        android:layout_toStartOf="@+id/indicatorReceivingSocketIo"
-        android:layout_toLeftOf="@+id/indicatorReceivingSocketIo"
+        android:layout_toStartOf="@+id/indicatorReceivingExternal"
+        android:layout_toLeftOf="@+id/indicatorReceivingExternal"
         android:layout_above="@+id/promo"
-        android:contentDescription="@string/indicator_ship_received_udp"
+        android:contentDescription="@string/indicator_ship_received_internal"
         android:src="@drawable/ic_green_sphere" />
 
 	<ToggleButton

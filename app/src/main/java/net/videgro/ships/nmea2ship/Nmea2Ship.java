@@ -3,6 +3,7 @@ package net.videgro.ships.nmea2ship;
 import android.util.Log;
 
 import net.videgro.ships.nmea2ship.domain.Ship;
+import net.videgro.ships.services.NmeaClientService;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessageException;
@@ -13,8 +14,6 @@ import dk.dma.ais.sentence.SentenceException;
 public class Nmea2Ship {
 	private static final String TAG="Nmea2Ship - ";
 
-	public enum NmeaSource { UDP, SOCKET_IO }
-
 	private AisPacketParser aisPacketParser=new AisPacketParser();
 	private final AisParser aisParser=new AisParser();
 	
@@ -22,7 +21,7 @@ public class Nmea2Ship {
 		Log.i(TAG,"constructor");
 	}
 	
-	public Ship onMessage(final String line,final NmeaSource nmeaSource){
+	public Ship onMessage(final String line, final NmeaClientService.Source source){
 		Ship result=null;
 		AisPacket aisPacket=null;
 		try {
@@ -35,12 +34,12 @@ public class Nmea2Ship {
 			try {
 				result=aisParser.parse(aisPacket.getAisMessage());
 
-                switch (nmeaSource) {
-                    case UDP:
-                        result.setSource(Ship.Source.UDP);
+                switch (source) {
+                    case INTERNAL:
+                        result.setSource(Ship.Source.INTERNAL);
                         break;
-                    case SOCKET_IO:
-                        result.setSource(Ship.Source.SOCKET_IO);
+                    case EXTERNAL:
+                        result.setSource(Ship.Source.EXTERNAL);
                         break;
                     default:
                         // Nothing to do

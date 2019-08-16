@@ -5,7 +5,13 @@ import android.util.Log;
 import java.util.Date;
 
 public class Ship {
-    public enum Source { UDP, SOCKET_IO }
+
+    /**
+     * INTERNAL: Received from RTL-SDR dongle
+     * EXTERNAL: Received from external party (show as 'peers')
+     * Both via UDP
+     */
+    public enum Source { INTERNAL, EXTERNAL }
 
     private static final String TAG="Ship";
     public static final String UNKNOWN="UNKNOWN";

@@ -21,7 +21,7 @@ function addShip(ship) {
 	ship.lastUpdated=new Date().getTime(); // Add extra field
 
     // Select ships source
-    var dataShip=(ship.source=="SOCKET_IO") ? dataShips[1] : dataShips[0];
+    var dataShip=(ship.source=="EXTERNAL") ? dataShips[1] : dataShips[0];
 
 	dataShip.ships[mmsiKey(ship)]=ship;
 	
@@ -136,7 +136,7 @@ function addShip(ship) {
 function autoZoom(){
 	var ext=dataShips[0].shipVectors.getDataExtent();
 
-    // No ships received via UDP, use data from peers to zoom to extent
+    // No ships received INTERNAL, use EXTERNAL data to zoom to extent
 	if (Object.keys(dataShips[0].ships).length==0 && Object.keys(dataShips[1].ships).length>0){
 	    ext=dataShips[1].shipVectors.getDataExtent();
 	}
@@ -533,8 +533,8 @@ const NUMBER_OF_SHIPS_SOURCES=2;
 const DEFAULT_MAX_AGE=(1000*60*20); // 20 minutes
 
 // Array of dataShip
-// - at index 0: Ships received via UDP
-// - at index 1: Ships received via SocketIO
+// - at index 0: Ships received INTERNAL
+// - at index 1: Ships received EXTERNAL
 var dataShips=[];
 for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
  var dataShip=new Object();

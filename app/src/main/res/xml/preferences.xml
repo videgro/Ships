@@ -8,6 +8,7 @@
             android:summary="@string/pref_loggingVerbose_summary"
             android:title="@string/pref_loggingVerbose_title" />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_MapSettings_title" >
         <EditTextPreference
             android:defaultValue="@string/pref_shipScaleFactor_default"
@@ -53,6 +54,7 @@
             android:summary="@string/pref_mapCacheMaxDiskUsage_summary"
             android:title="@string/pref_mapCacheMaxDiskUsage_title" />  
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_AisReceiverSettings_title" >
         <!-- 
         <CheckBoxPreference
@@ -71,33 +73,70 @@
         <Preference android:title="@string/pref_rtlSdrPpmInvalidate_title"
             android:key="@string/pref_rtlSdrPpmInvalidate"
             android:summary="@string/pref_rtlSdrPpmInvalidate_summary"/>
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/pref_nmeaShare"
-            android:summary="@string/pref_nmeaShare_summary"
-            android:title="@string/pref_nmeaShare_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_ThirdPartyPlotter_title">
-        <Preference android:summary="@string/pref_ThirdPartyPlotter_summary" />
+
+    <PreferenceCategory android:title="@string/pref_AisReceiveExternal_title">
+        <Preference android:summary="@string/pref_AisReceiveExternal_summary" />
+
+        <EditTextPreference android:summary="@string/pref_ownIp_summary"
+            android:editable="false"
+            android:key="@string/pref_ownIp" />
+
+        <EditTextPreference
+            android:defaultValue="@string/pref_aisMessagesClientPort_default"
+            android:dialogTitle="@string/pref_aisMessagesClientPort_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_aisMessagesClientPort"
+            android:summary="@string/pref_aisMessagesClientPort_summary"
+            android:title="@string/pref_aisMessagesClientPort_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_repeater_title" >
+        <Preference android:summary="@string/pref_repeater_summary" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_repeatInternal"
+            android:summary="@string/pref_repeatInternal_summary"
+            android:title="@string/pref_repeatInternal_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_repeatExternal"
+            android:summary="@string/pref_repeatExternal_summary"
+            android:title="@string/pref_repeatExternal_title" />
+
+        <!-- Repeater 1 -->
         <EditTextPreference
             inputType="phone"
-            android:defaultValue="@string/pref_aisMessagesDestinationHost_default"
-            android:dialogTitle="@string/pref_aisMessagesDestinationHost_dialog_title"
-            android:key="@string/pref_aisMessagesDestinationHost"
-            android:summary="@string/pref_aisMessagesDestinationHost_summary"
-            android:title="@string/pref_aisMessagesDestinationHost_title" />
+            android:defaultValue="@string/pref_aisMessagesDestinationHost1_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationHost1_dialog_title"
+            android:key="@string/pref_aisMessagesDestinationHost1"
+            android:summary="@string/pref_aisMessagesDestinationHost1_summary"
+            android:title="@string/pref_aisMessagesDestinationHost1_title" />
         <EditTextPreference
-            android:defaultValue="@string/pref_aisMessagesDestinationPort_default"
-            android:dialogTitle="@string/pref_aisMessagesDestinationPort_dialog_title"
+            android:defaultValue="@string/pref_aisMessagesDestinationPort1_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationPort1_dialog_title"
             android:inputType="number"
-            android:key="@string/pref_aisMessagesDestinationPort"
-            android:summary="@string/pref_aisMessagesDestinationPort_summary"
-            android:title="@string/pref_aisMessagesDestinationPort_title" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/pref_nmeaRelay"
-            android:summary="@string/pref_nmeaRelay_summary"
-            android:title="@string/pref_nmeaRelay_title" />
+            android:key="@string/pref_aisMessagesDestinationPort1"
+            android:summary="@string/pref_aisMessagesDestinationPort1_summary"
+            android:title="@string/pref_aisMessagesDestinationPort1_title" />
+
+        <!-- Repeater 2 -->
+        <EditTextPreference
+            inputType="phone"
+            android:defaultValue="@string/pref_aisMessagesDestinationHost2_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationHost2_dialog_title"
+            android:key="@string/pref_aisMessagesDestinationHost2"
+            android:summary="@string/pref_aisMessagesDestinationHost2_summary"
+            android:title="@string/pref_aisMessagesDestinationHost2_title" />
+        <EditTextPreference
+            android:defaultValue="@string/pref_aisMessagesDestinationPort2_default"
+            android:dialogTitle="@string/pref_aisMessagesDestinationPort2_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_aisMessagesDestinationPort2"
+            android:summary="@string/pref_aisMessagesDestinationPort2_summary"
+            android:title="@string/pref_aisMessagesDestinationPort2_title" />
     </PreferenceCategory>
 
     <Preference android:title="@string/pref_PrivacyPolicyCredits_title" >

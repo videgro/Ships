@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
@@ -28,8 +29,13 @@ import com.google.android.gms.ads.AdView;
 import net.videgro.ships.activities.MainActivity;
 import net.videgro.ships.listeners.ImagePopupListener;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Locale;
 
 public final class Utils {
@@ -67,6 +73,24 @@ public final class Utils {
 			}
 		}
 	    return haveConnectedWifi || haveConnectedMobile;
+	}
+
+	public static String retrieveLocalIpAddress() {
+		try {
+			for (final Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+				final NetworkInterface intf = en.nextElement();
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					final InetAddress inetAddress = enumIpAddr.nextElement();
+
+					if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+						return inetAddress.getHostAddress();
+					}
+				}
+			}
+		} catch (SocketException e) {
+			Log.e("IP Address", e.toString());
+		}
+		return null;
 	}
 
 	public static void loadAd(final View view){

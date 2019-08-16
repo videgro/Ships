@@ -12,6 +12,8 @@ public final class SettingsUtils {
 	// Declare the same values as in res/xml/preferences.xml!
 	public static final String KEY_PREF_RTL_SDR_PPM = "pref_rtlSdrPpm";
 
+	public static final String KEY_PREF_OWN_IP = "pref_ownIp";
+
     private static final String KEY_PREF_INTERNAL_CALIBRATION_FAILED = "pref_internalIsCalibrationFailed";
 
     private static final String KEY_PREF_SHIP_SCALE_FACTOR = "pref_shipScaleFactor";
@@ -24,10 +26,15 @@ public final class SettingsUtils {
     private static final String KEY_PREF_MAP_DISABLE_SOUND = "pref_mapDisableSound";
 	private static final String KEY_PREF_MAP_CACHE_ZOOM_LOWER_LEVELS = "pref_mapFetchLowerZoomLevels";
     private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
-	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST = "pref_aisMessagesDestinationHost";
-	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT = "pref_aisMessagesDestinationPort";
-	private static final String KEY_PREF_NMEA_SHARE = "pref_nmeaShare";
-    private static final String KEY_PREF_NMEA_RELAY_FROM_PEERS = "pref_nmeaRelay";
+
+	private static final String KEY_PREF_AIS_MESSAGES_CLIENT_PORT = "pref_aisMessagesClientPort";
+
+	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_1 = "pref_aisMessagesDestinationHost1";
+	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1 = "pref_aisMessagesDestinationPort1";
+	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_2 = "pref_aisMessagesDestinationHost2";
+	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2 = "pref_aisMessagesDestinationPort2";
+	private static final String KEY_PREF_REPEAT_INTERNAL = "pref_repeatInternal";
+    private static final String KEY_PREF_REPEAT_EXTERNAL = "pref_repeatExternal";
 
 	private static final boolean DEFAULT_LOGGING_VERBOSE = true;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
@@ -36,8 +43,11 @@ public final class SettingsUtils {
     private static final boolean DEFAULT_MAP_DISABLE_SOUND = false;
 	private static final int DEFAULT_MAP_CACHE_DISK_USAGE_MAX = 5;
 	private static final boolean DEFAULT_MAP_CACHE_ZOOM_LOWER_LEVELS = true;
-	private static final String DEFAULT_AIS_MESSAGES_DESTINATION_HOST = "127.0.0.1";
-	private static final int DEFAULT_AIS_MESSAGES_DESTINATION_PORT = 10110;
+	private static final int DEFAULT_AIS_MESSAGES_CLIENT_PORT = 10111;
+	private static final String DEFAULT_AIS_MESSAGES_DESTINATION_HOST_1 = "127.0.0.1";
+	private static final int DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1 = 10110;
+	private static final String DEFAULT_AIS_MESSAGES_DESTINATION_HOST_2 = "5.9.207.224";
+	private static final int DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2 = 8098;
 
 //	private static final boolean DEFAULT_RTL_SDR_FORCE_ROOT = false;
 	private static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
@@ -45,8 +55,8 @@ public final class SettingsUtils {
     private static final int RTL_SDR_PPM_VALID_OFFSET = 1000;
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;
     private static final int DEFAULT_MAX_AGE = 20;
-	private static final boolean DEFAULT_NMEA_SHARE = true;
-    private static final boolean DEFAULT_NMEA_RELAY_FROM_PEERS = true;
+	private static final boolean DEFAULT_REPEAT_INTERNAL = false;
+    private static final boolean DEFAULT_REPEAT_EXTERNAL = false;
 
 	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
     private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
@@ -109,6 +119,14 @@ public final class SettingsUtils {
 		editor.commit();
 	}
 
+    public void setToPreferencesOwnIp(final String ip) {
+        validateSharedPreferences();
+
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_PREF_OWN_IP,ip);
+        editor.commit();
+    }
+
 	public boolean parseFromPreferencesInternalIsCalibrationFailed() {
 		validateSharedPreferences();
 		return sharedPreferences.getBoolean(KEY_PREF_INTERNAL_CALIBRATION_FAILED, DEFAULT_INTERNAL_CALIBRATION_FAILED);
@@ -137,14 +155,14 @@ public final class SettingsUtils {
         return sharedPreferences.getBoolean(KEY_PREF_MAP_DISABLE_SOUND, DEFAULT_MAP_DISABLE_SOUND);
     }
 
-    public boolean parseFromPreferencesNmeaShare() {
+    public boolean parseFromPreferencesRepeatInternal() {
         validateSharedPreferences();
-        return sharedPreferences.getBoolean(KEY_PREF_NMEA_SHARE, DEFAULT_NMEA_SHARE);
+        return sharedPreferences.getBoolean(KEY_PREF_REPEAT_INTERNAL, DEFAULT_REPEAT_INTERNAL);
     }
 
-	public boolean parseFromPreferencesRelayNmeaFromPeers() {
+	public boolean parseFromPreferencesRepeatExternal() {
 		validateSharedPreferences();
-		return sharedPreferences.getBoolean(KEY_PREF_NMEA_RELAY_FROM_PEERS, DEFAULT_NMEA_RELAY_FROM_PEERS);
+		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_EXTERNAL, DEFAULT_REPEAT_EXTERNAL);
 	}
 
 	public boolean parseFromPreferencesMapCacheLowerZoomlevels() {
@@ -168,20 +186,52 @@ public final class SettingsUtils {
 		return result * 1024 * 1024L;
 	}
 
-	public String parseFromPreferencesAisMessagesDestinationHost() {
+	public int parseFromPreferencesAisMessagesClientPort() {
+		final String tag="parseFromPreferencesAisMessagesClientPort - ";
 		validateSharedPreferences();
-		return sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_HOST, DEFAULT_AIS_MESSAGES_DESTINATION_HOST);
+
+		int result = DEFAULT_AIS_MESSAGES_CLIENT_PORT;
+		try {
+			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_CLIENT_PORT, Integer.toString(DEFAULT_AIS_MESSAGES_CLIENT_PORT)));
+		} catch (ClassCastException | NumberFormatException e) {
+			Log.e(TAG,tag,e);
+		}
+		return result;
 	}
 
-	public int parseFromPreferencesAisMessagesDestinationPort() {
-		final String tag="parseFromPreferencesAisMessagesDestinationPort - ";
+	public String parseFromPreferencesAisMessagesDestinationHost1() {
+		validateSharedPreferences();
+		return sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_1, DEFAULT_AIS_MESSAGES_DESTINATION_HOST_1);
+	}
+
+	public int parseFromPreferencesAisMessagesDestinationPort1() {
+		final String tag="parseFromPreferencesAisMessagesDestinationPort1 - ";
 		validateSharedPreferences();
 
-		int result = DEFAULT_AIS_MESSAGES_DESTINATION_PORT;
+		int result = DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1;
         try {
-            result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT)));
+            result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1)));
         } catch (ClassCastException | NumberFormatException e) {
             Log.e(TAG,tag,e);
+		}
+		return result;
+	}
+
+
+	public String parseFromPreferencesAisMessagesDestinationHost2() {
+		validateSharedPreferences();
+		return sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_2, DEFAULT_AIS_MESSAGES_DESTINATION_HOST_2);
+	}
+
+	public int parseFromPreferencesAisMessagesDestinationPort2() {
+		final String tag="parseFromPreferencesAisMessagesDestinationPort2 - ";
+		validateSharedPreferences();
+
+		int result = DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2;
+		try {
+			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2)));
+		} catch (ClassCastException | NumberFormatException e) {
+			Log.e(TAG,tag,e);
 		}
 		return result;
 	}

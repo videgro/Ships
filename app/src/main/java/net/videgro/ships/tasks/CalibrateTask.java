@@ -185,7 +185,7 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	
 	@Override
 	public void onShipReceived(final Ship ship) {
-		if (ship.getSource() != null && ship.getSource().equals(Ship.Source.UDP)){
+		if (ship.getSource() != null && ship.getSource().equals(Ship.Source.INTERNAL)){
 			Log.d(TAG, "onShipReceived: Ship: " + ship);
 
 			// Test ppmIsValid ->Fire only once
