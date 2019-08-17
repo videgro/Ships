@@ -245,7 +245,8 @@ public class MainActivity extends Activity implements ImagePopupListener {
             case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
                 // TODO: Currently we can not restart RTL-SDR native code, so stop application
                 Analytics.logEvent(this,TAG, "stopApplication", "IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING");
-                finish();
+                finishAffinity();
+                System.exit(0);
                 break;
             case IMAGE_POPUP_ID_IGNORE:
             default:
