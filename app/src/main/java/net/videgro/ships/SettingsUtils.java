@@ -42,7 +42,7 @@ public final class SettingsUtils {
 //	private static final boolean DEFAULT_RTL_SDR_FORCE_ROOT = false;
 	private static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
 
-    private static final int RTL_SDR_PPM_VALID_OFFSET = 150;
+    private static final int RTL_SDR_PPM_VALID_OFFSET = 1000;
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;
     private static final int DEFAULT_MAX_AGE = 20;
 	private static final boolean DEFAULT_NMEA_SHARE = true;
