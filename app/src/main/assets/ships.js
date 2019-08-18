@@ -449,7 +449,9 @@ function setCurrentPosition(lon,lat){
 	var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
 	
 	if (previousMyPositionMarker!=null){
+	    layerMyPosition.removeMarker(previousMyPositionMarker);
 		previousMyPositionMarker.destroy();
+		previousMyPositionMarker=null;
 	}
 	
 	var size = new OpenLayers.Size(50, 50);
