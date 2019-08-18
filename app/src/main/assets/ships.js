@@ -177,7 +177,7 @@ function cleanup() {
                         dataShips[i].shipVectors.redraw();
 
                         if (age>maxAge){
-                            console.log("Removing ship: "+ship.mmsi+" ("+ship.name+"), Timestamp: "+timestamp+" (Age: "+age+")");
+                            android.log("Removing ship: "+ship.mmsi+" ("+ship.name+"), Timestamp: "+timestamp+" (Age: "+age+")");
 
                             // Remove ship markers
                             dataShips[i].shipVectors.removeFeatures(dataShips[i].markers[keyMmsi]);
@@ -200,7 +200,7 @@ function cleanup() {
         for (keyTimestamp in dataShips[i].traces) {
             if (dataShips[i].traces.hasOwnProperty(keyTimestamp)){
                     if ((now-keyTimestamp)>maxAge){
-                        //console.log("Removing trace - Timestamp: "+keyTimestamp+" (Age: "+(now-keyTimestamp)+")");
+                        android.log("Removing trace - Timestamp: "+keyTimestamp+" (Age: "+(now-keyTimestamp)+")");
 
                         // Remove trace
                         dataShips[i].lineLayer.removeFeatures(dataShips[i].traces[keyTimestamp]);
@@ -214,10 +214,16 @@ function cleanup() {
 }
 
 function printStatistics(i){
-	console.log("# Ships: "+Object.keys(dataShips[i].ships).length);
-	console.log("# Markers: "+Object.keys(dataShips[i].markers).length);
-	console.log("# Ships (name said): "+Object.keys(dataShips[i].shipsNamePlayed).length);
-	console.log("# Traces: "+Object.keys(dataShips[i].traces).length);
+    android.log("-------------------------------------");
+    var dataShip=dataShips[i];
+	android.log("# Ships: "+Object.keys(dataShip.ships).length);
+	android.log("# Markers: "+Object.keys(dataShip.markers).length);
+	android.log("# Ships (name said): "+Object.keys(dataShip.shipsNamePlayed).length);
+	android.log("# Traces: "+Object.keys(dataShip.traces).length);
+	android.log("# ShipVectors: "+Object.keys(dataShip.shipVectors).length);
+	android.log("# LineLayer: "+Object.keys(dataShip.lineLayer).length);
+	android.log("# prefetchedTiles: "+prefetchedTiles.length);
+	android.log("-------------------------------------");
 }
 
 function calculateAndPrefetchTileUrl(bounds) {	
@@ -395,6 +401,7 @@ function createLayerShips(layerName){
             'visibilitychanged': function(evt) {
                 console.log("visibilitychanged");
                 var layer = evt.object;
+                // Call Android code
                 android.showLayerVisibilityChanged(layer.name,layer.visibility);
             }
   		},

@@ -352,6 +352,11 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     break;
             } // END SWITCH
         }
+
+        @JavascriptInterface
+        public void log(String message) {
+            Log.i(TAG,"FromJS: "+message);
+        }
     }
 
     @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
