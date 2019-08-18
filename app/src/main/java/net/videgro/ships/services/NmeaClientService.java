@@ -1,7 +1,10 @@
 package net.videgro.ships.services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
@@ -15,10 +18,10 @@ import net.videgro.ships.Utils;
 import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.Nmea2Ship;
 import net.videgro.ships.nmea2ship.domain.Ship;
+import net.videgro.ships.services.internal.NmeaMessagesCache;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
-import net.videgro.ships.services.internal.NmeaMessagesCache;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -62,6 +65,8 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
      */
     private Map<Source,Set<Integer>> mmsiReceived = new HashMap<>();
 
+    private ConnectivityChangeReceiver connectivityChangeReceiver=new ConnectivityChangeReceiver();
+
     @Override
 	public IBinder onBind(Intent intent) {
 		return binder;
@@ -100,6 +105,8 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         mustRepeat.put(Source.EXTERNAL,Boolean.FALSE);
 
 		SettingsUtils.getInstance().init(this);
+
+        registerReceiver(connectivityChangeReceiver,new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
 	}
 
 	@Override
@@ -111,8 +118,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         mustRepeat.put(Source.INTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatInternal());
         mustRepeat.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatExternal());
 
-        final String ip=Utils.retrieveLocalIpAddress();
-        SettingsUtils.getInstance().setToPreferencesOwnIp(ip!=null? ip : "No network connection");
+        // Log 'must repeat'-settings
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - INTERNAL",String.valueOf(mustRepeat.get(Source.INTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - EXTERNAL",String.valueOf(mustRepeat.get(Source.EXTERNAL)));
 
         createClientConfigs();
         repeater=new Repeater(this,createRepeaterConfigs());
@@ -124,21 +132,16 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
         createAndStartNmeaUdpClientTasks();
 
-        logSettings();
-
         return result;
 	}
 
-	private void logSettings(){
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - INTERNAL",String.valueOf(mustRepeat.get(Source.INTERNAL)));
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - EXTERNAL",String.valueOf(mustRepeat.get(Source.EXTERNAL)));
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - Has data connection",String.valueOf(Utils.haveNetworkConnection(this)));
-    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        unregisterReceiver(connectivityChangeReceiver);
+
         for (final Source source:SOURCES) {
             final NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
             if (task != null && !task.isCancelled()) {
@@ -157,8 +160,14 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         clients.put(Source.INTERNAL,new DatagramSocketConfig(NMEA_UDP_HOST,NMEA_UDP_PORT));
 
         // External source
+        createExternalClientConfig();
+    }
+
+    private void createExternalClientConfig(){
         final String host = Utils.retrieveLocalIpAddress();
         final int port = SettingsUtils.getInstance().parseFromPreferencesAisMessagesClientPort();
+
+        SettingsUtils.getInstance().setToPreferencesOwnIp(host!=null? host : "No network connection");
 
         final DatagramSocketConfig client=createDatagramSocketConfig(host,port);
         if (client!=null) {
@@ -235,22 +244,26 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
     }
 
     private void createAndStartNmeaUdpClientTasks() {
-        final String tag = "createAndStartNmeaUdpClientTasks - ";
-
         for (final Source source : SOURCES) {
-            NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
-            if (task == null) {
-                Log.d(TAG, tag + "Creating new NmeaUdpClient");
-                final DatagramSocketConfig config = clients.get(source);
-                if (config != null) {
-                    // Create and start tasks when there is a config available
-                    task = new NmeaUdpClientTask(this, source, config);
-                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    nmeaUdpClientTasks.put(source, task);
-                }
-            } else {
-                Log.d(TAG, tag + "Using existing NmeaUdpClient");
+            createAndStartNmeaUdpClientTask(source);
+        }
+    }
+
+    private void createAndStartNmeaUdpClientTask(final Source source) {
+        final String tag = "createAndStartNmeaUdpClientTask - ";
+
+        NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
+        if (task == null) {
+            Log.d(TAG, tag + "Creating new NmeaUdpClient");
+            final DatagramSocketConfig config = clients.get(source);
+            if (config != null) {
+                // Create and start tasks when there is a config available
+                task = new NmeaUdpClientTask(this, source, config);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                nmeaUdpClientTasks.put(source, task);
             }
+        } else {
+            Log.d(TAG, tag + "Using existing NmeaUdpClient");
         }
     }
 
@@ -268,7 +281,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
     @Override
 	public synchronized void onNmeaReceived(final String nmea,final Source source) {
-		Log.d(TAG,"onNmeaReceived - nmea: "+nmea+", source: "+source);
+		Log.v(TAG,"onNmeaReceived - nmea: "+nmea+", source: "+source);
 
 		// Convert NMEA to Ship
         final Ship ship = nmea2Ship.onMessage(nmea,source);
@@ -296,4 +309,24 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 			return NmeaClientService.this;
 		}
 	}
+
+    public class ConnectivityChangeReceiver extends BroadcastReceiver {
+
+        /**
+         * Executed on change, so either there is or is not a connection.
+         */
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+
+            if (Utils.haveNetworkConnection(context)) {
+                // Now we have a connection, try to start external NMEA client
+                createExternalClientConfig();
+                createAndStartNmeaUdpClientTask(Source.EXTERNAL);
+
+                if (cache != null) {
+                    cache.processCachedMessages();
+                }
+            }
+        }
+    }
 }

@@ -40,10 +40,10 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
 
                 // Split received data into lines (strings)
                 final String sentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
-                final String lines[] = sentence.split("\\r?\\n");
+                final String[] lines = sentence.split("\\r?\\n");
 
                 for (final String line : lines) {
-                    Log.d(TAG, tag + "NMEA received - " + line);
+                    Log.v(TAG, tag + "NMEA received - " + line);
                     listener.onNmeaReceived(line,source);
                 }
             }
