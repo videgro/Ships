@@ -22,6 +22,10 @@ public class Repeater {
         this.repeaters=repeaters;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     public void repeat(final String nmea){
         final String tag="repeatViaUdp - ";
 

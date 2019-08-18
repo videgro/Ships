@@ -18,7 +18,7 @@ import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
-import net.videgro.ships.tasks.internal.NmeaMessagesCache;
+import net.videgro.ships.services.internal.NmeaMessagesCache;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -119,8 +119,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         cache=new NmeaMessagesCache(getCacheDir(),repeater);
 
         if (Utils.haveNetworkConnection(this)){
-            final int numLines=cache.processCachedMessages();
-            Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Numer of processed cached messages",String.valueOf(numLines));
+            cache.processCachedMessages();
         }
 
         createAndStartNmeaUdpClientTasks();
