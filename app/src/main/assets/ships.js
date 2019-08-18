@@ -303,6 +303,12 @@ function createMap(){
 		maxResolution : 156543,
 		units : 'meters'
 	});
+
+	window.onresize = function(){
+        setTimeout( function() {
+            map.updateSize();
+        }, 200);
+    }
 }
 
 
@@ -569,8 +575,3 @@ var shipScaleFactor=DEFAULT_SHIP_SCALE_FACTOR;
 var ownLocationIcon=DEFAULT_OWN_LOCATION_ICON;
 var maxAge = DEFAULT_MAX_AGE;
 
-window.onresize = function(){
-    setTimeout( function() {
-        map.updateSize();
-    }, 200);
-}
