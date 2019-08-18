@@ -3,8 +3,8 @@
     package="net.videgro.ships"
     android:hardwareAccelerated="false"
     android:largeHeap="true"
-    android:versionCode="300"
-    android:versionName="3.00">
+    android:versionCode="303"
+    android:versionName="3.03">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
