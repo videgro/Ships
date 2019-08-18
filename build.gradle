@@ -3,10 +3,15 @@ buildscript {
     repositories {
         jcenter()
         google()
+
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.2'
         classpath 'com.google.gms:google-services:4.3.0' // google-services plugin
+        classpath 'io.fabric.tools:gradle:1.31.0'  // Crashlytics plugin
     }
 }
 
