@@ -204,45 +204,59 @@ void send_ppm(const int ppm_current,const int ppm_cumulative) {
 
 /********************************************************************** From Java to Native */
 
-JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis(JNIEnv * env, jclass class, jstring args, jint fd, jstring uspfs_path) {
-	(*env)->GetJavaVM(env, &jvm);
-	javaversion = (*env)->GetVersion(env);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	if (cls != NULL){
-		(*env)->DeleteGlobalRef(env, cls);
-	}
-	cls = (jclass) (*env)->NewGlobalRef(env, class);
+JNIEXPORT void JNICALL
+Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis(JNIEnv *env, jclass class, jstring args,
+                                                          jint fd, jstring uspfs_path) {
+    (*env)->GetJavaVM(env, &jvm);
+    javaversion = (*env)->GetVersion(env);
 
-	const char *nargs = (*env)->GetStringUTFChars(env, args, 0);
-	const char * n_uspfs_path = (uspfs_path == NULL ) ?	(NULL ) : ((*env)->GetStringUTFChars(env, uspfs_path, 0));
-	const int nargslength = (*env)->GetStringLength(env, args);
-	int argc = 0;
-	char ** argv;
+    if (cls != NULL) {
+        (*env)->DeleteGlobalRef(env, cls);
+    }
+    cls = (jclass) (*env)->NewGlobalRef(env, class);
 
-	allocate_args_from_string(nargs, nargslength, &argc, &argv);
-	main_android(fd, n_uspfs_path, argc, argv);
+    const char *nargs = (*env)->GetStringUTFChars(env, args, 0);
+    const char *n_uspfs_path = (uspfs_path == NULL) ? (NULL) : ((*env)->GetStringUTFChars(env,
+                                                                                          uspfs_path,
+                                                                                          0));
+    const int nargslength = (*env)->GetStringLength(env, args);
+    int argc = 0;
+    char **argv;
 
-	(*env)->ReleaseStringUTFChars(env, args, nargs);
-	if (uspfs_path != NULL){
-		(*env)->ReleaseStringUTFChars(env, uspfs_path, n_uspfs_path);
-	}
+    allocate_args_from_string(nargs, nargslength, &argc, &argv);
+    main_android(fd, n_uspfs_path, argc, argv);
 
-	int i;
-	for (i = 0; i < argc; i++){
-		free(argv[i]);
-	}
-	free(argv);
+    (*env)->ReleaseStringUTFChars(env, args, nargs);
+    if (uspfs_path != NULL) {
+        (*env)->ReleaseStringUTFChars(env, uspfs_path, n_uspfs_path);
+    }
+
+    int i;
+    for (i = 0; i < argc; i++) {
+        free(argv[i]);
+    }
+    free(argv);
 }
 
-JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_stopRtlSdrAis(JNIEnv * env, jclass class) {
-	rtl_ais_close();
+JNIEXPORT void JNICALL
+Java_net_videgro_ships_bridge_NativeRtlSdr_stopRtlSdrAis(JNIEnv *env, jclass class) {
+    rtl_ais_close();
 }
 
-JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_changeRtlSdrPpm(JNIEnv * env, jclass class,jint newPpm) {
-	rtlsdr_change_ppm(newPpm);
+JNIEXPORT void JNICALL
+Java_net_videgro_ships_bridge_NativeRtlSdr_changeRtlSdrPpm(JNIEnv *env, jclass class, jint newPpm) {
+    rtlsdr_change_ppm(newPpm);
 }
 
-JNIEXPORT jboolean JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_isRunningRtlSdrAis(JNIEnv * env, jclass class) {
-	return (jboolean) ((rtl_ais_isrunning()) ? (JNI_TRUE) : (JNI_FALSE));
+JNIEXPORT jboolean JNICALL
+Java_net_videgro_ships_bridge_NativeRtlSdr_isRunningRtlSdrAis(JNIEnv *env, jclass class) {
+    return (jboolean) ((rtl_ais_isrunning()) ? (JNI_TRUE) : (JNI_FALSE));
 }
 
+#ifdef __cplusplus
+}
+#endif
