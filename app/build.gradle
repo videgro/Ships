@@ -55,8 +55,8 @@ dependencies {
     implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
 
     /* Firebase */
-    implementation 'com.google.firebase:firebase-core:17.0.1'
-    implementation 'com.google.firebase:firebase-ads:18.1.1'
+    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.firebase:firebase-ads:18.2.0'
     implementation 'com.google.firebase:firebase-crash:16.2.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
