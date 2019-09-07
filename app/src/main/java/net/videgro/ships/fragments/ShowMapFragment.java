@@ -233,7 +233,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
             final String url="file:///android_asset/index.html";
             if (webView.getUrl()==null || webView.getUrl().isEmpty() || !webView.getUrl().equalsIgnoreCase(url)) {
-                webView.loadUrl("file:///android_asset/index.html");
+                webView.loadUrl(url);
                 // Flow will resume at: onPageFinished
             }
         }

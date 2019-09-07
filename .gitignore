@@ -71,6 +71,7 @@ project.properties
 private.xml
 analytics.xml
 .idea
+.cxx
 
 # Crypto keys
 /app/src/main/res/raw/*_key
