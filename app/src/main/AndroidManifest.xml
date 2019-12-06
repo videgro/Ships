@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -84,6 +86,16 @@
             android:name=".services.NmeaClientService"
             android:enabled="true"
             android:label="NmeaClientService" />
+
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
 
         <meta-data
             android:name="com.google.android.gms.version"

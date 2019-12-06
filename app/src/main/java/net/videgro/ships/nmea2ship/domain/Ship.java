@@ -10,8 +10,9 @@ public class Ship {
      * INTERNAL: Received from RTL-SDR dongle
      * EXTERNAL: Received from external party (show as 'peers')
      * Both via UDP
+     * CLOUD:    Received via Firebase
      */
-    public enum Source { INTERNAL, EXTERNAL }
+    public enum Source { INTERNAL, EXTERNAL, CLOUD }
 
     private static final String TAG="Ship";
     public static final String UNKNOWN="UNKNOWN";

@@ -59,6 +59,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-ads:18.3.0'
     implementation 'com.google.firebase:firebase-crash:16.2.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.google.firebase:firebase-messaging:20.0.1'
 
     /* Google Play services (Analytics) */
     implementation "com.google.android.gms:play-services-analytics:17.0.0"
@@ -73,4 +74,5 @@ dependencies {
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "org.nanohttpd:nanohttpd:2.3.1"
     implementation "de.codecrafters.tableview:tableview:2.8.0"
+    implementation 'com.android.volley:volley:1.1.1'
 }

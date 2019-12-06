@@ -7,11 +7,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import net.videgro.ships.Analytics;
+import net.videgro.ships.MyFirebaseMessagingRepeater;
 import net.videgro.ships.Repeater;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
@@ -31,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class NmeaClientService extends Service implements NmeaUdpClientListener {
 	private static final String TAG = "NmeaClientService";
@@ -39,8 +44,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
      * INTERNAL: Received from RTL-SDR dongle
      * EXTERNAL: Received from external party (show as 'peers')
      * Both via UDP
+     * CLOUD:    Received from Firebase
      */
-    public enum Source { INTERNAL, EXTERNAL }
+    public enum Source { INTERNAL, EXTERNAL, CLOUD }
 
 	public static final int NMEA_UDP_PORT=10109;
     public static final String NMEA_UDP_HOST="127.0.0.1";
@@ -50,7 +56,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
     private Nmea2Ship nmea2Ship = new Nmea2Ship();
 
-    private static final Source[] SOURCES={Source.INTERNAL,Source.EXTERNAL};
+    private static final Source[] SOURCES={Source.INTERNAL,Source.EXTERNAL,Source.CLOUD};
 
     private Map<Source,DatagramSocketConfig> clients=new HashMap<>();
     private Map<Source,Boolean> mustRepeat=new HashMap<>();
@@ -74,18 +80,13 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
     @Override
     public boolean onUnbind(Intent intent) {
-        final Set<Integer> mmsiReceivedInternal=mmsiReceived.get(Source.INTERNAL);
-        if (mmsiReceivedInternal.isEmpty()) {
-            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"No ships received - INTERNAL",Utils.retrieveAbi());
-        } else {
-            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"Number of received ships - INTERNAL", Utils.retrieveAbi(),mmsiReceivedInternal.size());
-        }
-
-        final Set<Integer> mmsiReceivedExternal=mmsiReceived.get(Source.EXTERNAL);
-        if (mmsiReceivedExternal.isEmpty()) {
-            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"No ships received - EXTERNAL",Utils.retrieveAbi());
-        } else {
-            Analytics.logEvent(this,Analytics.CATEGORY_STATISTICS,"Number of received ships - EXTERNAL", Utils.retrieveAbi(),mmsiReceivedExternal.size());
+        for (final Source src:SOURCES) {
+            final Set<Integer> mmsiReceivedSrc = mmsiReceived.get(src);
+            if (mmsiReceivedSrc.isEmpty()) {
+                Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "No ships received - "+src.name(), Utils.retrieveAbi());
+            } else {
+                Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "Number of received ships - "+src.name(), Utils.retrieveAbi(), mmsiReceivedSrc.size());
+            }
         }
         return super.onUnbind(intent);
     }
@@ -97,16 +98,19 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
         mmsiReceived.put(Source.INTERNAL,new HashSet<>());
         mmsiReceived.put(Source.EXTERNAL,new HashSet<>());
+        mmsiReceived.put(Source.CLOUD,new HashSet<>());
 
         nmeaUdpClientTasks.put(Source.INTERNAL,null);
         nmeaUdpClientTasks.put(Source.EXTERNAL,null);
 
         mustRepeat.put(Source.INTERNAL,Boolean.FALSE);
         mustRepeat.put(Source.EXTERNAL,Boolean.FALSE);
+        mustRepeat.put(Source.CLOUD,Boolean.FALSE);
 
 		SettingsUtils.getInstance().init(this);
 
         registerReceiver(connectivityChangeReceiver,new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver((messageReceiver),new IntentFilter(MyFirebaseMessagingService.LOCAL_BROADCAST_TOPIC));
 	}
 
 	@Override
@@ -124,6 +128,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
         createClientConfigs();
         repeater=new Repeater(this,createRepeaterConfigs());
+
+        repeater.startFirebaseMessaging();
+
         cache=new NmeaMessagesCache(getCacheDir(),repeater);
 
         if (Utils.haveNetworkConnection(this)){
@@ -135,12 +142,15 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         return result;
 	}
 
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        if (repeater!=null) {
+            repeater.stopFirebaseMessaging();
+        }
         unregisterReceiver(connectivityChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
 
         for (final Source source:SOURCES) {
             final NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
@@ -291,9 +301,13 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
                 cache.add(nmea);
             }
 
-            mmsiReceived.get(source).add(ship.getMmsi());
-            if (mustRepeat.get(source)){
-                repeater.repeat(nmea);
+            if (mmsiReceived.get(source)!=null) {
+                mmsiReceived.get(source).add(ship.getMmsi());
+            }
+            if (mustRepeat.get(source)!=null && mustRepeat.get(source)){
+                if (repeater!=null) {
+                    repeater.repeat(nmea);
+                }
             }
 
             synchronized (listeners) {
@@ -309,6 +323,27 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 			return NmeaClientService.this;
 		}
 	}
+
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                final Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    final String nmeasRaw = bundle.getString(MyFirebaseMessagingService.LOCAL_BROADCAST_DATA);
+                    if (nmeasRaw != null) {
+                        final String[] nmeas = nmeasRaw.split(Pattern.quote(MyFirebaseMessagingRepeater.NMEA_SEP));
+                        for (final String nmea : nmeas) {
+                            if (!nmea.isEmpty()) {
+                                onNmeaReceived(MyFirebaseMessagingRepeater.PREFIX_AIVDM + nmea, Source.CLOUD);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     public class ConnectivityChangeReceiver extends BroadcastReceiver {
 

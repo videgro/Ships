@@ -41,6 +41,9 @@ public class Nmea2Ship {
                     case EXTERNAL:
                         result.setSource(Ship.Source.EXTERNAL);
                         break;
+					case CLOUD:
+						result.setSource(Ship.Source.CLOUD);
+						break;
                     default:
                         // Nothing to do
                         break;

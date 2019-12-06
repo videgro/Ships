@@ -16,10 +16,12 @@ public class Repeater {
 
     private final Context context;
     private final List<DatagramSocketConfig> repeaters;
+    private final MyFirebaseMessagingRepeater myFirebaseMessagingRepeater;
 
     public Repeater(Context context,List<DatagramSocketConfig> repeaters){
         this.context=context;
         this.repeaters=repeaters;
+        myFirebaseMessagingRepeater=new MyFirebaseMessagingRepeater(context);
     }
 
     public Context getContext() {
@@ -43,5 +45,16 @@ public class Repeater {
                 }
             }
         }
+
+        myFirebaseMessagingRepeater.broadcast(nmea);
     }
+
+    public void stopFirebaseMessaging(){
+        myFirebaseMessagingRepeater.stop();
+    }
+
+    public void startFirebaseMessaging(){
+        myFirebaseMessagingRepeater.start();
+    }
+
 }
