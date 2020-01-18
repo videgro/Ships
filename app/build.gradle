@@ -55,11 +55,11 @@ dependencies {
     implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
 
     /* Firebase */
-    implementation 'com.google.firebase:firebase-core:17.2.1'
+    implementation 'com.google.firebase:firebase-core:17.2.2'
     implementation 'com.google.firebase:firebase-ads:18.3.0'
     implementation 'com.google.firebase:firebase-crash:16.2.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation 'com.google.firebase:firebase-messaging:20.0.1'
+    implementation 'com.google.firebase:firebase-messaging:20.1.0'
 
     /* Google Play services (Analytics) */
     implementation "com.google.android.gms:play-services-analytics:17.0.0"
@@ -67,7 +67,7 @@ dependencies {
     /* Android support libs */
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'androidx.browser:browser:1.0.0'
+    implementation 'androidx.browser:browser:1.2.0'
     implementation 'androidx.media:media:1.1.0'
 
     /* Misc. */
