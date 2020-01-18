@@ -49,7 +49,7 @@ public class ProcessCachedMessagesTask extends AsyncTask<Void, Void, Integer> {
 	public void onPostExecute(Integer result) {
 		if (result != null) {
 			Log.d(TAG, "Result: " + result);
-			Analytics.logEvent(repeater.getContext(),Analytics.CATEGORY_NMEA_REPEAT, "Numer of processed cached messages",String.valueOf(result));
+			Analytics.logEvent(repeater.getContext(),Analytics.CATEGORY_NMEA_REPEAT, "Numer_of_processed_cached_messages",String.valueOf(result));
 		}
 	}
 }

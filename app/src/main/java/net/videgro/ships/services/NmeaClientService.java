@@ -123,8 +123,8 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         mustRepeat.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatExternal());
 
         // Log 'must repeat'-settings
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - INTERNAL",String.valueOf(mustRepeat.get(Source.INTERNAL)));
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - User preferences - EXTERNAL",String.valueOf(mustRepeat.get(Source.EXTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_INTERNAL",String.valueOf(mustRepeat.get(Source.INTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_EXTERNAL",String.valueOf(mustRepeat.get(Source.EXTERNAL)));
 
         createClientConfigs();
         repeater=new Repeater(this,createRepeaterConfigs());
@@ -193,7 +193,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         final DatagramSocketConfig config1=createRepeaterConfig(host1,port1);
         if (config1!=null){
             result.add(config1);
-            Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - Config 1",String.valueOf(config1));
+            Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_Config1",String.valueOf(config1));
         }
 
         final String host2 = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationHost2();
@@ -201,7 +201,7 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         final DatagramSocketConfig config2=createRepeaterConfig(host2,port2);
         if (config2!=null){
             result.add(config2);
-            Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "Repeat NMEA - Config 2",String.valueOf(config2));
+            Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_Config2",String.valueOf(config2));
         }
 
         return result;
