@@ -7,15 +7,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef net_videgro_ships_bridge_NativeRtlSdr_WAIT_TIME
-#define net_videgro_ships_bridge_NativeRtlSdr_WAIT_TIME 5000L
 /*
  * Class:     net_videgro_ships_bridge_NativeRtlSdr
  * Method:    startRtlSdrAis
  * Signature: (Ljava/lang/String;ILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis
-  (JNIEnv *, jclass, jstring, jint, jstring);
+  (JNIEnv *, jobject, jstring, jint, jstring);
 
 /*
  * Class:     net_videgro_ships_bridge_NativeRtlSdr
@@ -23,15 +21,15 @@ JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_stopRtlSdrAis
-  (JNIEnv *, jclass);
+  (JNIEnv *, jobject);
 
 /*
  * Class:     net_videgro_ships_bridge_NativeRtlSdr
  * Method:    changeRtlSdrPpm
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_changeRtlSdrPpm
-  (JNIEnv *, jclass,jint);
-
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     net_videgro_ships_bridge_NativeRtlSdr
@@ -39,19 +37,8 @@ JNIEXPORT void JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_changeRtlSdrPp
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_net_videgro_ships_bridge_NativeRtlSdr_isRunningRtlSdrAis
-  (JNIEnv *, jclass);
+  (JNIEnv *, jobject);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
-/* Header for class net_videgro_ships_bridge_NativeRtlSdr_NativeRtlSdrListener */
-
-#ifndef _Included_net_videgro_ships_bridge_NativeRtlSdr_NativeRtlSdrListener
-#define _Included_net_videgro_ships_bridge_NativeRtlSdr_NativeRtlSdrListener
-#ifdef __cplusplus
-extern "C" {
-#endif
 #ifdef __cplusplus
 }
 #endif

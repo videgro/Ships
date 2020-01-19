@@ -1,9 +1,8 @@
 package net.videgro.ships.bridge;
 
 import android.util.Log;
-
+import androidx.annotation.Keep;
 import net.videgro.ships.StartRtlSdrRequest;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,32 +25,35 @@ public class NativeRtlSdr {
     /*
      * Calls TO native code
      */
-    private static native void startRtlSdrAis(final String args, final int fd, final String uspfsPath);
+    public native void startRtlSdrAis(final String args, final int fd, final String uspfsPath);
 
-    private static native void stopRtlSdrAis();
+    public native void stopRtlSdrAis();
 
-    private static native void changeRtlSdrPpm(final int newPpm);
+    public native void changeRtlSdrPpm(final int newPpm);
 
-    private static native boolean isRunningRtlSdrAis();
+    public native boolean isRunningRtlSdrAis();
 
     /*
      * Calls FROM native code
      */
-    private static void onMessage(final String data) {
+    @Keep
+    public void onMessage(final String data) {
         Log.d(TAG, "onMessage - " + data);
         for (final NativeRtlSdrListener listener : LISTENERS) {
             listener.onMessage(data);
         }
     }
 
-    private static void onError(final String data) {
+    @Keep
+    public void onError(final String data) {
         Log.w(TAG, "onError - " + data);
         for (final NativeRtlSdrListener listener : LISTENERS) {
             listener.onError(data);
         }
     }
 
-    private static void onException(final int exitCode) {
+    @Keep
+    public void onException(final int exitCode) {
         Log.i(TAG, "onException - exitCode: " + exitCode);
 
         for (final NativeRtlSdrListener listener : LISTENERS) {
@@ -59,7 +61,8 @@ public class NativeRtlSdr {
         }
     }
 
-    private static void onReady() {
+    @Keep
+    public void onReady() {
         Log.d(TAG, "onReady");
 
         for (final NativeRtlSdrListener listener : LISTENERS) {
@@ -67,7 +70,8 @@ public class NativeRtlSdr {
         }
     }
 
-    private static void onPpm(final int ppmCurrent, final int ppmCumulative) {
+    @Keep
+    public void onPpm(final int ppmCurrent, final int ppmCumulative) {
         Log.d(TAG, "onPpm - current: " + ppmCurrent + ", cumulative: " + ppmCumulative);
         for (final NativeRtlSdrListener listener : LISTENERS) {
             listener.onPpm(ppmCurrent, ppmCumulative);
