@@ -16,11 +16,13 @@ public class Repeater {
 
     private final Context context;
     private final List<DatagramSocketConfig> repeaters;
+    private final boolean mustRepeatToCloud;
     private final MyFirebaseMessagingRepeater myFirebaseMessagingRepeater;
 
-    public Repeater(Context context,List<DatagramSocketConfig> repeaters){
+    public Repeater(final Context context,final List<DatagramSocketConfig> repeaters,final boolean mustRepeatToCloud){
         this.context=context;
         this.repeaters=repeaters;
+        this.mustRepeatToCloud=mustRepeatToCloud;
         myFirebaseMessagingRepeater=new MyFirebaseMessagingRepeater(context);
     }
 
@@ -28,9 +30,14 @@ public class Repeater {
         return context;
     }
 
+    /**
+     * Repeat NMEA to other host(s) and cloud
+     * @param nmea The NMEA sentence to repeat
+     */
     public void repeat(final String nmea){
-        final String tag="repeatViaUdp - ";
+        final String tag="repeat - ";
 
+        // Repeat to other host(s) via UDP
         for (final DatagramSocketConfig repeater : repeaters) {
             if (repeater != null) {
                 try {
@@ -46,7 +53,11 @@ public class Repeater {
             }
         }
 
-        myFirebaseMessagingRepeater.broadcast(nmea);
+        // Repeat to cloud (Firebase)
+        // Will be send asynchronous in batches
+        if (mustRepeatToCloud) {
+            myFirebaseMessagingRepeater.broadcast(nmea);
+        }
     }
 
     public void stopFirebaseMessaging(){
@@ -56,5 +67,4 @@ public class Repeater {
     public void startFirebaseMessaging(){
         myFirebaseMessagingRepeater.start();
     }
-
 }

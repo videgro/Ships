@@ -59,9 +59,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
     private static final Source[] SOURCES={Source.INTERNAL,Source.EXTERNAL,Source.CLOUD};
 
     private Map<Source,DatagramSocketConfig> clients=new HashMap<>();
-    private Map<Source,Boolean> mustRepeat=new HashMap<>();
+    private Map<Source,Boolean> mustRepeatFrom=new HashMap<>();
 
-    private Repeater repeater;
+    private Repeater repeater=null;
     private NmeaMessagesCache cache;
 
 	private Map<Source,NmeaUdpClientTask> nmeaUdpClientTasks=new HashMap<>();
@@ -82,10 +82,12 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
     public boolean onUnbind(Intent intent) {
         for (final Source src:SOURCES) {
             final Set<Integer> mmsiReceivedSrc = mmsiReceived.get(src);
-            if (mmsiReceivedSrc.isEmpty()) {
-                Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "No ships received - "+src.name(), Utils.retrieveAbi());
-            } else {
-                Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "Number of received ships - "+src.name(), Utils.retrieveAbi(), mmsiReceivedSrc.size());
+            if (mmsiReceivedSrc != null) {
+                if (mmsiReceivedSrc.isEmpty()) {
+                    Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "No ships received - " + src.name(), Utils.retrieveAbi());
+                } else {
+                    Analytics.logEvent(this, Analytics.CATEGORY_STATISTICS, "Number of received ships - " + src.name(), Utils.retrieveAbi(), mmsiReceivedSrc.size());
+                }
             }
         }
         return super.onUnbind(intent);
@@ -103,9 +105,11 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         nmeaUdpClientTasks.put(Source.INTERNAL,null);
         nmeaUdpClientTasks.put(Source.EXTERNAL,null);
 
-        mustRepeat.put(Source.INTERNAL,Boolean.FALSE);
-        mustRepeat.put(Source.EXTERNAL,Boolean.FALSE);
-        mustRepeat.put(Source.CLOUD,Boolean.FALSE);
+        mustRepeatFrom.put(Source.INTERNAL,Boolean.FALSE);
+        mustRepeatFrom.put(Source.EXTERNAL,Boolean.FALSE);
+
+        // Never repeat messages which has CLOUD as source, to prevent loop
+        mustRepeatFrom.put(Source.CLOUD,Boolean.FALSE);
 
 		SettingsUtils.getInstance().init(this);
 
@@ -118,16 +122,35 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 		final String tag="onStartCommand - ";
 		int result = super.onStartCommand(intent, flags, startId);
 		Log.d(TAG,tag);
+        init();
+        return result;
+	}
 
-        mustRepeat.put(Source.INTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatInternal());
-        mustRepeat.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatExternal());
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+        deinit();
+        unregisterReceiver(connectivityChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        Analytics.logEvent(this,TAG, "destroy", "");
+    }
+
+    public void init(){
+        deinit();
+
+        mustRepeatFrom.put(Source.INTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatInternal());
+        mustRepeatFrom.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatExternal());
+
+        final boolean mustRepeatToCloud=SettingsUtils.getInstance().parseFromPreferencesRepeatToCloud();
 
         // Log 'must repeat'-settings
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_INTERNAL",String.valueOf(mustRepeat.get(Source.INTERNAL)));
-        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_EXTERNAL",String.valueOf(mustRepeat.get(Source.EXTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_INTERNAL",String.valueOf(mustRepeatFrom.get(Source.INTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_EXTERNAL",String.valueOf(mustRepeatFrom.get(Source.EXTERNAL)));
+        Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_UserPreferences_TO_CLOUD",String.valueOf(mustRepeatToCloud));
 
         createClientConfigs();
-        repeater=new Repeater(this,createRepeaterConfigs());
+        repeater=new Repeater(this,createRepeaterConfigs(),mustRepeatToCloud);
 
         repeater.startFirebaseMessaging();
 
@@ -138,19 +161,13 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         }
 
         createAndStartNmeaUdpClientTasks();
+    }
 
-        return result;
-	}
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
+    private void deinit(){
         if (repeater!=null) {
             repeater.stopFirebaseMessaging();
         }
-        unregisterReceiver(connectivityChangeReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        repeater=null;
 
         for (final Source source:SOURCES) {
             final NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
@@ -159,8 +176,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
                 nmeaUdpClientTasks.put(source,null);
             }
         }
-
-        Analytics.logEvent(this,TAG, "destroy", "");
     }
 
     private void createClientConfigs() {
@@ -301,10 +316,13 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
                 cache.add(nmea);
             }
 
-            if (mmsiReceived.get(source)!=null) {
-                mmsiReceived.get(source).add(ship.getMmsi());
+            final Set<Integer> mmsiReceivedSrc=mmsiReceived.get(source);
+            if (mmsiReceivedSrc!=null) {
+                mmsiReceivedSrc.add(ship.getMmsi());
             }
-            if (mustRepeat.get(source)!=null && mustRepeat.get(source)){
+
+            final Boolean mustRepeatFromSrc=mustRepeatFrom.get(source);
+            if (mustRepeatFromSrc!=null && mustRepeatFromSrc){
                 if (repeater!=null) {
                     repeater.repeat(nmea);
                 }
@@ -323,7 +341,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 			return NmeaClientService.this;
 		}
 	}
-
 
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override

@@ -106,6 +106,12 @@
             android:summary="@string/pref_repeatExternal_summary"
             android:title="@string/pref_repeatExternal_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_repeatToCloud"
+            android:summary="@string/pref_repeatToCloud_summary"
+            android:title="@string/pref_repeatToCloud_title" />
+
         <!-- Repeater 1 -->
         <EditTextPreference
             inputType="phone"

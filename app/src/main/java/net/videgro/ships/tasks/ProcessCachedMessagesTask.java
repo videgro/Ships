@@ -12,7 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class ProcessCachedMessagesTask extends AsyncTask<Void, Void, Integer> {
-	private static final String TAG = "ProcessCachedMessagesTask";
+	private static final String TAG = "ProcessCachedMsgTask";
 
 	private final File cacheFile;
 	private final Repeater repeater;

@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Objects;
 
 import de.codecrafters.tableview.SortableTableView;
 import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
@@ -87,6 +88,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private static final int IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR = 1102;
     private static final int IMAGE_POPUP_ID_IGNORE = 1109;
+    private static final int IMAGE_POPUP_ID_AIS_RUNNING = 1110;
 
     private static final int REQ_CODE_START_RTLSDR = 1201;
     private static final int REQ_CODE_STOP_RTLSDR = 1202;
@@ -107,6 +109,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         R.string.ships_table_col_updated
     };
 
+    private final DialogRepeatToCloudClickListener dialogRepeatToCloudClickListener=new DialogRepeatToCloudClickListener();
+
     private WebView webView;
     private ImageView indicatorReceivingInternal;
     private ImageView indicatorReceivingExternal;
@@ -117,7 +121,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private ServiceConnection nmeaClientServiceConnection;
     private Location lastReceivedOwnLocation = null;
     private ToggleButton startStopButton;
-    private File fileMap;
+    private File fileMap=null;
     private ShipsTableManager shipsTableManager;
 
     private boolean triedToReceiveFromAntenna=false;
@@ -135,8 +139,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         createShipsTable(rootView.findViewById(R.id.shipsTable));
         logTextView = (TextView) rootView.findViewById(R.id.textView1);
 
-        final File filesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        fileMap = new File(filesDirectory, FILE_MAP);
+        if (isAdded()) {
+            final File filesDirectory = Objects.requireNonNull(getActivity()).getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            fileMap = new File(filesDirectory, FILE_MAP);
+        }
 
         Utils.loadAd(rootView);
         setHasOptionsMenu(true);
@@ -209,6 +215,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     Utils.showPopup(IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR, getActivity(), this, getString(R.string.popup_start_device_failed_title), getString(R.string.popup_start_device_failed_message) + " " + startRtlSdrResultAsString, R.drawable.thumbs_down_circle, null);
                 } else {
                     FragmentUtils.rtlSdrRunning = true;
+                    final String msg = getString(R.string.popup_receiving_ais_message);
+                    logStatus(msg);
+                    Utils.showPopup(IMAGE_POPUP_ID_AIS_RUNNING, getActivity(), this, getString(R.string.popup_receiving_ais_title), msg, R.drawable.ic_information,null);
+                    // On dismiss: Will continue onImagePopupDispose
                 }
                 break;
             case REQ_CODE_STOP_RTLSDR:
@@ -236,6 +246,26 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 webView.loadUrl(url);
                 // Flow will resume at: onPageFinished
             }
+        }
+    }
+
+    private void inviteToShareToCloud(){
+        // Check is sharing to cloud already
+        final boolean repeatToCloud=SettingsUtils.getInstance().parseFromPreferencesRepeatToCloud();
+        final boolean repeatFromInternal=SettingsUtils.getInstance().parseFromPreferencesRepeatInternal();
+
+        if (!repeatToCloud || !repeatFromInternal) {
+            new AlertDialog.Builder(getActivity()).setMessage(getString(R.string.popup_share_to_cloud_message))
+                    .setPositiveButton(getString(R.string.popup_share_to_cloud_yes), dialogRepeatToCloudClickListener)
+                    .setNegativeButton(getString(R.string.popup_share_to_cloud_no), dialogRepeatToCloudClickListener)
+                    .setTitle(getString(R.string.popup_share_to_cloud_title))
+                    .show();
+        }
+    }
+
+    private void showMessageRepeatToCloud(){
+        if (isAdded()) {
+            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_share_to_cloud_title), getString(R.string.popup_share_to_cloud_message_result), R.drawable.ic_information, Utils.IMAGE_POPUP_AUTOMATIC_DISMISS);
         }
     }
 
@@ -430,7 +460,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         } else {
             final String msg = getString(R.string.popup_receiving_ais_message);
             logStatus(msg);
-            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.popup_receiving_ais_title), msg, R.drawable.ic_information, Utils.IMAGE_POPUP_AUTOMATIC_DISMISS);
+            Utils.showPopup(IMAGE_POPUP_ID_AIS_RUNNING, getActivity(), this, getString(R.string.popup_receiving_ais_title), msg, R.drawable.ic_information,null);
             // On dismiss: Will continue onImagePopupDispose
         }
     }
@@ -448,15 +478,18 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private Intent getShareIntent() {
-        final ArrayList<Uri> uris = new ArrayList<>();
-        uris.add(FileProvider.getUriForFile(getActivity(),getActivity().getApplicationContext().getPackageName() + getString(R.string.dot_provider),fileMap));
-
         final Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "\n\n" + getString(R.string.share_text) + " " + getString(R.string.app_name) + " - " + getString(R.string.app_url));
-        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        shareIntent.setType("*/*");
+
+        if (fileMap!=null) {
+            final ArrayList<Uri> uris = new ArrayList<>();
+            uris.add(FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + getString(R.string.dot_provider), fileMap));
+
+            shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "\n\n" + getString(R.string.share_text) + " " + getString(R.string.app_name) + " - " + getString(R.string.app_url));
+            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            shareIntent.setType("*/*");
+        }
 
         return shareIntent;
     }
@@ -471,26 +504,28 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String tag="takeScreenShot - ";
 		Log.i(TAG,tag);
 
-		final Picture picture = webView.capturePicture();
-        final int width=picture.getWidth();
-        final int height=picture.getHeight();
+		if (fileMap!=null) {
+            final Picture picture = webView.capturePicture();
+            final int width = picture.getWidth();
+            final int height = picture.getHeight();
 
-        if (width>0 && height>0) {
-            final Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            final Canvas c = new Canvas(b);
-            picture.draw(c);
+            if (width > 0 && height > 0) {
+                final Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                final Canvas c = new Canvas(b);
+                picture.draw(c);
 
-            FileOutputStream fosScreenshot = null;
-            try {
-                fosScreenshot = new FileOutputStream(fileMap);
-                b.compress(Bitmap.CompressFormat.JPEG, 100, fosScreenshot);
-                fosScreenshot.close();
-                Log.i(TAG,tag+"Screenshot available at: " + fileMap.toString());
-            } catch (IOException e) {
-                Log.e(TAG,tag, e);
+                FileOutputStream fosScreenshot = null;
+                try {
+                    fosScreenshot = new FileOutputStream(fileMap);
+                    b.compress(Bitmap.CompressFormat.JPEG, 100, fosScreenshot);
+                    fosScreenshot.close();
+                    Log.i(TAG, tag + "Screenshot available at: " + fileMap.toString());
+                } catch (IOException e) {
+                    Log.e(TAG, tag, e);
+                }
+            } else {
+                Analytics.logEvent(getActivity(), TAG, tag, "Width (" + width + ") or height (" + height + ") of image <= 0.");
             }
-        } else {
-            Analytics.logEvent(getActivity(),TAG,tag,"Width ("+width+") or height ("+height+") of image <= 0.");
         }
 	}
 
@@ -518,6 +553,38 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     /************************** LISTENER IMPLEMENTATIONS ******************/
 
+    private class DialogRepeatToCloudClickListener implements DialogInterface.OnClickListener {
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            final String analyticsAction="RepeatToCloud";
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    // 'Yes'-button clicked
+
+                    // Update settings
+                    SettingsUtils.getInstance().setToPreferencesRepeatInternal(true);
+                    SettingsUtils.getInstance().setToPreferencesRepeatToCloud(true);
+
+                    // Re-init Repeater
+                    if (nmeaClientService!=null) {
+                        nmeaClientService.init();
+                    }
+
+                    Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, analyticsAction,"Yes");
+
+                    // Show message to user
+                    showMessageRepeatToCloud();
+
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    // 'No'-button clicked
+                    Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, analyticsAction,"No");
+                    break;
+            }
+        }
+    }
+
 	/**** START ImagePopupListener ****/
 
 	@Override
@@ -525,6 +592,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		switch (id) {
 		case IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR:
 		    // Ignore this error. User can still receive Ships from peers
+		break;
+		case IMAGE_POPUP_ID_AIS_RUNNING:
+            // AIS is running, invite to share data to cloud
+            inviteToShareToCloud();
 		break;
 		default:
 			Log.d(TAG,"onImagePopupDispose - id: "+id);

@@ -73,6 +73,12 @@
 
     <string name="popup_ship_info_title">Ship information</string>
 
+    <string name="popup_share_to_cloud_title">Share ships data to cloud</string>
+    <string name="popup_share_to_cloud_message">Do you mind to share ships data with fellow users?\n\nYou can change this later in settings.\n\nWARNING: It is not in all regions allowed to repeat received ships data to third parties.</string>
+    <string name="popup_share_to_cloud_yes">OK, JUST DO IT !</string>
+    <string name="popup_share_to_cloud_no">Don\'t do it</string>
+    <string name="popup_share_to_cloud_message_result">Ship data received from dongle, will be repeated to the cloud. You can change this in Settings.</string>
+
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
     <string name="permission_externalstorage_denied_title">Denied storage permission</string>
@@ -194,12 +200,6 @@
     <!-- RTL-SDR receiver -->
     <string name="pref_AisReceiverSettings_title">AIS Receiver</string>
 
-	<!--
-    <string name="pref_rtlSdrForceRoot">pref_forceRoot</string>
-    <string name="pref_rtlSdrForceRoot_summary">Force root to access RTL-SDR device.</string>
-	<string name="pref_rtlSdrForceRoot_title">RTL-SDR: Force Root</string>
-	-->
-			
 	<string name="pref_rtlSdrPpm">pref_rtlSdrPpm</string>
     <string name="pref_rtlSdrPpm_default">99999</string>
     <string name="pref_rtlSdrPpm_dialog_title">The RTL-SDR parts per million offset.</string>
@@ -220,12 +220,12 @@
     <string name="pref_aisMessagesClientPort">pref_aisMessagesClientPort</string>
     <string name="pref_aisMessagesClientPort_default">10111</string>
     <string name="pref_aisMessagesClientPort_dialog_title">AIS messages client port (UDP port)</string>
-    <string name="pref_aisMessagesClientPort_summary">The UDP port this application is listeing for NMEA..</string>
+    <string name="pref_aisMessagesClientPort_summary">The UDP port this application is listening for NMEA.</string>
     <string name="pref_aisMessagesClientPort_title">AIS Messages client port</string>
 
     <!-- Repeater -->
     <string name="pref_repeater_title">Repeater</string>
-    <string name="pref_repeater_summary">Repeat received messages to third party plotter like OpenCPN, to other instance of this app or other interested party like MarineTraffic.\nYou can add up to 2 repeaters.\nWARNING: It is not in all regions allowed to repeat received messages to third parties!\nSettings will apply after restart of application.</string>
+    <string name="pref_repeater_summary">Repeat received messages to fellow users of this app via cloud or peer-to-peer link, to third party plotter like OpenCPN, or to other interested party like MarineTraffic.\nYou can add up to 2 peer-to-peer repeaters.\nWARNING: It is not in all regions allowed to repeat received ships data to third parties!\nSettings will apply after restart of application.</string>
 
     <string name="pref_repeatInternal">pref_repeatInternal</string>
     <string name="pref_repeatInternal_summary">Repeat received ship locations from dongle (RTL-SDR).</string>
@@ -235,29 +235,33 @@
     <string name="pref_repeatExternal_summary">Repeat received AIS messages from external source.</string>
     <string name="pref_repeatExternal_title">Repeat ships from external source</string>
 
+    <string name="pref_repeatToCloud">pref_repeatToCloud</string>
+    <string name="pref_repeatToCloud_summary">Repeat received AIS messages to fellow users of this app (cloud).</string>
+    <string name="pref_repeatToCloud_title">Repeat ships to cloud</string>
+
     <string name="pref_ThirdPartyPlotter_summary">Add an incoming Net/UDP connection in i.e. OpenCPN. Default: address 127.0.0.1 and port 10110.</string>
     <string name="pref_aisMessagesDestinationHost1">pref_aisMessagesDestinationHost1</string>
     <string name="pref_aisMessagesDestinationHost1_default">127.0.0.1</string>
     <string name="pref_aisMessagesDestinationHost1_dialog_title">AIS messages destination host 1 (IP address)</string>
-    <string name="pref_aisMessagesDestinationHost1_summary">The IP address to send received AIS messages to. </string>
+    <string name="pref_aisMessagesDestinationHost1_summary">The IP address to send received AIS messages to (peer-to-peer). </string>
     <string name="pref_aisMessagesDestinationHost1_title">AIS Messages destination host 1</string>
 
     <string name="pref_aisMessagesDestinationPort1">pref_aisMessagesDestinationPort1</string>
     <string name="pref_aisMessagesDestinationPort1_default">10110</string>
     <string name="pref_aisMessagesDestinationPort1_dialog_title">AIS messages destination port 1 (UDP port)</string>
-    <string name="pref_aisMessagesDestinationPort1_summary">The UDP port to send received AIS messages to. To disable this repeater, enter 0 as value.</string>
+    <string name="pref_aisMessagesDestinationPort1_summary">The UDP port to send received AIS messages to (peer-to-peer). To disable this repeater, enter 0 as value.</string>
     <string name="pref_aisMessagesDestinationPort1_title">AIS Messages destination port 1</string>
 
     <string name="pref_aisMessagesDestinationHost2">pref_aisMessagesDestinationHost2</string>
     <string name="pref_aisMessagesDestinationHost2_default">5.9.207.224</string>
     <string name="pref_aisMessagesDestinationHost2_dialog_title">AIS messages destination host 2 (IP address)</string>
-    <string name="pref_aisMessagesDestinationHost2_summary">The IP address to send received AIS messages to. </string>
+    <string name="pref_aisMessagesDestinationHost2_summary">The IP address to send received AIS messages to (peer-to-peer). </string>
     <string name="pref_aisMessagesDestinationHost2_title">AIS Messages destination host 2</string>
 
     <string name="pref_aisMessagesDestinationPort2">pref_aisMessagesDestinationPort2</string>
     <string name="pref_aisMessagesDestinationPort2_default">8098</string>
     <string name="pref_aisMessagesDestinationPort2_dialog_title">AIS messages destination port 2 (UDP port)</string>
-    <string name="pref_aisMessagesDestinationPort2_summary">The UDP port to send received AIS messages to. To disable this repeater, enter 0 as value.</string>
+    <string name="pref_aisMessagesDestinationPort2_summary">The UDP port to send received AIS messages to (peer-to-peer). To disable this repeater, enter 0 as value.</string>
     <string name="pref_aisMessagesDestinationPort2_title">AIS Messages destination port 2</string>
 
     <!-- Privacy policy / Credits -->

@@ -19,7 +19,6 @@ public final class SettingsUtils {
     private static final String KEY_PREF_SHIP_SCALE_FACTOR = "pref_shipScaleFactor";
     private static final String KEY_PREF_MAX_AGE = "pref_maxAge";
     private static final String KEY_PREF_OWN_LOCATION_ICON = "pref_ownLocationIcon";
-//	private static final String KEY_PREF_RTL_SDR_FORCE_ROOT = "pref_rtlSdrForceRoot";
 
 	private static final String KEY_PREF_LOGGING_VERBOSE = "pref_loggingVerbose";
 	private static final String KEY_PREF_MAP_ZOOM_TO_EXTENT = "pref_mapZoomToExtent";
@@ -28,6 +27,8 @@ public final class SettingsUtils {
     private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
 
 	private static final String KEY_PREF_AIS_MESSAGES_CLIENT_PORT = "pref_aisMessagesClientPort";
+
+	private static final String KEY_PREF_REPEAT_TO_CLOUD = "pref_repeatToCloud";
 
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_1 = "pref_aisMessagesDestinationHost1";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1 = "pref_aisMessagesDestinationPort1";
@@ -49,12 +50,13 @@ public final class SettingsUtils {
 	private static final String DEFAULT_AIS_MESSAGES_DESTINATION_HOST_2 = "5.9.207.224";
 	private static final int DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2 = 8098;
 
-//	private static final boolean DEFAULT_RTL_SDR_FORCE_ROOT = false;
 	private static final int DEFAULT_RTL_SDR_PPM = Integer.MAX_VALUE;
 
     private static final int RTL_SDR_PPM_VALID_OFFSET = 1000;
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;
     private static final int DEFAULT_MAX_AGE = 20;
+
+	private static final boolean DEFAULT_REPEAT_TO_CLOUD = false;
 	private static final boolean DEFAULT_REPEAT_INTERNAL = false;
     private static final boolean DEFAULT_REPEAT_EXTERNAL = false;
 
@@ -155,6 +157,14 @@ public final class SettingsUtils {
         return sharedPreferences.getBoolean(KEY_PREF_MAP_DISABLE_SOUND, DEFAULT_MAP_DISABLE_SOUND);
     }
 
+	public void setToPreferencesRepeatInternal(final boolean repeat) {
+		validateSharedPreferences();
+
+		final SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(KEY_PREF_REPEAT_INTERNAL,repeat);
+		editor.commit();
+	}
+
     public boolean parseFromPreferencesRepeatInternal() {
         validateSharedPreferences();
         return sharedPreferences.getBoolean(KEY_PREF_REPEAT_INTERNAL, DEFAULT_REPEAT_INTERNAL);
@@ -163,6 +173,19 @@ public final class SettingsUtils {
 	public boolean parseFromPreferencesRepeatExternal() {
 		validateSharedPreferences();
 		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_EXTERNAL, DEFAULT_REPEAT_EXTERNAL);
+	}
+
+	public boolean parseFromPreferencesRepeatToCloud() {
+		validateSharedPreferences();
+		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_TO_CLOUD, DEFAULT_REPEAT_TO_CLOUD);
+	}
+
+	public void setToPreferencesRepeatToCloud(final boolean repeat) {
+		validateSharedPreferences();
+
+		final SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(KEY_PREF_REPEAT_TO_CLOUD,repeat);
+		editor.commit();
 	}
 
 	public boolean parseFromPreferencesMapCacheLowerZoomlevels() {
@@ -216,7 +239,6 @@ public final class SettingsUtils {
 		}
 		return result;
 	}
-
 
 	public String parseFromPreferencesAisMessagesDestinationHost2() {
 		validateSharedPreferences();
