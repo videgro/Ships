@@ -197,7 +197,8 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		
 		requestCount++;
 
-		final String url = "https://" + session.getUri(); // URI starts with /
+		// Just one slash, URI starts with slash too
+		final String url = "https:/" + session.getUri(); // URI starts with /
 		if (isAllowed(url)) {
             final File imageFile = getImage(url);
             if (imageFile!=null && imageFile.exists()){
