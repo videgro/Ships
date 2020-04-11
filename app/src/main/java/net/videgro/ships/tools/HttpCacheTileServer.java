@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -66,7 +67,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		final String tag="retrieveCacheDir - ";
 		dirCache = null;
 		if (isExternalStorageWritable()){
-			final File dir=new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
+			final File dir=new File(Objects.requireNonNull(context).getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
 			if (!dir.exists()) {
 				try {
 					if (!dir.mkdirs()){
@@ -196,7 +197,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		
 		requestCount++;
 
-		final String url = "http:/" + session.getUri(); // URI starts with /
+		final String url = "https://" + session.getUri(); // URI starts with /
 		if (isAllowed(url)) {
             final File imageFile = getImage(url);
             if (imageFile!=null && imageFile.exists()){
