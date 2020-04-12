@@ -61,9 +61,6 @@ dependencies {
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     implementation 'com.google.firebase:firebase-messaging:20.1.5'
 
-    /* Google Play services (Analytics) */
-    implementation "com.google.android.gms:play-services-analytics:17.0.0"
-
     /* Android support libs */
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'

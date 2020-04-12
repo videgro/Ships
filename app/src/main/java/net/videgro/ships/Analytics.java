@@ -3,7 +3,6 @@ package net.videgro.ships;
 import android.content.Context;
 
 import net.videgro.analytics.MyFirebaseAnalytics;
-import net.videgro.analytics.MyGoogleAnalytics;
 
 public final class Analytics {
 	/* Package protected */
@@ -18,17 +17,11 @@ public final class Analytics {
 		// Utility class, no public constructor
 	}
 
-	public static synchronized void logScreenView(final Context context,final String screen){
-		MyGoogleAnalytics.logScreenView(context,screen);
-	}
-
 	public static synchronized void logEvent(final Context context,final String category,final String action,final String label) {
-		MyGoogleAnalytics.logEvent(context, category, action, label);
 		MyFirebaseAnalytics.logEvent(context, category, action, label);
 	}
 
 	public static synchronized void logEvent(final Context context,final String category,final String action,final String label,final long value){
-		MyGoogleAnalytics.logEvent(context, category, action, label,value);
 		MyFirebaseAnalytics.logEvent(context, category, action, label, value);
 	}
 }

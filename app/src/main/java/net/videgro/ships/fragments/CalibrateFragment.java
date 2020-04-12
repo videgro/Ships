@@ -91,7 +91,6 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	@Override
 	public void onResume() {
 		super.onResume();
-		Analytics.logScreenView(getActivity(),TAG);
 		final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
 		if (SettingsUtils.isValidPpm(ppm) && isAdded()) {
 			Log.d(TAG, "Valid PPM available, no need to calibrate. Return.");

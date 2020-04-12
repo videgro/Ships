@@ -19,7 +19,7 @@ public class MyFirebaseAnalytics {
         final Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_CATEGORY,category);
         bundle.putString(FirebaseAnalytics.Param.ITEM_NAME,label);
-        getFirebaseAnalyticsInstance(context).logEvent(action, bundle);
+        getFirebaseAnalyticsInstance(context).logEvent(action.replaceAll(" ","_").replaceAll("-",""), bundle);
     }
 
     public static void logEvent(final Context context, final String category, final String action, final String label, final long value) {
@@ -27,6 +27,6 @@ public class MyFirebaseAnalytics {
         bundle.putString(FirebaseAnalytics.Param.ITEM_CATEGORY,category);
         bundle.putString(FirebaseAnalytics.Param.ITEM_NAME,label);
         bundle.putString(FirebaseAnalytics.Param.VALUE,""+value);
-        getFirebaseAnalyticsInstance(context).logEvent(action, bundle);
+        getFirebaseAnalyticsInstance(context).logEvent(action.replaceAll(" ","_").replaceAll("-",""), bundle);
     }
 }

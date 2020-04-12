@@ -62,7 +62,7 @@ public class TrackService extends Service implements LocationListener {
 
 		final String provider = locationManager.getBestProvider(criteria, true);
 		Log.i(TAG, "Provider " + provider + " has been selected.");
-		Analytics.logEvent(this,TAG, "Selected provider", provider);
+		Analytics.logEvent(this,TAG, "SelectedProvider", provider);
 
 		if (provider != null) {
 			try {

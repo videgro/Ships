@@ -31,10 +31,4 @@ public class HelpFragment extends Fragment {
 		Utils.loadAd(rootView);
 		return rootView;
 	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		Analytics.logScreenView(getActivity(),TAG);
-	}
 }

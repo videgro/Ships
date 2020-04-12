@@ -179,13 +179,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        Analytics.logScreenView(getActivity(),TAG);
-    }
-
-    @Override
     public void onPause() {
         final String tag = "onPause";
         Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, "HttpCacheTileServer",HttpCacheTileServer.getInstance().getStatistics());
