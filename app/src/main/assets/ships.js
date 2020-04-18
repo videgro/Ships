@@ -21,7 +21,7 @@ function addShip(ship) {
 	ship.lastUpdated=new Date().getTime(); // Add extra field
 
     // Select ships source
-    var dataShip=(ship.source=="EXTERNAL") ? dataShips[1] : dataShips[0];
+    var dataShip=(ship.source=="EXTERNAL" || ship.source=="CLOUD") ? dataShips[1] : dataShips[0];
 
 	dataShip.ships[mmsiKey(ship)]=ship;
 	
@@ -549,7 +549,7 @@ const DEFAULT_MAX_AGE=(1000*60*20); // 20 minutes
 
 // Array of dataShip
 // - at index 0: Ships received INTERNAL
-// - at index 1: Ships received EXTERNAL
+// - at index 1: Ships received EXTERNAL (from CLOUD, is a special type of EXTERNAL source)
 var dataShips=[];
 for (i=0;i<NUMBER_OF_SHIPS_SOURCES;i++){
  var dataShip=new Object();

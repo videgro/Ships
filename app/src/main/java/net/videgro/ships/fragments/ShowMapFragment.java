@@ -362,13 +362,14 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         @JavascriptInterface
         public void showLayerVisibilityChanged(String layerName,boolean visibility) {
-            // Use ase case labels literally the layer names specified in assets/index.html
+            // Use as case labels literally the layer names specified in assets/index.html
             switch (layerName){
                 case "Ships":
                     shipsTableManager.updateEnabledSource(Ship.Source.INTERNAL,visibility);
                 break;
                 case "Ships - Peers":
                     shipsTableManager.updateEnabledSource(Ship.Source.EXTERNAL,visibility);
+                    shipsTableManager.updateEnabledSource(Ship.Source.CLOUD,visibility);
                 break;
                 default:
                     // Nothing to do
@@ -612,7 +613,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     shipsTableManager.update(ship);
 
                     // Show indicator (animation)
-                    final ImageView indicator=(Ship.Source.EXTERNAL.equals(ship.getSource())) ? indicatorReceivingExternal : indicatorReceivingInternal;
+                    final ImageView indicator=(Ship.Source.EXTERNAL.equals(ship.getSource()) || Ship.Source.CLOUD.equals(ship.getSource())) ? indicatorReceivingExternal : indicatorReceivingInternal;
                     indicator.setVisibility(View.VISIBLE);
                     indicator.startAnimation(new IndicatorAnimation(false));
 

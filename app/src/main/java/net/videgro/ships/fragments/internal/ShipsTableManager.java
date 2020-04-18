@@ -24,6 +24,7 @@ public class ShipsTableManager {
         this.maxAgeInMs=1000*60*maxAge;
         enabledSources.put(Ship.Source.INTERNAL,true);
         enabledSources.put(Ship.Source.EXTERNAL,true);
+        enabledSources.put(Ship.Source.CLOUD,true);
     }
 
     public void updateEnabledSource(Ship.Source source,boolean newValuie){
