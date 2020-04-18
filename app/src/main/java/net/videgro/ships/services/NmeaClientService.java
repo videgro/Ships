@@ -113,9 +113,6 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
         mustRepeatFrom.put(Source.INTERNAL,Boolean.FALSE);
         mustRepeatFrom.put(Source.EXTERNAL,Boolean.FALSE);
 
-        // Never repeat messages which has CLOUD as source, to prevent loop
-        mustRepeatFrom.put(Source.CLOUD,Boolean.FALSE);
-
 		SettingsUtils.getInstance().init(this);
 
         registerReceiver(connectivityChangeReceiver,new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
@@ -144,8 +141,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
     public void init(){
         deinit();
 
-        mustRepeatFrom.put(Source.INTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatInternal());
-        mustRepeatFrom.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatExternal());
+        mustRepeatFrom.put(Source.INTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatFromInternal());
+        mustRepeatFrom.put(Source.EXTERNAL,SettingsUtils.getInstance().parseFromPreferencesRepeatFromExternal());
+        mustRepeatFrom.put(Source.CLOUD,SettingsUtils.getInstance().parseFromPreferencesRepeatFromCloud());
 
         final boolean mustRepeatToCloud=SettingsUtils.getInstance().parseFromPreferencesRepeatToCloud();
 
@@ -356,7 +354,11 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
                 final Boolean mustRepeatFromSrc = mustRepeatFrom.get(source);
                 if (mustRepeatFromSrc != null && mustRepeatFromSrc) {
                     if (repeater != null) {
-                        repeater.repeat(nmea);
+                        repeater.repeatViaUdp(nmea);
+                        if (!Source.CLOUD.equals(source)){
+                            // Only repeat to cloud when source is not CLOUD already, preventing loop
+                            repeater.repeatToCloud(nmea);
+                        }
                     }
                 }
 

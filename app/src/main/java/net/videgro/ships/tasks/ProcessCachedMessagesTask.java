@@ -33,7 +33,8 @@ public class ProcessCachedMessagesTask extends AsyncTask<Void, Void, Integer> {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
-					repeater.repeat(line);
+					repeater.repeatViaUdp(line);
+					repeater.repeatToCloud(line);
 					numLines++;
 				}
 			} catch (IOException e) {

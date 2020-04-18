@@ -31,11 +31,11 @@ public class Repeater {
     }
 
     /**
-     * Repeat NMEA to other host(s) and cloud
+     * Repeat NMEA to other host(s) via UDP
      * @param nmea The NMEA sentence to repeat
      */
-    public void repeat(final String nmea){
-        final String tag="repeat - ";
+    public void repeatViaUdp(final String nmea){
+        final String tag="repeatViaUdp - ";
 
         // Repeat to other host(s) via UDP
         for (final DatagramSocketConfig repeater : repeaters) {
@@ -52,9 +52,14 @@ public class Repeater {
                 }
             }
         }
+    }
 
-        // Repeat to cloud (Firebase)
-        // Will be send asynchronous in batches
+    /**
+     * Repeat NMEA o cloud (Firebase)
+     * Will be send asynchronous in batches
+     * @param nmea The NMEA sentence to repeat
+     */
+    public void repeatToCloud(final String nmea) {
         if (mustRepeatToCloud) {
             myFirebaseMessagingRepeater.broadcast(nmea);
         }

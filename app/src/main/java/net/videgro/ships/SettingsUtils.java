@@ -28,14 +28,15 @@ public final class SettingsUtils {
 
 	private static final String KEY_PREF_AIS_MESSAGES_CLIENT_PORT = "pref_aisMessagesClientPort";
 
-	private static final String KEY_PREF_REPEAT_TO_CLOUD = "pref_repeatToCloud";
+	private static final String KEY_PREF_REPEAT_FROM_INTERNAL = "pref_repeatFromInternal";
+    private static final String KEY_PREF_REPEAT_FROM_EXTERNAL = "pref_repeatFromExternal";
+	private static final String KEY_PREF_REPEAT_FROM_CLOUD = "pref_repeatFromCloud";
 
+    private static final String KEY_PREF_REPEAT_TO_CLOUD = "pref_repeatToCloud";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_1 = "pref_aisMessagesDestinationHost1";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1 = "pref_aisMessagesDestinationPort1";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_2 = "pref_aisMessagesDestinationHost2";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2 = "pref_aisMessagesDestinationPort2";
-	private static final String KEY_PREF_REPEAT_INTERNAL = "pref_repeatInternal";
-    private static final String KEY_PREF_REPEAT_EXTERNAL = "pref_repeatExternal";
 
 	private static final boolean DEFAULT_LOGGING_VERBOSE = true;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
@@ -56,9 +57,10 @@ public final class SettingsUtils {
     private static final int DEFAULT_SHIP_SCALE_FACTOR = 5;
     private static final int DEFAULT_MAX_AGE = 20;
 
+	private static final boolean DEFAULT_REPEAT_FROM_INTERNAL = false;
+    private static final boolean DEFAULT_REPEAT_FROM_EXTERNAL = false;
+	private static final boolean DEFAULT_REPEAT_FROM_CLOUD = false;
 	private static final boolean DEFAULT_REPEAT_TO_CLOUD = false;
-	private static final boolean DEFAULT_REPEAT_INTERNAL = false;
-    private static final boolean DEFAULT_REPEAT_EXTERNAL = false;
 
 	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
     private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
@@ -157,22 +159,27 @@ public final class SettingsUtils {
         return sharedPreferences.getBoolean(KEY_PREF_MAP_DISABLE_SOUND, DEFAULT_MAP_DISABLE_SOUND);
     }
 
-	public void setToPreferencesRepeatInternal(final boolean repeat) {
+	public void setToPreferencesRepeatFromInternal(final boolean repeat) {
 		validateSharedPreferences();
 
 		final SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(KEY_PREF_REPEAT_INTERNAL,repeat);
+		editor.putBoolean(KEY_PREF_REPEAT_FROM_INTERNAL,repeat);
 		editor.commit();
 	}
 
-    public boolean parseFromPreferencesRepeatInternal() {
+    public boolean parseFromPreferencesRepeatFromInternal() {
         validateSharedPreferences();
-        return sharedPreferences.getBoolean(KEY_PREF_REPEAT_INTERNAL, DEFAULT_REPEAT_INTERNAL);
+        return sharedPreferences.getBoolean(KEY_PREF_REPEAT_FROM_INTERNAL, DEFAULT_REPEAT_FROM_INTERNAL);
     }
 
-	public boolean parseFromPreferencesRepeatExternal() {
+	public boolean parseFromPreferencesRepeatFromExternal() {
 		validateSharedPreferences();
-		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_EXTERNAL, DEFAULT_REPEAT_EXTERNAL);
+		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_FROM_EXTERNAL, DEFAULT_REPEAT_FROM_EXTERNAL);
+	}
+
+	public boolean parseFromPreferencesRepeatFromCloud() {
+		validateSharedPreferences();
+		return sharedPreferences.getBoolean(KEY_PREF_REPEAT_FROM_CLOUD, DEFAULT_REPEAT_FROM_CLOUD);
 	}
 
 	public boolean parseFromPreferencesRepeatToCloud() {

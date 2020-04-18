@@ -245,7 +245,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private void inviteToShareToCloud(){
         // Check is sharing to cloud already
         final boolean repeatToCloud=SettingsUtils.getInstance().parseFromPreferencesRepeatToCloud();
-        final boolean repeatFromInternal=SettingsUtils.getInstance().parseFromPreferencesRepeatInternal();
+        final boolean repeatFromInternal=SettingsUtils.getInstance().parseFromPreferencesRepeatFromInternal();
 
         if (!repeatToCloud || !repeatFromInternal) {
             new AlertDialog.Builder(getActivity()).setMessage(getString(R.string.popup_share_to_cloud_message))
@@ -556,7 +556,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     // 'Yes'-button clicked
 
                     // Update settings
-                    SettingsUtils.getInstance().setToPreferencesRepeatInternal(true);
+                    SettingsUtils.getInstance().setToPreferencesRepeatFromInternal(true);
                     SettingsUtils.getInstance().setToPreferencesRepeatToCloud(true);
 
                     // Re-init Repeater
