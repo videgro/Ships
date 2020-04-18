@@ -35,6 +35,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
 public class NmeaClientService extends Service implements NmeaUdpClientListener {
@@ -50,6 +52,9 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 
 	public static final int NMEA_UDP_PORT=10109;
     public static final String NMEA_UDP_HOST="127.0.0.1";
+
+    private static final int CAPACITY_NMEA_SEEN=1024;
+    private final BlockingQueue<String> nmeaSeen = new ArrayBlockingQueue<>(CAPACITY_NMEA_SEEN);
 
 	private final IBinder binder = new ServiceBinder();
 	private final Set<ShipReceivedListener> listeners=new HashSet<>();
@@ -304,35 +309,65 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 		}	
 	}
 
+    private boolean checkNmeaSeenAlready(final String nmea){
+        final String tag="checkNmeaSeen - ";
+
+        // Before adding element, check whether or not the element is present already.
+        final boolean result=nmeaSeen.contains(nmea);
+
+        // Make space for new element when needed FIFO behaviour
+        if (nmeaSeen.size()==CAPACITY_NMEA_SEEN){
+            // Must remove element before adding a new one
+            // Ignore removed element
+            nmeaSeen.poll();
+        }
+
+        // Add new element
+        try {
+            nmeaSeen.put(nmea);
+        } catch (InterruptedException e) {
+            Log.e(TAG,tag,e);
+        }
+
+        return result;
+    }
+
     @Override
 	public synchronized void onNmeaReceived(final String nmea,final Source source) {
-		Log.v(TAG,"onNmeaReceived - nmea: "+nmea+", source: "+source);
+        final String tag="onNmeaReceived - ";
+		Log.v(TAG,tag+"nmea: "+nmea+", source: "+source);
 
-		// Convert NMEA to Ship
-        final Ship ship = nmea2Ship.onMessage(nmea,source);
-        if (ship != null && ship.isValid()) {
-            if (Source.INTERNAL.equals(source) && !Utils.haveNetworkConnection(this)){
-                // Add to cache when NMEA is from own source (dongle) and there is no network connection
-                cache.add(nmea);
-            }
+		// Don't process NMEA messages 2 (or more) times.
+        if (!checkNmeaSeenAlready(nmea)) {
 
-            final Set<Integer> mmsiReceivedSrc=mmsiReceived.get(source);
-            if (mmsiReceivedSrc!=null) {
-                mmsiReceivedSrc.add(ship.getMmsi());
-            }
+            // Convert NMEA to Ship
+            final Ship ship = nmea2Ship.onMessage(nmea, source);
+            if (ship != null && ship.isValid()) {
+                if (Source.INTERNAL.equals(source) && !Utils.haveNetworkConnection(this)) {
+                    // Add to cache when NMEA is from own source (dongle) and there is no network connection
+                    cache.add(nmea);
+                }
 
-            final Boolean mustRepeatFromSrc=mustRepeatFrom.get(source);
-            if (mustRepeatFromSrc!=null && mustRepeatFromSrc){
-                if (repeater!=null) {
-                    repeater.repeat(nmea);
+                final Set<Integer> mmsiReceivedSrc = mmsiReceived.get(source);
+                if (mmsiReceivedSrc != null) {
+                    mmsiReceivedSrc.add(ship.getMmsi());
+                }
+
+                final Boolean mustRepeatFromSrc = mustRepeatFrom.get(source);
+                if (mustRepeatFromSrc != null && mustRepeatFromSrc) {
+                    if (repeater != null) {
+                        repeater.repeat(nmea);
+                    }
+                }
+
+                synchronized (listeners) {
+                    for (final ShipReceivedListener listener : listeners) {
+                        listener.onShipReceived(ship);
+                    }
                 }
             }
-
-            synchronized (listeners) {
-                for (final ShipReceivedListener listener : listeners) {
-                    listener.onShipReceived(ship);
-                }
-            }
+        } else {
+            Log.d(TAG,tag+"Seen this NMEA message already: "+nmea);
         }
 	}
 
