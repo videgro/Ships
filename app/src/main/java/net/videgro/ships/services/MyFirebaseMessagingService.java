@@ -17,7 +17,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private LocalBroadcastManager broadcaster;
 
-    public final static String MESSAGING_TOPIC="/topics/nmea";
+    public final static String MESSAGING_TOPIC="nmea";
     public final static String LOCAL_BROADCAST_TOPIC="BroadcastNmeaData";
     public final static String LOCAL_BROADCAST_DATA="NmeaData";
 

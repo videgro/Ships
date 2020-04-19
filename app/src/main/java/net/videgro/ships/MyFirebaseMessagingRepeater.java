@@ -95,7 +95,7 @@ public class MyFirebaseMessagingRepeater {
         try {
             notifcationBody.put(JSON_DATA_FIELD, payload);
             fcmOptions.put("analyticsLabel","NMEA_LABEL");
-            notification.put("to", MyFirebaseMessagingService.MESSAGING_TOPIC);
+            notification.put("to", "/topics/"+MyFirebaseMessagingService.MESSAGING_TOPIC);
             notification.put("data", notifcationBody);
             notification.put("fcm_options", fcmOptions);
         } catch (JSONException e) {
