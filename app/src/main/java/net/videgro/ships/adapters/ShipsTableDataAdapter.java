@@ -2,16 +2,14 @@ package net.videgro.ships.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.core.content.ContextCompat;
-
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import net.videgro.ships.R;
 import net.videgro.ships.nmea2ship.domain.Ship;
@@ -67,7 +65,7 @@ public class ShipsTableDataAdapter extends TableDataAdapter<Ship> {
                 }
                 break;
             case COL_MMSI:
-                renderedView = createTableTextView(String.valueOf(ship.getMmsi()),true);
+                renderedView = createTableTextView(String.valueOf(ship.getMmsi()));
                 break;
             case COL_NAME_CALLSIGN:
                 renderedView = createTableTextView(ship.getName() + (Ship.UNKNOWN.equals(ship.getCallsign()) ? "" : "\n" + ship.getCallsign()));
@@ -90,22 +88,10 @@ public class ShipsTableDataAdapter extends TableDataAdapter<Ship> {
     }
 
     private TextView createTableTextView(final String text) {
-        return createTableTextView(text,false);
-    }
-
-    private TextView createTableTextView(final String text,final boolean isMmsi) {
         final TextView result = new TextView(getContext());
-
         result.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
         result.setTextColor(ContextCompat.getColor(getContext(), R.color.ships_table_text));
-        if (isMmsi) {
-            // Text represents MMSI, make link
-            result.setText(Html.fromHtml("<a href='"+getContext().getString(R.string.url_mmsi_info)+text+"'>"+text+"</a>"));
-            result.setLinksClickable(true);
-            result.setMovementMethod(LinkMovementMethod.getInstance());
-        } else {
-            result.setText(text);
-        }
+        result.setText(text);
         return result;
     }
 }

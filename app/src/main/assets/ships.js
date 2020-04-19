@@ -46,7 +46,8 @@ function addShip(ship) {
 //	popupText += "<tr><td> - Port:</td><td>" + ship.dimPort + "</td></tr>";
 //	popupText += "<tr><td> - Starboard:</td><td>" + ship.dimStarboard+ "</td></tr>";
 //	popupText += "<tr><td> - Stern:</td><td>" + ship.dimStern + "</td></tr>";
-	popupText += "<tr><td>Time:</td><td>"+ timestamp2prettyPrint(ship.timestamp) + " ("	+ (new Date().getTime() - ship.timestamp) + ")</td></tr>";
+	popupText += "<tr><td>Updated:</td><td>"+ timestamp2prettyPrint(ship.timestamp) + " ("	+ (new Date().getTime() - ship.timestamp) + ")</td></tr>";
+	popupText += "<tr><td>Source:</td><td>"+ship.source+"</td></tr>";
 	popupText += "</table>";
 
 	// "rot":

@@ -272,7 +272,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
             shipsTable.addDataClickListener((int rowIndex, Ship ship) -> {
                 if (isAdded()) {
-                    String msg = "<h3>" + ship.getName() + " " + ship.getMmsi() + "</h3>";
+                    String msg = "<h3><a href='"+getString(R.string.url_mmsi_info)+ship.getMmsi()+"'>" + ship.getName() + " " + ship.getMmsi() + "</a></h3>";
                     msg += getString(R.string.ships_table_country) + ship.getCountryName() + "<br />";
                     msg += getString(R.string.ships_table_callsign) + ship.getCallsign() + "<br />";
                     msg += getString(R.string.ships_table_type) + ship.getShipType() + "<br />";
@@ -290,7 +290,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                     msg += " - "+getString(R.string.ships_table_dim_port) + ship.getDimPort() + " meters<br />";
                     msg += " - "+getString(R.string.ships_table_dim_starboard) + ship.getDimStarboard() + " meters<br />";
                     msg += " - "+getString(R.string.ships_table_dim_stern) + ship.getDimStern() + " meters<br /><br />";
-                    msg += getString(R.string.ships_table_updated) + getDateTimeInstance().format(ship.getTimestamp()) + " (age: " + (Calendar.getInstance().getTimeInMillis() - ship.getTimestamp()) + " ms)";
+                    msg += getString(R.string.ships_table_updated) + getDateTimeInstance().format(ship.getTimestamp()) + " (age: " + (Calendar.getInstance().getTimeInMillis() - ship.getTimestamp()) + " ms)<br />";
+                    msg += getString(R.string.ships_table_source) + ship.getSource();
 
                     Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(),this,getString(R.string.popup_ship_info_title), msg, R.drawable.ic_information, null);
                     // On dismiss: Will continue onImagePopupDispose

@@ -14,12 +14,13 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.core.app.NotificationCompat;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.core.app.NotificationCompat;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
@@ -212,6 +213,9 @@ public final class Utils {
 
 				final AlertDialog alert = ad.create();
 				alert.show();
+
+				// Make the textview clickable. Must be called after show()
+				((TextView)alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
 
 				if (automaticDismissDelay != null) {
 					final Handler handler = new Handler();

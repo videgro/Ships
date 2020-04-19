@@ -144,6 +144,7 @@
     <string name="ships_table_dim_starboard">Starboard: </string>
     <string name="ships_table_dim_stern">Stern: </string>
     <string name="ships_table_updated">Updated: </string>
+    <string name="ships_table_source">Source: </string>
 
 	<!-- Preferences -->
 	<string name="pref_GeneralSettings">General</string>
@@ -225,7 +226,7 @@
 
     <!-- Repeater -->
     <string name="pref_repeater_title">Repeater</string>
-    <string name="pref_repeater_summary">Repeat received messages to fellow users of this app via cloud or peer-to-peer link, to third party plotter like OpenCPN, or to other interested party like MarineTraffic.\nYou can add up to 2 peer-to-peer repeaters.\nWARNING: It is not in all regions allowed to repeat received ships data to third parties!\nSettings will apply after restart of application.</string>
+    <string name="pref_repeater_summary">Repeat received messages to fellow users of this app via cloud or peer-to-peer link, to third party plotter like OpenCPN, or to other interested party like MarineTraffic.\n\nYou can add up to 2 peer-to-peer repeaters.\n\nWARNING: It is not in all regions allowed to repeat received ships data to third parties!\nSettings will apply after restart of application.</string>
 
     <string name="pref_repeatFromInternal">pref_repeatFromInternal</string>
     <string name="pref_repeatFromInternal_summary">Repeat received ships (AIS messages) FROM dongle (RTL-SDR).</string>
