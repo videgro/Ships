@@ -8,9 +8,11 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
+import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
 import net.videgro.ships.Utils;
+import net.videgro.ships.activities.MainActivity;
 import net.videgro.ships.bridge.NativeRtlSdr;
 import net.videgro.ships.bridge.NativeRtlSdr.NativeRtlSdrListener;
 
@@ -49,7 +51,23 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 	public void onDestroy() {
     	final String tag="onDestroy - ";
     	Log.i(TAG,tag);
-    	nativeRtlSdr.stopAis();
+
+    	if (MainActivity.isNativeLibraryLoaded()) {
+			try {
+				nativeRtlSdr.stopAis();
+			} catch (UnsatisfiedLinkError e) {
+				/*
+				 * Catch UnsatisfiedLinkError to prevent:
+				 *
+				 * Fatal Exception: java.lang.UnsatisfiedLinkError
+				 * No implementation found for boolean net.videgro.ships.bridge.NativeRtlSdr.isRunningRtlSdrAis() (tried Java_net_videgro_ships_bridge_NativeRtlSdr_isRunningRtlSdrAis and Java_net_videgro_ships_bridge_NativeRtlSdr_isRunningRtlSdrAis__)
+				 */
+				Analytics.logEvent(this, Analytics.CATEGORY_ERRORS, TAG, tag + "Stop AIS native call: " + e.getMessage());
+			}
+		} else {
+			Analytics.logEvent(this, Analytics.CATEGORY_ERRORS, TAG, tag + "Stop AIS native call, but native lib not loaded.");
+		}
+
     	nativeRtlSdr.removeListener(this);
     	releaseWakeLock();
 		super.onDestroy();
