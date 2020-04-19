@@ -321,7 +321,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAllowFileAccessFromFileURLs(true);
-        webView.addJavascriptInterface(new JavaScriptInterface(getActivity()), "android");
+        webView.addJavascriptInterface(new JavaScriptInterface(), "android");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -354,12 +354,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private class JavaScriptInterface {
-        private Context context;
-
-        JavaScriptInterface(Context context) {
-            this.context = context;
-        }
-
         @JavascriptInterface
         public void showLayerVisibilityChanged(String layerName,boolean visibility) {
             // Use as case labels literally the layer names specified in assets/index.html
