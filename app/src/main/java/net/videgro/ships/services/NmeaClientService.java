@@ -15,16 +15,16 @@ import android.widget.Toast;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.videgro.ships.Analytics;
-import net.videgro.ships.MyFirebaseMessagingRepeater;
 import net.videgro.ships.Repeater;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
+import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.listeners.ShipReceivedListener;
 import net.videgro.ships.nmea2ship.Nmea2Ship;
 import net.videgro.ships.nmea2ship.domain.Ship;
 import net.videgro.ships.services.internal.NmeaMessagesCache;
+import net.videgro.ships.tasks.NmeaFirebaseMessagingClientTask;
 import net.videgro.ships.tasks.NmeaUdpClientTask;
-import net.videgro.ships.tasks.NmeaUdpClientTask.NmeaUdpClientListener;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 
 import java.net.InetAddress;
@@ -37,9 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.regex.Pattern;
 
-public class NmeaClientService extends Service implements NmeaUdpClientListener {
+public class NmeaClientService extends Service implements NmeaReceivedListener {
 	private static final String TAG = "NmeaClientService";
 
     /**
@@ -379,23 +378,21 @@ public class NmeaClientService extends Service implements NmeaUdpClientListener 
 		}
 	}
 
+	private void processMessageReceivedFromFirebaseMessaging(final String nmeasRaw){
+        final NmeaFirebaseMessagingClientTask task = new NmeaFirebaseMessagingClientTask(this,nmeasRaw);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                final Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    final String nmeasRaw = bundle.getString(MyFirebaseMessagingService.LOCAL_BROADCAST_DATA);
-                    if (nmeasRaw != null) {
-                        final String[] nmeas = nmeasRaw.split(Pattern.quote(MyFirebaseMessagingRepeater.NMEA_SEP));
-                        for (final String nmea : nmeas) {
-                            if (!nmea.isEmpty()) {
-                                onNmeaReceived(MyFirebaseMessagingRepeater.PREFIX_AIVDM + nmea, Source.CLOUD);
-                            }
-                        }
-                    }
-                }
+        if (intent != null) {
+            final Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                final String nmeasRaw = bundle.getString(MyFirebaseMessagingService.LOCAL_BROADCAST_DATA);
+                processMessageReceivedFromFirebaseMessaging(nmeasRaw);
             }
+        }
         }
     };
 

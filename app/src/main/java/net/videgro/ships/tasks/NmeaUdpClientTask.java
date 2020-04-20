@@ -3,6 +3,7 @@ package net.videgro.ships.tasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import net.videgro.ships.listeners.NmeaReceivedListener;
 import net.videgro.ships.services.NmeaClientService;
 import net.videgro.ships.tasks.domain.DatagramSocketConfig;
 
@@ -16,10 +17,10 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
 
     private final DatagramSocketConfig datagramSocketConfig;
 
-    private final NmeaUdpClientListener listener;
+    private final NmeaReceivedListener listener;
     private final NmeaClientService.Source source;
 
-    public NmeaUdpClientTask(final NmeaUdpClientListener listener,final NmeaClientService.Source source,final DatagramSocketConfig datagramSocketConfig) {
+    public NmeaUdpClientTask(final NmeaReceivedListener listener,final NmeaClientService.Source source,final DatagramSocketConfig datagramSocketConfig) {
         this.listener = listener;
         this.source = source;
         this.datagramSocketConfig = datagramSocketConfig;
@@ -58,9 +59,5 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
         if (result != null) {
             Log.d(TAG, "Result: " + result);
         }
-    }
-
-    public interface NmeaUdpClientListener {
-        void onNmeaReceived(String line,final NmeaClientService.Source source);
     }
 }
