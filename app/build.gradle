@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'io.fabric'
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 29
@@ -26,6 +26,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            firebaseCrashlytics {
+                nativeSymbolUploadEnabled true
+            }
         }
     }
     externalNativeBuild {
@@ -55,12 +58,12 @@ dependencies {
     implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
 
     /* Firebase */
-    implementation 'com.google.firebase:firebase-core:17.3.0'
-    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.google.firebase:firebase-core:17.4.2'
+    implementation 'com.google.firebase:firebase-analytics:17.4.2'
     implementation 'com.google.firebase:firebase-ads:19.1.0'
-    implementation 'com.google.firebase:firebase-crash:16.2.1'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation 'com.google.firebase:firebase-messaging:20.1.5'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.0.0'
+    implementation 'com.google.firebase:firebase-messaging:20.2.0'
 
     /* Android support libs */
     implementation 'androidx.appcompat:appcompat:1.1.0'
