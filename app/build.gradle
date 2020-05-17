@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
@@ -71,9 +73,19 @@ dependencies {
     implementation 'androidx.browser:browser:1.2.0'
     implementation 'androidx.media:media:1.1.0'
 
+    /* ARCore */
+    implementation 'com.google.ar:core:1.17.0'
+    implementation "com.google.ar.sceneform:core:1.15.0"
+    implementation 'com.github.appoly:ARCore-Location:1.2'
+
+    /* Glide - An image loading and caching library for Android - https://github.com/bumptech/glide */
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
     /* Misc. */
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "org.nanohttpd:nanohttpd:2.3.1"
     implementation "de.codecrafters.tableview:tableview:2.8.1"
     implementation 'com.android.volley:volley:1.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

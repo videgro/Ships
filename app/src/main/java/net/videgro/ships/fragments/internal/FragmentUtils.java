@@ -3,6 +3,7 @@ package net.videgro.ships.fragments.internal;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
@@ -23,31 +24,47 @@ public final class FragmentUtils {
 	private FragmentUtils(){
 		// Utility class, no public constructor
 	}
-	
+
+	private static String createArgumentsToReceiveAis(final int ppm){
+		return  "-p " + ppm + " -P " + NmeaClientService.NMEA_UDP_PORT + " -h " + NmeaClientService.NMEA_UDP_HOST + " -R -x -S 60 -n";
+	}
+
 	public static boolean startReceivingAisFromAntenna(final Fragment fragment,final int reqCode,final int ppm) {
-		final String tag="startReceivingAisFromAntenna - ";
+		final String tag="startReceivingAisFromAntenna (Fragment) - ";
 		Log.d(TAG,tag);
 		boolean result=false;
-		final String arguments = "-p " + ppm + " -P "+ NmeaClientService.NMEA_UDP_PORT+" -h " + NmeaClientService.NMEA_UDP_HOST + " -R -x -S 60 -n";
-		final Intent intent=createOpenDeviceIntent(fragment,arguments);
-		if (intent!=null){
+		if (fragment!=null && fragment.isAdded()) {
+			final Intent intent = createOpenDeviceIntent(fragment.getActivity(), createArgumentsToReceiveAis(ppm));
 			fragment.startActivityForResult(intent, reqCode);
-			result=true;
+			result = true;
+		} else {
+			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}
 		return result;
 	}
-	
+
+	public static boolean startReceivingAisFromAntenna(final Activity activity,final int reqCode,final int ppm) {
+		final String tag="startReceivingAisFromAntenna (Activity) - ";
+		Log.d(TAG,tag);
+		final Intent intent = createOpenDeviceIntent(activity, createArgumentsToReceiveAis(ppm));
+		activity.startActivityForResult(intent, reqCode);
+		return true;
+	}
+
 	public static boolean changeRtlSdrPpm(final Fragment fragment,final int reqCode,final int ppm) {
 		final String tag="changeRtlSdrPpm - ";
 		Log.d(TAG,tag);
 		boolean result=false;
-		final Intent intent=createOpenDeviceIntent(fragment,null);		
-		if (intent!=null){
+		if (fragment!=null && fragment.isAdded()) {
+			final Intent intent=createOpenDeviceIntent(fragment.getActivity(),null);
+
 			// Request to change PPM instead of (re)starting RTL-SDR
 			intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
 	
 			fragment.startActivityForResult(intent, reqCode);
 			result=true;
+		} else {
+			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}
 		return result;
 	}
@@ -56,11 +73,14 @@ public final class FragmentUtils {
 		final String tag="stopReceivingAisFromAntenna - ";		
 		Log.d(TAG,tag);
 		boolean result=false;
-		final Intent intent=createOpenDeviceIntent(fragment,null);
-		if (intent!=null){
+		if (fragment!=null && fragment.isAdded()) {
+			final Intent intent=createOpenDeviceIntent(fragment.getActivity(),null);
+
 			intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
 			fragment.startActivityForResult(intent, reqCode);
 			result=true;
+		} else {
+			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}
 		return result;
 	}
@@ -77,8 +97,7 @@ public final class FragmentUtils {
 	}
 
 	public static String parseOpenCloseDeviceActivityResultAsString(final Intent data){
-		final OpenDeviceResult startRtlSdrResult = parseOpenCloseDeviceActivityResult(data);
-		return (startRtlSdrResult!=null) ? startRtlSdrResult.toString() : "RESULT UNKNOWN";
+		return parseOpenCloseDeviceActivityResult(data).toString();
 	}
 	
 	public static void stopApplication(final Fragment fragment) {
@@ -110,17 +129,13 @@ public final class FragmentUtils {
 		}
 	}
 	
-	private static Intent createOpenDeviceIntent(final Fragment fragment,final String arguments){
-		final String tag="createOpenDeviceIntent - ";		
-		Intent result=null;
-		if (fragment!=null && fragment.isAdded()){
-			result = new Intent(Intent.ACTION_VIEW);
-			final String filterSchema = fragment.getString(R.string.opendevice_intent_filter_schema);
-			final Uri intentData = Uri.parse(filterSchema+ "://" + (arguments==null ? "" : arguments));
-			result.setData(intentData);
-		} else {
-			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
-		}
+	private static Intent createOpenDeviceIntent(final Context context,final String arguments){
+		final Intent result = new Intent(Intent.ACTION_VIEW);
+
+		final String filterSchema = context.getString(R.string.opendevice_intent_filter_schema);
+		final Uri intentData = Uri.parse(filterSchema+ "://" + (arguments==null ? "" : arguments));
+		result.setData(intentData);
+
 		return result;
 	}
 }

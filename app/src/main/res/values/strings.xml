@@ -7,8 +7,9 @@
     <string name="dot_provider">.provider</string>
     
     <string name="url_mmsi_info">http://www.marinetraffic.com/en/ais/details/ships/mmsi:PLACEHOLDER_MMSI</string>
-    
+
     <string name="opendevice_intent_filter_schema">opendevice</string>
+    <string name="action_ar">Augmented Reality</string>
 	<string name="action_help">Help</string>
     <string name="action_settings">Settings</string>
 
@@ -78,6 +79,22 @@
     <string name="popup_share_to_cloud_yes">OK, JUST DO IT !</string>
     <string name="popup_share_to_cloud_no">Don\'t do it</string>
     <string name="popup_share_to_cloud_message_result">Ship data received from dongle, will be repeated to the cloud. You can change this in Settings.</string>
+
+    <!-- Popups - AR -->
+    <string name="popup_ar_error_title">Not possible to start Augmented Reality</string>
+    <string name="popup_ar_error_arcore_not_installed">Please install ARCore</string>
+    <string name="popup_ar_error_arcore_not_updated">Please update ARCore</string>
+    <string name="popup_ar_error_app_not_updated">Please update this app</string>
+    <string name="popup_ar_error_arcore_not_supported">This device does not support AR</string>
+
+    <string name="popup_camera_open_error_title">Open camera</string>
+    <string name="popup_camera_open_error_message">Unable to get camera. Is another app using the camera?</string>
+
+    <string name="popup_camera_and_location_permission_request_title">Permissions</string>
+    <string name="popup_camera_and_location_permission_request_message">Location and Camera permissions are needed to use this feature.</string>
+
+    <string name="popup_ar_accuracy_title">Accuracy vessels locations</string>
+    <string name="popup_ar_accuracy_message">The locations of moving vessels depicted on the screen are not their exact locations. Vessels are not continuously sending their position, so more accurate data is simply not available.</string>
 
 	<!-- Permissions -->
 	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
@@ -283,7 +300,7 @@
     
     <string name="alt_rtlsdrStick">RTL-SDR device</string>
 
-	<string name="text_help"><![CDATA[
+    <string name="text_help"><![CDATA[
 	    <small>(please read the complete text by scrolling down)</small>
 
         <h2>Minimal requirements</h2>
@@ -331,4 +348,11 @@
 
         <small>(press BACK to return to the app)</small>
    ]]></string>
+
+    <!-- AR -->
+    <string name="ar_loading_message">Loading your current location...</string>
+    <string name="ar_number_ships">"#Ships: %1$d</string>
+    <string name="ar_up">- UP -</string>
+
+
 </resources>

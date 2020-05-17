@@ -183,7 +183,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Not possible to share anything from this fragment
-		menu.setGroupVisible(R.id.main_menu_group_share, false);
+		menu.setGroupVisible(R.id.main_menu_group_show_map, false);
 	}
 	
 	/************************** LISTENER IMPLEMENTATIONS ******************/

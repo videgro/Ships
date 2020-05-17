@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="net.videgro.ships"
     android:hardwareAccelerated="false"
     android:largeHeap="true"
@@ -15,6 +16,15 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
+
+    <!-- Augmented Reality -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.location.gps"/>
+    <!--    ARcorelocation needs minSdkVersion 24,
+            but we still want to support older devices which doesn't have AR functionality anyway.
+            We override this constraint, and will risk runtime errors this way.
+    -->
+    <uses-sdk tools:overrideLibrary="uk.co.arcorelocation"/>
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -68,6 +78,10 @@
         <activity android:name=".activities.SettingsActivity" />
 
         <activity
+            android:name=".activities.AugmentedRealityLocationActivity"
+            android:theme="@style/Theme.Transparent" />
+
+        <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
@@ -100,6 +114,10 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="optional"/>
 
         <!--
          More info:

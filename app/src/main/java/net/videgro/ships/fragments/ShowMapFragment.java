@@ -17,12 +17,14 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -40,6 +42,7 @@ import android.widget.ToggleButton;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.ar.core.ArCoreApk;
 import com.google.gson.Gson;
 
 import net.videgro.ships.Analytics;
@@ -483,6 +486,26 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         return shareIntent;
     }
 
+    private void maybeEnableArButton(final MenuItem menuItem) {
+        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
+        if (availability.isTransient()) {
+            // Re-query at 5Hz while compatibility is checked in the background.
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    maybeEnableArButton(menuItem);
+                }
+            }, 200);
+        }
+        if (availability.isSupported()) {
+            menuItem.setVisible(true);
+            menuItem.setEnabled(true);
+        } else { // Unsupported or unknown.
+            menuItem.setVisible(false);
+            menuItem.setEnabled(false);
+        }
+    }
+
     private void takeScreenShotWithCheck() {
         ShowMapFragmentPermissionsDispatcher.takeScreenShotWithPermissionCheck(this);
     }
@@ -520,7 +543,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		menu.setGroupVisible(R.id.main_menu_group_share, true);
+        menu.setGroupVisible(R.id.main_menu_group_show_map, true);
+
+        // Enable AR related functionality on ARCore supported devices only.
+        maybeEnableArButton(menu.findItem(R.id.action_ar));
 
 		final ShareActionProvider shareActionProvider = (ShareActionProvider) menu.findItem(R.id.menu_share).getActionProvider();
 		shareActionProvider.setShareIntent(getShareIntent());

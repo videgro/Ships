@@ -151,6 +151,10 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		boolean result;
 		// Handle presses on the action bar items
 		switch (item.getItemId()) {
+            case R.id.action_ar:
+                openAr();
+                result = true;
+                break;
 			case R.id.action_help:
 				openHelp();
 				result = true;
@@ -164,6 +168,10 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		}
 		return result;
 	}
+
+    private void openAr() {
+        startActivity(new Intent(this, AugmentedRealityLocationActivity.class));
+    }
 
 	private void openSettings() {
 		startActivity(new Intent(this, SettingsActivity.class));
