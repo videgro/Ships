@@ -67,11 +67,16 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	}
 	
 	private void waitForPendingRequestToOpenDevice(){
+		final String tag="waitForPendingRequestToOpenDevice - ";
 		while (pendingRequestToOpenDevice){
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				Log.e(TAG,"waitForPendingRequestToOpenDevice",e);
+				if (isCancelled()){
+					Log.i(TAG, tag+"Task has been cancelled. Ignore exception.", e);
+				} else {
+					Log.e(TAG, tag, e);
+				}
 			}
 		}
 	}

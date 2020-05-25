@@ -174,7 +174,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         for (final Source source:SOURCES) {
             final NmeaUdpClientTask task = nmeaUdpClientTasks.get(source);
             if (task != null && !task.isCancelled()) {
-                task.cancel(true);
+                task.stop();
                 nmeaUdpClientTasks.put(source,null);
             }
         }

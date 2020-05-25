@@ -20,23 +20,36 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
     private final NmeaReceivedListener listener;
     private final NmeaClientService.Source source;
 
+    private DatagramSocket socket;
+    private boolean stopped=false;
+
     public NmeaUdpClientTask(final NmeaReceivedListener listener,final NmeaClientService.Source source,final DatagramSocketConfig datagramSocketConfig) {
         this.listener = listener;
         this.source = source;
         this.datagramSocketConfig = datagramSocketConfig;
     }
 
+    public void stop(){
+        stopped=true;
+
+        if (socket!=null){
+            // Will stop the socket.receive() call blocking
+            socket.close();
+        }
+    }
+
     public String doInBackground(Void... params) {
         final String tag = "doInBackground - ";
         Thread.currentThread().setName(TAG+datagramSocketConfig);
 
-        try (final DatagramSocket socket = new DatagramSocket(datagramSocketConfig.getPort(), InetAddress.getByName(datagramSocketConfig.getAddress()))){
+        try {
+            socket = new DatagramSocket(datagramSocketConfig.getPort(), InetAddress.getByName(datagramSocketConfig.getAddress()));
             Log.d(TAG, "Listening on UDP: " + datagramSocketConfig);
 
             byte[] receiveData = new byte[1024];
             final DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-            while (!isCancelled()) {
+            while (!stopped) {
                 socket.receive(receivePacket);
 
                 // Split received data into lines (strings)
@@ -49,7 +62,16 @@ public class NmeaUdpClientTask extends AsyncTask<Void, Void, String> {
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, tag, e);
+            if (stopped){
+                Log.i(TAG, tag+"Task has been stopped and socket closed. Ignore this exception.", e);
+            } else {
+                Log.e(TAG, tag, e);
+            }
+        } finally {
+            if (socket!=null && !socket.isClosed()){
+                socket.close();
+                socket=null;
+            }
         }
 
         return "FINISHED";
