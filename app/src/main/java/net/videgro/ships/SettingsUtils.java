@@ -12,7 +12,7 @@ public final class SettingsUtils {
 	// Declare the same values as in res/xml/preferences.xml!
 	public static final String KEY_PREF_RTL_SDR_PPM = "pref_rtlSdrPpm";
 
-	public static final String KEY_PREF_OWN_IP = "pref_ownIp";
+	private static final String KEY_PREF_OWN_IP = "pref_ownIp";
 
     private static final String KEY_PREF_INTERNAL_CALIBRATION_FAILED = "pref_internalIsCalibrationFailed";
 
@@ -25,6 +25,10 @@ public final class SettingsUtils {
     private static final String KEY_PREF_MAP_DISABLE_SOUND = "pref_mapDisableSound";
 	private static final String KEY_PREF_MAP_CACHE_ZOOM_LOWER_LEVELS = "pref_mapFetchLowerZoomLevels";
     private static final String KEY_PREF_MAP_CACHE_DISK_USAGE_MAX = "pref_mapCacheMaxDiskUsage";
+
+    /* AR */
+	private static final String KEY_PREF_AR_DISTANCE_MAX = "pref_arMaxDistance";
+	private static final String KEY_PREF_AR_AGE_MAX = "pref_arMaxAge";
 
 	private static final String KEY_PREF_AIS_MESSAGES_CLIENT_PORT = "pref_aisMessagesClientPort";
 
@@ -65,10 +69,13 @@ public final class SettingsUtils {
 	/* Same as  res/values/strings.xml pref_ownLocationIcon_default */
     private static final String DEFAULT_OWN_LOCATION_ICON = "antenna.png";
 
+    /* AR (defaults) */
+	private static final int DEFAULT_AR_DISTANCE_MAX = 2000;
+	private static final int DEFAULT_AR_AGE_MAX = 10;
+
     private static SettingsUtils instance=null;
 
     private SharedPreferences sharedPreferences=null;
-
 
     private SettingsUtils() {
 		// Singleton, no public constructor
@@ -103,7 +110,7 @@ public final class SettingsUtils {
 		int result = DEFAULT_RTL_SDR_PPM;
 
 		try {
-			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_RTL_SDR_PPM, Integer.toString(DEFAULT_RTL_SDR_PPM)));
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_RTL_SDR_PPM, Integer.toString(DEFAULT_RTL_SDR_PPM)));
 		} catch (ClassCastException | NumberFormatException e) {
 			Log.e(TAG,tag, e);
 		}
@@ -207,7 +214,7 @@ public final class SettingsUtils {
 		int result = DEFAULT_MAP_CACHE_DISK_USAGE_MAX;
 
         try {
-            result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_MAP_CACHE_DISK_USAGE_MAX, Integer.toString(DEFAULT_MAP_CACHE_DISK_USAGE_MAX)));
+            result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_MAP_CACHE_DISK_USAGE_MAX, Integer.toString(DEFAULT_MAP_CACHE_DISK_USAGE_MAX)));
         } catch (ClassCastException | NumberFormatException e) {
             Log.e(TAG,tag,e);
         }
@@ -222,7 +229,7 @@ public final class SettingsUtils {
 
 		int result = DEFAULT_AIS_MESSAGES_CLIENT_PORT;
 		try {
-			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_CLIENT_PORT, Integer.toString(DEFAULT_AIS_MESSAGES_CLIENT_PORT)));
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_CLIENT_PORT, Integer.toString(DEFAULT_AIS_MESSAGES_CLIENT_PORT)));
 		} catch (ClassCastException | NumberFormatException e) {
 			Log.e(TAG,tag,e);
 		}
@@ -240,7 +247,7 @@ public final class SettingsUtils {
 
 		int result = DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1;
         try {
-            result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1)));
+            result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_1, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_1)));
         } catch (ClassCastException | NumberFormatException e) {
             Log.e(TAG,tag,e);
 		}
@@ -258,7 +265,7 @@ public final class SettingsUtils {
 
 		int result = DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2;
 		try {
-			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2)));
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2, Integer.toString(DEFAULT_AIS_MESSAGES_DESTINATION_PORT_2)));
 		} catch (ClassCastException | NumberFormatException e) {
 			Log.e(TAG,tag,e);
 		}
@@ -272,7 +279,7 @@ public final class SettingsUtils {
 		int result = DEFAULT_SHIP_SCALE_FACTOR;
 
         try {
-            result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_SHIP_SCALE_FACTOR, Integer.toString(DEFAULT_SHIP_SCALE_FACTOR)));
+            result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_SHIP_SCALE_FACTOR, Integer.toString(DEFAULT_SHIP_SCALE_FACTOR)));
         } catch (ClassCastException | NumberFormatException e) {
             Log.e(TAG,tag, e);
         }
@@ -287,7 +294,7 @@ public final class SettingsUtils {
 		int result = DEFAULT_MAX_AGE;
 
 		try {
-			result = Integer.valueOf(sharedPreferences.getString(KEY_PREF_MAX_AGE, Integer.toString(DEFAULT_MAX_AGE)));
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_MAX_AGE, Integer.toString(DEFAULT_MAX_AGE)));
 		} catch (ClassCastException | NumberFormatException e) {
 			Log.e(TAG,tag, e);
 		}
@@ -299,5 +306,34 @@ public final class SettingsUtils {
 		validateSharedPreferences();
 		return sharedPreferences.getString(KEY_PREF_OWN_LOCATION_ICON, DEFAULT_OWN_LOCATION_ICON);
     }
-}
 
+	public int parseFromPreferencesArMaxAge() {
+		final String tag="parseFromPreferencesArMaxAge - ";
+		validateSharedPreferences();
+
+		int result = DEFAULT_AR_AGE_MAX;
+
+		try {
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_AR_AGE_MAX, Integer.toString(DEFAULT_AR_AGE_MAX)));
+		} catch (ClassCastException | NumberFormatException e) {
+			Log.e(TAG,tag, e);
+		}
+
+		return result;
+	}
+
+	public int parseFromPreferencesArMaxDistance() {
+		final String tag="parseFromPreferencesArMaxDistance - ";
+		validateSharedPreferences();
+
+		int result = DEFAULT_AR_DISTANCE_MAX;
+
+		try {
+			result = Integer.parseInt(sharedPreferences.getString(KEY_PREF_AR_DISTANCE_MAX, Integer.toString(DEFAULT_AR_DISTANCE_MAX)));
+		} catch (ClassCastException | NumberFormatException e) {
+			Log.e(TAG,tag, e);
+		}
+
+		return result;
+	}
+}

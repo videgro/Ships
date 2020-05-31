@@ -47,16 +47,6 @@ import java.util.concurrent.CompletableFuture
 class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListener, ImagePopupListener {
     private val TAG = "ARLocationActivity"
 
-    /**
-     * Only render markers when ship is within 2000 meter
-     */
-    private val ONLY_RENDER_WHEN_WITHIN=2000;
-
-    /**
-     * Remove ship from list of ships to render when last update is more than 10 minutes ago
-     */
-    private val MAX_AGE_OF_SHIPS=1000*60*10;
-
     private val IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR = 1102
     private val IMAGE_POPUP_ID_IGNORE = 1109
     private val IMAGE_POPUP_ID_AIS_RUNNING = 1110
@@ -88,6 +78,12 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     private var nmeaClientService: NmeaClientService? = null
     private var nmeaClientServiceConnection: ServiceConnection? = null
 
+    /* Only render markers when ship is within this distance (meters) */
+    private var maxDistance=0
+
+    /* Remove ship from list of ships to render when last update is older than this value (in milliseconds) */
+    private var maxAge=0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_augmented_reality_location)
@@ -98,6 +94,8 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     override fun onResume() {
         super.onResume()
         shipsMap.clear()
+        maxDistance = SettingsUtils.getInstance().parseFromPreferencesArMaxDistance()
+        maxAge = SettingsUtils.getInstance().parseFromPreferencesArMaxAge()*1000*60
         checkAndRequestPermissions()
     }
 
@@ -334,7 +332,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
                             ship.lat,
                             setNode(ship, completableFutureViewRenderable)
                         )
-                        marker.setOnlyRenderWhenWithin(ONLY_RENDER_WHEN_WITHIN)
+                        marker.setOnlyRenderWhenWithin(maxDistance)
 
                         markers.put(ship.mmsi, marker);
                         arHandler.postDelayed({
@@ -519,7 +517,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         val now=Calendar.getInstance().timeInMillis;
         val cleanedShipsMap: HashMap<Int, Ship> = hashMapOf()
         shipsMap.forEach { key, ship ->
-            if ((now - ship.timestamp) < MAX_AGE_OF_SHIPS) {
+            if ((now - ship.timestamp) < maxAge) {
                 cleanedShipsMap.put(ship.mmsi,ship)
             }
         }

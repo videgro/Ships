@@ -55,6 +55,24 @@
             android:title="@string/pref_mapCacheMaxDiskUsage_title" />  
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_ArSettings_title">
+        <Preference android:summary="@string/pref_arSummary" />
+        <EditTextPreference
+            android:defaultValue="@string/pref_arMaxDistance_default"
+            android:dialogTitle="@string/pref_arMaxDistance_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_arMaxDistance"
+            android:summary="@string/pref_arMaxDistance_summary"
+            android:title="@string/pref_arMaxDistance_title" />
+        <EditTextPreference
+            android:defaultValue="@string/pref_arMaxAge_default"
+            android:dialogTitle="@string/pref_arMaxAge_dialog_title"
+            android:inputType="number"
+            android:key="@string/pref_arMaxAge"
+            android:summary="@string/pref_arMaxAge_summary"
+            android:title="@string/pref_arMaxAge_title" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_AisReceiverSettings_title" >
         <EditTextPreference
             android:defaultValue="@string/pref_rtlSdrPpm_default"

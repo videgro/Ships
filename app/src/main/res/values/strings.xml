@@ -219,6 +219,21 @@
         <item>container-ship-top_1.png</item>
     </string-array>
 
+    <string name="pref_ArSettings_title">Augmented reality (AR)</string>
+    <string name="pref_arSummary">This is an experimental feature, which is not available on all devices. When it is available, an AR-button will be shown at the map-view. When you press the button, the camera will be opened. Be sure to have at least one vessel in your view. In the view: the MMSI, the country flag and eventually the name will be shown. Click on the marker to view more information.</string>
+
+    <string name="pref_arMaxDistance">pref_arMaxDistance</string>
+    <string name="pref_arMaxDistance_default">2000</string>
+    <string name="pref_arMaxDistance_dialog_title">AR Maximum distance (meters)</string>
+    <string name="pref_arMaxDistance_summary">Change this value to show only ships which are within the specified distance range.</string>
+    <string name="pref_arMaxDistance_title">AR Maximum distance</string>
+
+    <string name="pref_arMaxAge">pref_arMaxAge</string>
+    <string name="pref_arMaxAge_default">10</string>
+    <string name="pref_arMaxAge_dialog_title">AR Maximum age (minutes)</string>
+    <string name="pref_arMaxAge_summary">Remove ship from list of ships to render when last update is older than this value.</string>
+    <string name="pref_arMaxAge_title">AR Maximum age</string>
+
     <!-- RTL-SDR receiver -->
     <string name="pref_AisReceiverSettings_title">AIS Receiver</string>
 
