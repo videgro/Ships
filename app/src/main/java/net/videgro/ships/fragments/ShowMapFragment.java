@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -68,6 +69,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
 
 import de.codecrafters.tableview.SortableTableView;
@@ -83,7 +85,7 @@ import permissions.dispatcher.RuntimePermissions;
 import static java.text.DateFormat.getDateTimeInstance;
 
 @RuntimePermissions
-public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, ShipReceivedListener, ImagePopupListener {
+public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, ShipReceivedListener, ImagePopupListener, TextToSpeech.OnInitListener {
     private static final String TAG = "ShowMapFragment";
 
     private static final DecimalFormat GPS_COORD_FORMAT = new DecimalFormat("##.00");
@@ -95,6 +97,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private static final int REQ_CODE_START_RTLSDR = 1201;
     private static final int REQ_CODE_STOP_RTLSDR = 1202;
+    private static final int REQ_CODE_CHECK_TTS_DATA = 1203;
 
     /**
      * The value of this placeholder is used literally in the webview link (ship popup) and in the string resources "url_mmsi_info".
@@ -129,6 +132,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private boolean triedToReceiveFromAntenna=false;
 
+    /* TTS */
+    private TextToSpeech tts;
+    private List<Integer> nameSpoken=new ArrayList<>();
+
     @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -151,6 +158,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         setHasOptionsMenu(true);
         setupWebView(rootView);
         setupNmeaClientService();
+        setupTts();
 
         startStopButton = (ToggleButton) rootView.findViewById(R.id.startStopAisButton);
         startStopButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -192,6 +200,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     public void onDestroy() {
         destroyNmeaClientService();
         destroyLocationService();
+        destroyTts();
         super.onDestroy();
     }
 
@@ -220,6 +229,18 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             case REQ_CODE_STOP_RTLSDR:
                 logStatus(FragmentUtils.parseOpenCloseDeviceActivityResultAsString(data));
                 FragmentUtils.rtlSdrRunning = false;
+                break;
+
+            case REQ_CODE_CHECK_TTS_DATA:
+                if (isAdded()) {
+                    if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                        tts = new TextToSpeech(getActivity(), this);
+                    } //else {
+//                    final Intent installTTSIntent = new Intent();
+//                    installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+//                    startActivity(installTTSIntent);
+//                    }
+                }
                 break;
 
             default:
@@ -398,6 +419,14 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
     }
 
+    private void setupTts(){
+        if (isAdded()) {
+            final Intent intent = new Intent();
+            intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(intent, REQ_CODE_CHECK_TTS_DATA);
+        }
+    }
+
     private void setupNmeaClientService() {
         final String tag="setupNmeaClientService - ";
         if (isAdded()) {
@@ -432,6 +461,13 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         if (nmeaClientServiceConnection != null) {
             getActivity().unbindService(nmeaClientServiceConnection);
             nmeaClientServiceConnection = null;
+        }
+    }
+
+    private void destroyTts(){
+        if (tts!=null){
+            tts.shutdown();
+            tts=null;
         }
     }
 
@@ -628,6 +664,12 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
         logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship.toString().replace(",","\n   ") : ""));
 
+        if (tts!=null && ship.getName() != null && !ship.getName().isEmpty() && isAdded() && !SettingsUtils.getInstance().parseFromPreferencesMapDisableSound() && !nameSpoken.contains(ship.getMmsi()) && isAdded()){
+            nameSpoken.add(ship.getMmsi());
+            final String msg=ship.getName().toLowerCase()+" "+ship.getCountryName();
+            tts.speak(msg,TextToSpeech.QUEUE_ADD, null);
+        }
+
         if (isAdded() && getActivity()!=null){
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
@@ -671,6 +713,26 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
 	/**** END OwnLocationReceivedListener ****/
 
+    /**** START TextToSpeech.OnInitListener ****/
+
+    @Override
+    public void onInit(int initStatus) {
+        //check for successful instantiation
+        if (initStatus == TextToSpeech.SUCCESS) {
+            Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, "TTS","OK");
+            if (webView!=null) {
+                webView.loadUrl("javascript:setDisableSound(true)");
+            }
+//            if (tts.isLanguageAvailable(Locale.US)==TextToSpeech.LANG_AVAILABLE) {
+//                tts.setLanguage(Locale.US);
+//            }
+        } else if (initStatus == TextToSpeech.ERROR) {
+            Analytics.logEvent(getActivity(),Analytics.CATEGORY_STATISTICS, "TTS","FAILED");
+            // Toast.makeText(this, "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**** END TextToSpeech.OnInitListener ****/
 
 	/************************** PRIVATE CLASS IMPLEMENTATIONS ******************/
 
