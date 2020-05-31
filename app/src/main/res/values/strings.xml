@@ -46,7 +46,7 @@
 	<string name="popup_not_found_ppm_message">Not possible to automatically determine PPM. Are there ships in your area? Try it again or manually enter the PPM into the Settings.</string>
 	
 	<string name="popup_other_rtlsdr_device_title">Other RTL-SDR device</string>
-	<string name="popup_other_rtlsdr_device_message">To use another RTL-SDR device, the application will stop now. Start it again and make sure to enter the device specific PPM for the device.</string>
+	<string name="popup_other_rtlsdr_device_message">To use another RTL-SDR device, the application will stop now. Insert the RTL-SDR device to start the app automagically. Afterwards make sure to enter the device specific PPM or use the calibrate utility to find it.</string>
 
 	<string name="popup_start_device_failed_title">Failed to start RTL-SDR device</string>
 	<string name="popup_start_device_failed_message">Reason:</string>

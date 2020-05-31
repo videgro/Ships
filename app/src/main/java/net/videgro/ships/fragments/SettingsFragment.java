@@ -1,5 +1,6 @@
 package net.videgro.ships.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -22,7 +23,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	private static final String TAG = "SettingsFragment";
 
 	private static final int REQ_CODE_CHANGE_RTLSDR_PPM = 3201;
-	private static final int IMAGE_POPUP_ID_MUST_STOP=3103;
+	private static final int IMAGE_POPUP_ID_MUST_STOP_OTHER_DEVICE=3103;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 		SettingsUtils.getInstance().setToPreferencesPpm(Integer.MAX_VALUE);
 		
 		// Show popup and on closing popup, close application
-		Utils.showPopup(IMAGE_POPUP_ID_MUST_STOP,getActivity(),this,getString(R.string.popup_other_rtlsdr_device_title),getString(R.string.popup_other_rtlsdr_device_message),R.drawable.warning_icon,null);
+		Utils.showPopup(IMAGE_POPUP_ID_MUST_STOP_OTHER_DEVICE,getActivity(),this,getString(R.string.popup_other_rtlsdr_device_title),getString(R.string.popup_other_rtlsdr_device_message),R.drawable.warning_icon,null);
 	}
 
 	private String getAppVersion() {
@@ -108,10 +109,15 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	@Override
 	public void onImagePopupDispose(int id) {
 		switch (id) {
-		case IMAGE_POPUP_ID_MUST_STOP:
+		case IMAGE_POPUP_ID_MUST_STOP_OTHER_DEVICE:
 			// TODO: Currently not possible to stop RTL-SDR correctly, stop application for now.
-			FragmentUtils.stopApplication(this);
-		break;		
+			if (isAdded()) {
+				final Activity activity=getActivity();
+				Analytics.logEvent(activity,TAG, "stopApplication", "IMAGE_POPUP_ID_MUST_STOP_OTHER_DEVICE");
+				activity.finishAffinity();
+			}
+			System.exit(0);
+		break;
 		default:
 			Log.d(TAG,"onImagePopupDispose - id: "+id);
 		}

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.activities.OpenDeviceActivity;
 import net.videgro.ships.services.NmeaClientService;
@@ -20,7 +19,7 @@ public final class FragmentUtils {
 	 * Shared across fragments
 	 */
 	public static boolean rtlSdrRunning=false;
-	
+
 	private FragmentUtils(){
 		// Utility class, no public constructor
 	}
@@ -60,7 +59,7 @@ public final class FragmentUtils {
 
 			// Request to change PPM instead of (re)starting RTL-SDR
 			intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
-	
+
 			fragment.startActivityForResult(intent, reqCode);
 			result=true;
 		} else {
@@ -70,7 +69,7 @@ public final class FragmentUtils {
 	}
 
 	public static boolean stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
-		final String tag="stopReceivingAisFromAntenna - ";		
+		final String tag="stopReceivingAisFromAntenna - ";
 		Log.d(TAG,tag);
 		boolean result=false;
 		if (fragment!=null && fragment.isAdded()) {
@@ -84,7 +83,7 @@ public final class FragmentUtils {
 		}
 		return result;
 	}
-	
+
 	private static OpenDeviceResult parseOpenCloseDeviceActivityResult(final Intent data){
 		OpenDeviceResult result;
 		if (data!=null){
@@ -92,31 +91,12 @@ public final class FragmentUtils {
 		} else {
             result=new OpenDeviceResult("Unknown reason","Unknown device",OpenDeviceActivity.ERROR_REASON_MISC);
         }
-		
+
 		return result;
 	}
 
 	public static String parseOpenCloseDeviceActivityResultAsString(final Intent data){
 		return parseOpenCloseDeviceActivityResult(data).toString();
-	}
-	
-	public static void stopApplication(final Fragment fragment) {
-		final String tag = "stopApplication - ";
-		final int waitTime = 5000;
-
-		if (fragment != null && fragment.getActivity() != null) {
-			Analytics.logEvent(fragment.getActivity(),TAG, "stopApplication", "");
-
-			fragment.getActivity().finish();
-
-			try {
-				Thread.sleep(waitTime);
-			} catch (InterruptedException e) {
-				Log.e(TAG,tag,e);
-			}
-		}
-
-		System.exit(0);
 	}
 
 	public static void returnFromFragment(final Fragment fragment){
@@ -128,7 +108,7 @@ public final class FragmentUtils {
 			}
 		}
 	}
-	
+
 	private static Intent createOpenDeviceIntent(final Context context,final String arguments){
 		final Intent result = new Intent(Intent.ACTION_VIEW);
 
