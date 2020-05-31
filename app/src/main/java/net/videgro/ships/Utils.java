@@ -183,10 +183,17 @@ public final class Utils {
 
 	private static void updateText(final Activity activity,final TextView textView,final String text) {
 		final String tag="updateText - ";
+		final int maxLines=100;
 		if (activity!=null){
 			activity.runOnUiThread(new Runnable() {
-				public void run() {					
-					textView.setText(text+"\n"+textView.getText());
+				public void run() {
+					final String[] lines=textView.getText().toString().split("\n");
+					StringBuilder txt=new StringBuilder();
+					txt.append(text);
+					for (int i=0;i<maxLines && i<lines.length;i++){
+						txt.append("\n").append(lines[i]);
+					}
+					textView.setText(txt);
 				}
 			});
 		} else {

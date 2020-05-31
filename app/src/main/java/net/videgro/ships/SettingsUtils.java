@@ -38,7 +38,7 @@ public final class SettingsUtils {
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_2 = "pref_aisMessagesDestinationHost2";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2 = "pref_aisMessagesDestinationPort2";
 
-	private static final boolean DEFAULT_LOGGING_VERBOSE = true;
+	private static final boolean DEFAULT_LOGGING_VERBOSE = false;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
 
     private static final boolean DEFAULT_MAP_ZOOM_TO_EXTENT = true;

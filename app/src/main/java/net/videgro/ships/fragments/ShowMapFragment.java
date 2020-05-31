@@ -626,7 +626,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 		final String tag="onShipReceived - ";
 
         final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
-        logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship : ""));
+        logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship.toString().replace(",","\n   ") : ""));
 
         if (isAdded() && getActivity()!=null){
             getActivity().runOnUiThread(new Runnable() {
