@@ -31,7 +31,7 @@
 
 	<string name="toggle_turn_on_calibrating_thorough">START (calm traffic)</string>
 	<string name="toggle_turn_off_calibrating_thorough">STOP (calm traffic)</string>
-    
+
 	<string name="toggle_turn_on_ais">START</string>
 	<string name="toggle_turn_off_ais">STOP</string>
 
@@ -51,12 +51,16 @@
 	<string name="popup_start_device_failed_title">Failed to start RTL-SDR device</string>
 	<string name="popup_start_device_failed_message">Reason:</string>
 
-    <string name="popup_no_ppm_set_title">No PPM value</string>
-    <string name="popup_no_ppm_set_message"><![CDATA[Now you have two options:<br/>- Enter the known PPM value of your RTL-SDR device in the Settings or<br/>- Let this app try to find it for you.<br/>For the latter you need to be in an area with (multiple) ships.]]></string>
-		
-	<string name="popup_calibration_cancelled_title">Calibration cancelled</string>
+    <string name="popup_no_ppm_set_title">First time use / External sources</string>
+    <string name="popup_no_ppm_set_message"><![CDATA[You have three options:<br><br>- Let this app try to calibrate the RTL-SDR device. For this you need to be in an area with (multiple) ships. (RECOMMENDED)<br><br>- Enter the known PPM value of your RTL-SDR device in the Settings,<br><br>- Don\'t use the RTL-SDR device at all / I don\'t have such a device. Receive from external device and/or fellow users only.]]></string>
+    <string name="popup_no_ppm_do_calibrate">Calibrate</string>
+    <string name="popup_no_ppm_do_only_external_sources">Only use external sources</string>
+    <string name="popup_external_sources_title">External sources</string>
+    <string name="popup_external_sources_message">You will only receive Ships data from external sources.</string>
+
+    <string name="popup_calibration_cancelled_title">Calibration cancelled</string>
 	<string name="popup_calibration_cancelled_message">Cancelled calibration of RTL-SDR device. You will only receive Ship data from fellow users.</string>
-	
+
 	<string name="popup_are_you_sure_title">Are you sure?</string>
 	<string name="popup_are_you_sure_yes">Yes</string>
 	<string name="popup_are_you_sure_no">No</string>

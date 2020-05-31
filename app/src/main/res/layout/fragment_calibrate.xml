@@ -3,14 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF" >
+    android:background="#FFFFFF"
+	android:padding="10dp">
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight=".3"
         android:text="@string/title_calibrate"
+		android:layout_gravity="center_horizontal"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ImageView
@@ -48,6 +50,7 @@
 		        android:layout_weight="1"         
 		        android:textOff="@string/toggle_turn_on_calibrating_thorough"
 		        android:textOn="@string/toggle_turn_off_calibrating_thorough" />
+
     </LinearLayout>
 	
     <ProgressBar

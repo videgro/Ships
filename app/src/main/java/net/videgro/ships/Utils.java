@@ -237,6 +237,41 @@ public final class Utils {
 		});		
 	}
 
+	public static void showQuestion(final String labelPositive,final String labelNegative,final int idPositive,final int idNegative,final Activity activity,final ImagePopupListener listener,final String title,final String message,final int imageResource){
+		final String tag="showQuestion - ";
+
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
+				ad.setTitle(title);
+				ad.setMessage(Html.fromHtml(message));
+				ad.setIcon(imageResource);
+				ad.setPositiveButton(labelPositive, new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						if (listener!=null){
+							listener.onImagePopupDispose(idPositive);
+						}
+					}
+				});
+				ad.setNegativeButton(labelNegative, new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						if (listener!=null){
+							listener.onImagePopupDispose(idNegative);
+						}
+					}
+				});
+
+				final AlertDialog alert = ad.create();
+				alert.show();
+
+				// Make the textview clickable. Must be called after show()
+				((TextView)alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+			}
+		});
+	}
+
 	public static boolean is64bit(){
 		final String VAL_64="64";
 		// API level 21+ use Build.SUPPORTED_64_BIT_ABIS

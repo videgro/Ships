@@ -26,9 +26,10 @@ import net.videgro.usb.UsbUtils;
 public class MainActivity extends Activity implements ImagePopupListener {
     private static final String TAG="MainActivity";
 
-    private static final int IMAGE_POPUP_ID_CALIBRATE_WARNING = 1101;
+    private static final int IMAGE_POPUP_ID_CALIBRATE_START = 1101;
     private static final int IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING = 1102;
     private static final int IMAGE_POPUP_ID_IGNORE = 1109;
+    private static final int IMAGE_POPUP_ID_ONLY_USE_EXTERNAL_SOURCES = 1110;
 
     private static boolean nativeLibraryLoaded=false;
     private static boolean active = false;
@@ -213,10 +214,11 @@ public class MainActivity extends Activity implements ImagePopupListener {
                     if (failedToCalibrate){
                         showMap();
                     } else {
-                        // Start calibration attempt
+                        // Set this to true, to prevent loop
                         tryingToCalibrate = true;
-                        Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_WARNING, this, this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon, null);
-                        // On dismiss: Will continue by switching to CalibrateFragment
+
+                        Utils.showQuestion(getString(R.string.popup_no_ppm_do_calibrate), getString(R.string.popup_no_ppm_do_only_external_sources), IMAGE_POPUP_ID_CALIBRATE_START, IMAGE_POPUP_ID_ONLY_USE_EXTERNAL_SOURCES, this, this, getString(R.string.popup_no_ppm_set_title), getString(R.string.popup_no_ppm_set_message), R.drawable.warning_icon);
+                        // On question answered: Will continue in onImagePopupDispose
                     }
                 }
             }
@@ -247,7 +249,9 @@ public class MainActivity extends Activity implements ImagePopupListener {
     @Override
     public void onImagePopupDispose(int id) {
         switch (id) {
-            case IMAGE_POPUP_ID_CALIBRATE_WARNING:
+            case IMAGE_POPUP_ID_CALIBRATE_START:
+                // Start calibration attempt
+                SettingsUtils.getInstance().setToPreferencesInternalIsCalibrationFailed(false);
                 gotoFragment(new CalibrateFragment());
                 break;
             case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
@@ -256,6 +260,10 @@ public class MainActivity extends Activity implements ImagePopupListener {
                 finishAffinity();
                 System.exit(0);
                 break;
+            case IMAGE_POPUP_ID_ONLY_USE_EXTERNAL_SOURCES:
+                Analytics.logEvent(this,TAG, "onOptedToUseOnlyExternalSources", "");
+                tryingToCalibrate=false;
+                Utils.showPopup(IMAGE_POPUP_ID_IGNORE,this, this, getString(R.string.popup_external_sources_title), getString(R.string.popup_external_sources_message), R.drawable.ic_information, null);
             case IMAGE_POPUP_ID_IGNORE:
             default:
                 Log.d(TAG,"onImagePopupDispose - id: "+id);
