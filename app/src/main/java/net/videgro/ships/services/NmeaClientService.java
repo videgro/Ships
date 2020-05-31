@@ -10,7 +10,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -245,7 +244,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         Log.d(TAG,tag+informText);
         if (port>0) {
             // When port is 0, asked to disable this repeater: Be quiet about this.
-            Toast.makeText(this, informText, Toast.LENGTH_LONG).show();
+            Utils.sendNotification(this,"Repeater",informText);
         }
 
         return result;

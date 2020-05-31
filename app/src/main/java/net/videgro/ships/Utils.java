@@ -35,6 +35,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -161,7 +162,7 @@ public final class Utils {
         final NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (mNotificationManager!=null) {
             // mId allows you to update the notification later on.
-            int mId = 0;
+            final int mId = (int)Calendar.getInstance().getTime().getTime();
             mNotificationManager.notify(mId, mBuilder.build());
             Analytics.logEvent(context,TAG, tag,message);
         } else {

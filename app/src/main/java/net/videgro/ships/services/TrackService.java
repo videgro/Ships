@@ -11,11 +11,11 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
+import net.videgro.ships.Utils;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 
 public class TrackService extends Service implements LocationListener {
@@ -98,7 +98,7 @@ public class TrackService extends Service implements LocationListener {
 			// Better solution would be to display a dialog and suggesting to
 			// go to the settings
 			if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				Toast.makeText(this,getString(R.string.msg_gps_not_enabled),Toast.LENGTH_LONG).show();
+				Utils.sendNotification(this,"Own location",getString(R.string.msg_gps_not_enabled));
 			} else {
 				askLocationManagerForLocationUpdates();
 			}
