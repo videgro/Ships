@@ -106,6 +106,23 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
     override fun onPause() {
         super.onPause()
+
+        // Count number of rendered markers at THIS moment and log it
+        var numMarkers=0
+        markers.values.forEach{marker -> if (marker.anchorNode!=null) numMarkers++ }
+        val msg="Rendered markers on pause: "+numMarkers+" ("+shipsMap.size+")"
+        Log.i(
+            TAG,
+            msg
+        )
+
+        Analytics.logEvent(
+            this,
+            Analytics.CATEGORY_STATISTICS,
+            "AR",
+            msg
+        )
+
         arSceneView.session?.let {
             locationScene?.pause()
             arSceneView?.pause()
