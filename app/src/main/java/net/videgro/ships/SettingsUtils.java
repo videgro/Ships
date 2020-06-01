@@ -15,6 +15,7 @@ public final class SettingsUtils {
 	private static final String KEY_PREF_OWN_IP = "pref_ownIp";
 
     private static final String KEY_PREF_INTERNAL_CALIBRATION_FAILED = "pref_internalIsCalibrationFailed";
+	private static final String KEY_PREF_INTERNAL_USE_ONLY_EXTERNAL_SOURCES = "pref_useOnlyExternalSources";
 
     private static final String KEY_PREF_SHIP_SCALE_FACTOR = "pref_shipScaleFactor";
     private static final String KEY_PREF_MAX_AGE = "pref_maxAge";
@@ -44,6 +45,7 @@ public final class SettingsUtils {
 
 	private static final boolean DEFAULT_LOGGING_VERBOSE = false;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
+	private static final boolean DEFAULT_INTERNAL_USE_ONLY_EXTERNAL_SOURCES = false;
 
     private static final boolean DEFAULT_MAP_ZOOM_TO_EXTENT = true;
     private static final boolean DEFAULT_MAP_DISABLE_SOUND = false;
@@ -150,6 +152,19 @@ public final class SettingsUtils {
         editor.putBoolean(KEY_PREF_INTERNAL_CALIBRATION_FAILED,failed);
         editor.commit();
     }
+
+	public boolean parseFromPreferencesInternalUseOnlyExternalSources() {
+		validateSharedPreferences();
+		return sharedPreferences.getBoolean(KEY_PREF_INTERNAL_USE_ONLY_EXTERNAL_SOURCES, DEFAULT_INTERNAL_USE_ONLY_EXTERNAL_SOURCES);
+	}
+
+	public void setToPreferencesInternalUseOnlyExternalSources(final boolean useOnlyExternalSources) {
+		validateSharedPreferences();
+
+		final SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(KEY_PREF_INTERNAL_USE_ONLY_EXTERNAL_SOURCES,useOnlyExternalSources);
+		editor.commit();
+	}
 
 	public boolean parseFromPreferencesLoggingVerbose() {
 		validateSharedPreferences();

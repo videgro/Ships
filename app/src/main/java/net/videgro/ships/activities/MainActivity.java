@@ -9,10 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
@@ -100,6 +102,15 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		if (actionBar!=null) {
             actionBar.setDisplayShowTitleEnabled(true);
             //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        }
+
+		// Get the intent that started this activity
+        final Intent intent = getIntent();
+        if(intent.getAction()!=null && intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)){
+            Analytics.logEvent(this,TAG, Analytics.CATEGORY_RTLSDR_DEVICE, "Started by inserting RTL-SDR");
+
+            // Re-enable calibration utility
+            SettingsUtils.getInstance().setToPreferencesInternalUseOnlyExternalSources(false);
         }
 
         final IntentFilter filter=new IntentFilter();
@@ -193,8 +204,9 @@ public class MainActivity extends Activity implements ImagePopupListener {
         if (UsbUtils.isUsbSupported() && nativeLibraryLoaded) {
             final int ppm = SettingsUtils.getInstance().parseFromPreferencesRtlSdrPpm();
 
-            if (SettingsUtils.isValidPpm(ppm)){
-                // Everything ok -> show map
+            if (SettingsUtils.isValidPpm(ppm) || SettingsUtils.getInstance().parseFromPreferencesInternalUseOnlyExternalSources()){
+                // Valid PPM or selected to use external sources only
+                // -> show map
                 tryingToCalibrate=false;
                 showMap();
             } else {
@@ -255,6 +267,9 @@ public class MainActivity extends Activity implements ImagePopupListener {
                 gotoFragment(new CalibrateFragment());
                 break;
             case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
+                // Re-enable calibration utility
+                SettingsUtils.getInstance().setToPreferencesInternalUseOnlyExternalSources(false);
+
                 // TODO: Currently we can not restart RTL-SDR native code, so stop application
                 Analytics.logEvent(this,TAG, "stopApplication", "IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING");
                 finishAffinity();
@@ -262,6 +277,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
                 break;
             case IMAGE_POPUP_ID_ONLY_USE_EXTERNAL_SOURCES:
                 Analytics.logEvent(this,TAG, "onOptedToUseOnlyExternalSources", "");
+                SettingsUtils.getInstance().setToPreferencesInternalUseOnlyExternalSources(true);
                 tryingToCalibrate=false;
                 Utils.showPopup(IMAGE_POPUP_ID_IGNORE,this, this, getString(R.string.popup_external_sources_title), getString(R.string.popup_external_sources_message), R.drawable.ic_information, null);
             case IMAGE_POPUP_ID_IGNORE:

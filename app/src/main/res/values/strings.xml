@@ -56,7 +56,7 @@
     <string name="popup_no_ppm_do_calibrate">Calibrate</string>
     <string name="popup_no_ppm_do_only_external_sources">Only use external sources</string>
     <string name="popup_external_sources_title">External sources</string>
-    <string name="popup_external_sources_message">You will only receive Ships data from external sources.</string>
+    <string name="popup_external_sources_message">You will only receive Ships data from external sources. To re-enable the Calibrate utility, insert a supported RTL-SDR device.</string>
 
     <string name="popup_calibration_cancelled_title">Calibration cancelled</string>
 	<string name="popup_calibration_cancelled_message">Cancelled calibration of RTL-SDR device. You will only receive Ship data from fellow users.</string>
@@ -240,9 +240,8 @@
 	<string name="pref_rtlSdrPpm">pref_rtlSdrPpm</string>
     <string name="pref_rtlSdrPpm_default">99999</string>
     <string name="pref_rtlSdrPpm_dialog_title">The RTL-SDR parts per million offset.</string>
-    <string name="pref_rtlSdrPpm_summary">Use the calibrate feature to determine this automatically or set this value manually.</string> 
+    <string name="pref_rtlSdrPpm_summary">Use the calibrate utility to determine this automatically or set this value manually.</string>
     <string name="pref_rtlSdrPpm_title">RTL-SDR: PPM</string>
-    
     <string name="pref_rtlSdrPpmInvalidate">pref_rtlSdrPpmInvalidate</string>
     <string name="pref_rtlSdrPpmInvalidate_summary">Invalidate the current PPM setting.</string>
     <string name="pref_rtlSdrPpmInvalidate_title">Use other RTL-SDR device</string>
