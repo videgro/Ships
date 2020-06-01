@@ -545,29 +545,35 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         boolean enable = false;
 
         if (isAdded()) {
-            final ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
-            if (availability.isTransient()) {
-                // Re-query at 5Hz while compatibility is checked in the background.
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        maybeEnableArButton(menuItem);
-                    }
-                }, 200);
-            }
-            if (availability.isSupported()) {
-                if (checkCameraAvailable()) {
-                    if (gpsAvailable()) {
-                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "OK");
-                        enable = true;
+            try {
+                final ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
+
+                if (availability.isTransient()) {
+                    // Re-query at 5Hz while compatibility is checked in the background.
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            maybeEnableArButton(menuItem);
+                        }
+                    }, 200);
+                }
+                if (availability.isSupported()) {
+                    if (checkCameraAvailable()) {
+                        if (gpsAvailable()) {
+                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "OK");
+                            enable = true;
+                        } else {
+                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NoGPS");
+                        }
                     } else {
-                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NoGPS");
+                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NoCamera");
                     }
                 } else {
-                    Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NoCamera");
+                    Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NotSupportedArCore");
                 }
-            } else {
-                Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NotSupportedArCore");
+            } catch (Exception e) {
+                // Just log all exceptions. Not sure what can happen in ArCoreApk
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, e.getMessage());
             }
         }
 
