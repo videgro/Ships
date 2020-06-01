@@ -10,10 +10,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Picture;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -522,24 +524,50 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         return shareIntent;
     }
 
+    private boolean checkCameraAvailable(){
+        final PackageManager pm = getActivity().getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
+    private boolean gpsAvailable() {
+        final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        return (locationManager != null && locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER));
+    }
+
     private void maybeEnableArButton(final MenuItem menuItem) {
-        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
-        if (availability.isTransient()) {
-            // Re-query at 5Hz while compatibility is checked in the background.
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    maybeEnableArButton(menuItem);
+        final String analyticsAr = "AR";
+
+        boolean enable = false;
+
+        if (isAdded()) {
+            final ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
+            if (availability.isTransient()) {
+                // Re-query at 5Hz while compatibility is checked in the background.
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        maybeEnableArButton(menuItem);
+                    }
+                }, 200);
+            }
+            if (availability.isSupported()) {
+                if (checkCameraAvailable()) {
+                    if (gpsAvailable()) {
+                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "OK");
+                        enable = true;
+                    } else {
+                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NoGPS");
+                    }
+                } else {
+                    Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NoCamera");
                 }
-            }, 200);
+            } else {
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "NotSupportedArCore");
+            }
         }
-        if (availability.isSupported()) {
-            menuItem.setVisible(true);
-            menuItem.setEnabled(true);
-        } else { // Unsupported or unknown.
-            menuItem.setVisible(false);
-            menuItem.setEnabled(false);
-        }
+
+        menuItem.setVisible(enable);
+        menuItem.setEnabled(enable);
     }
 
     private void takeScreenShotWithCheck() {

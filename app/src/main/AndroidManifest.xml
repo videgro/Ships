@@ -18,8 +18,8 @@
     <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
 
     <!-- Augmented Reality -->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.location.gps"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
     <!--    ARcorelocation needs minSdkVersion 24,
             but we still want to support older devices which doesn't have AR functionality anyway.
             We override this constraint, and will risk runtime errors this way.
