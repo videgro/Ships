@@ -4,6 +4,7 @@
     android:layout_width="150dp"
     android:layout_height="wrap_content"
     android:background="@drawable/ar_marker"
+    android:alpha = "0.8"
     android:visibility="visible">
 
     <RelativeLayout
