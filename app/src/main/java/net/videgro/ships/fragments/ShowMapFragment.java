@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -421,11 +422,15 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
     }
 
-    private void setupTts(){
+    private void setupTts() {
         if (isAdded()) {
             final Intent intent = new Intent();
-            intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-            startActivityForResult(intent, REQ_CODE_CHECK_TTS_DATA);
+            try {
+                intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(intent, REQ_CODE_CHECK_TTS_DATA);
+            } catch (ActivityNotFoundException e) {
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, "TTS", "ActNotFound");
+            }
         }
     }
 
