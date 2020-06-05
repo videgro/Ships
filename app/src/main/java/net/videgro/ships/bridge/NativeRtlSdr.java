@@ -37,22 +37,6 @@ public class NativeRtlSdr {
      * Calls FROM native code
      */
     @Keep
-    public void onMessage(final String data) {
-        Log.d(TAG, "onMessage - " + data);
-        for (final NativeRtlSdrListener listener : LISTENERS) {
-            listener.onMessage(data);
-        }
-    }
-
-    @Keep
-    public void onError(final String data) {
-        Log.w(TAG, "onError - " + data);
-        for (final NativeRtlSdrListener listener : LISTENERS) {
-            listener.onError(data);
-        }
-    }
-
-    @Keep
     public void onException(final int exitCode) {
         Log.i(TAG, "onException - exitCode: " + exitCode);
 
@@ -67,14 +51,6 @@ public class NativeRtlSdr {
 
         for (final NativeRtlSdrListener listener : LISTENERS) {
             listener.onRtlSdrStarted();
-        }
-    }
-
-    @Keep
-    public void onPpm(final int ppmCurrent, final int ppmCumulative) {
-        Log.d(TAG, "onPpm - current: " + ppmCurrent + ", cumulative: " + ppmCumulative);
-        for (final NativeRtlSdrListener listener : LISTENERS) {
-            listener.onPpm(ppmCurrent, ppmCumulative);
         }
     }
 
@@ -126,16 +102,8 @@ public class NativeRtlSdr {
     }
 
     public interface NativeRtlSdrListener {
-        void onMessage(final String data);
-
-        void onError(final String data);
-
         void onException(final int exitCode);
-
-        void onPpm(final int ppmCurrent, final int ppmCumulative);
-
         void onRtlSdrStarted();
-
         void onRtlSdrStopped();
     }
 }

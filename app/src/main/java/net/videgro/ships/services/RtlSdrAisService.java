@@ -133,25 +133,16 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 			return RtlSdrAisService.this;
 		}
 	}
-	
-	@Override
-	public void onMessage(String data) {
-		// Nothing to do					
-	}
-
-	@Override
-	public void onError(String data) {
-		// Nothing to do					
-	}
 
 	@Override
 	public void onException(int exitCode) {
-		// Nothing to do					
-	}
 
-	@Override
-	public void onPpm(int ppmCurrent, int ppmCumulative) {
-		// Nothing to do					
+		Log.d(TAG,"NativeRtlSdrListener - onException - "+exitCode);
+
+		// Inform listeners
+		for (final RtlSdrServiceListener listener : listeners){
+			listener.onRtlSdrException(exitCode);
+		}
 	}
 
 	@Override

@@ -1,7 +1,8 @@
 package net.videgro.ships.services;
 
-import net.videgro.ships.StartRtlSdrRequest;
 import android.app.Service;
+
+import net.videgro.ships.StartRtlSdrRequest;
 
 public abstract class RtlSdrService extends Service {
 	
@@ -15,5 +16,6 @@ public abstract class RtlSdrService extends Service {
     public interface RtlSdrServiceListener {
         void onRtlSdrStarted();
         void onRtlSdrStopped();
+        void onRtlSdrException(final int exitCode);
     }
 }

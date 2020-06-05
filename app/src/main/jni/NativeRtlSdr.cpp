@@ -68,7 +68,7 @@ void send_exception(const int exception_code) {
         return;
     }
 
-    jmethodID method = env->GetMethodID(pctx->jniClz, "onException", "()V");
+    jmethodID method = env->GetMethodID(pctx->jniClz, "onException", "(I)V");
     if (!method){
         LOGE("Failed to retrieve onException methodID @ line %d",__LINE__);
         return;
@@ -121,7 +121,6 @@ Java_net_videgro_ships_bridge_NativeRtlSdr_changeRtlSdrPpm(JNIEnv *env, jobject 
 
 JNIEXPORT void JNICALL
 Java_net_videgro_ships_bridge_NativeRtlSdr_startRtlSdrAis(JNIEnv *env, jobject instance,jstring args,jint fd, jstring uspfs_path) {
-
     const char *nargs = env->GetStringUTFChars(args, 0);
     const char *n_uspfs_path = (uspfs_path == NULL) ? (NULL) : (env->GetStringUTFChars(uspfs_path,0));
     const int nargslength = env->GetStringLength(args);

@@ -288,6 +288,12 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         } else {
             getParent().setResult(resultCode, data);
         }
+
+        if (errorReason != NO_ERROR) {
+            // Log error to Analytics
+            Analytics.logEvent(this, Analytics.CATEGORY_RTLSDR_DEVICE, message, "");
+        }
+
         finish();
     }
 
@@ -331,6 +337,12 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
     public void onRtlSdrStarted() {
         Log.d(TAG, "onRtlSdrStarted");
         finish(NO_ERROR, getString(R.string.connect_usb_device_status_started));
+    }
+
+    @Override
+    public void onRtlSdrException(final int exitCode){
+        Log.d(TAG, "onRtlSdrException");
+        finish(ERROR_REASON_MISC, getString(R.string.connect_usb_device_status_exception_unknown)+" ("+exitCode+")");
     }
 
 	/* START implementation DeviceDialogListener */
