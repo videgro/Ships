@@ -18,6 +18,7 @@ import android.graphics.Picture;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -544,7 +545,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         boolean enable = false;
 
-        if (isAdded()) {
+        if (isAdded() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)) {
             try {
                 final ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
 
