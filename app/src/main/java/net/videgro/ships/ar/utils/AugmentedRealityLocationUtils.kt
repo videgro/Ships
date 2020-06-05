@@ -28,12 +28,28 @@ object AugmentedRealityLocationUtils {
             }
         }
 
-        val session = Session(activity)
+        var session: Session? = null
+        try {
+            session = Session(activity)
+        } catch (e: FatalException) {
+            /*
+             * Will wrap the FatalException into a UnavailableException.
+             *              *
+             * Also throwing:
+             * - UnavailableArcoreNotInstalledException
+             * - UnavailableApkTooOldException
+             * - UnavailableSdkTooOldException
+             * - UnavailableDeviceNotCompatibleException
+             */
+            throw UnavailableException("FatalException - "+e.message);
+        }
+
         val config = Config(session)
         config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
         // IMPORTANT!!!  ArSceneView requires the `LATEST_CAMERA_IMAGE` non-blocking update mode.
 
         session.configure(config)
+
         return session
     }
 

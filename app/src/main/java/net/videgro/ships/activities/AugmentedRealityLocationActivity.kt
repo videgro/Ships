@@ -281,7 +281,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
                 }
             } catch (e: UnavailableException) {
                 val message=AugmentedRealityLocationUtils.handleSessionException(this, e)
-                // TODO: Currently we can not restart RTL-SDR native code, so stop application
+
                 Analytics.logEvent(
                     this,
                     TAG,
