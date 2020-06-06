@@ -555,8 +555,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private void maybeEnableArButton(final MenuItem menuItem) {
-        final String analyticsAr = "AR";
-
         boolean enable = false;
 
         if (isAdded() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)) {
@@ -575,20 +573,20 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 if (availability.isSupported()) {
                     if (checkCameraAvailable()) {
                         if (gpsAvailable()) {
-                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, analyticsAr, "OK");
+                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_AR, TAG, "OK");
                             enable = true;
                         } else {
-                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NoGPS");
+                            Analytics.logEvent(getActivity(), Analytics.CATEGORY_AR_ERRORS, TAG, "NoGPS");
                         }
                     } else {
-                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NoCamera");
+                        Analytics.logEvent(getActivity(), Analytics.CATEGORY_AR_ERRORS, TAG, "NoCamera");
                     }
                 } else {
-                    Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, "NotSupportedArCore");
+                    Analytics.logEvent(getActivity(), Analytics.CATEGORY_AR_ERRORS, TAG, "NotSupportedArCore");
                 }
             } catch (Exception e) {
                 // Just log all exceptions. Not sure what can happen in ArCoreApk
-                Analytics.logEvent(getActivity(), Analytics.CATEGORY_ERRORS, analyticsAr, e.getMessage());
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_AR_ERRORS, TAG, e.getMessage());
             }
         }
 

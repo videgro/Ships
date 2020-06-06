@@ -12,6 +12,8 @@ public final class Analytics {
 	public static final String CATEGORY_ANDROID_DEVICE="Device (Android)";
 	public static final String CATEGORY_RTLSDR_DEVICE="Device (RTL-SDR)";
 	public static final String CATEGORY_NMEA_REPEAT="NMEA Repeat";
+	public static final String CATEGORY_AR="AR";
+	public static final String CATEGORY_AR_ERRORS="AR Errors";
 
 	private Analytics(){
 		// Utility class, no public constructor

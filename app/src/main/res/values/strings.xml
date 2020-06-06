@@ -108,9 +108,10 @@
     <string name="popup_ar_error_arcore_not_updated">Please update ARCore</string>
     <string name="popup_ar_error_app_not_updated">Please update this app</string>
     <string name="popup_ar_error_arcore_not_supported">This device does not support AR</string>
+    <string name="popup_ar_error_arsceneview_not_set">ArSceneView not set.</string>
 
-    <string name="popup_camera_open_error_title">Open camera</string>
     <string name="popup_camera_open_error_message">Unable to get camera. Is another app using the camera?</string>
+
 
     <string name="popup_camera_and_location_permission_request_title">Permissions</string>
     <string name="popup_camera_and_location_permission_request_message">Location and Camera permissions are needed to use this feature.</string>

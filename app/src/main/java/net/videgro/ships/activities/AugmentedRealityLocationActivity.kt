@@ -50,14 +50,12 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     private val IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR = 1102
     private val IMAGE_POPUP_ID_IGNORE = 1109
     private val IMAGE_POPUP_ID_AIS_RUNNING = 1110
-    private val IMAGE_POPUP_ID_OPEN_CAMERA_ERROR = 1111
+    private val IMAGE_POPUP_ID_START_AR_ERROR = 1111
     private val IMAGE_POPUP_ID_REQUEST_PERMISSIONS = 1112
     private val IMAGE_POPUP_ID_ACCURACY_MSG_SHOWN = 1113
 
     private val REQ_CODE_START_RTLSDR = 1201
     private val REQ_CODE_STOP_RTLSDR = 1202
-
-    private var arCoreInstallRequested = false
 
     // Our ARCore-Location scene
     private var locationScene: LocationScene? = null
@@ -86,9 +84,27 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_augmented_reality_location)
-        setupLoadingDialog()
-        setupNmeaClientService()
+        val error=AugmentedRealityLocationUtils.checkAvailability(this);
+        if (error.isEmpty()) {
+            setContentView(R.layout.activity_augmented_reality_location)
+            setupLoadingDialog()
+            setupNmeaClientService()
+        } else {
+            // Not possible to start AR
+            Log.e(
+                TAG,
+                error
+            )
+
+            Analytics.logEvent(
+                this,
+                Analytics.CATEGORY_AR_ERRORS,
+                TAG,
+                error
+            )
+
+            finish();
+        }
     }
 
     override fun onResume() {
@@ -118,8 +134,8 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
         Analytics.logEvent(
             this,
-            Analytics.CATEGORY_STATISTICS,
-            "AR",
+            Analytics.CATEGORY_AR,
+            TAG,
             msg
         )
 
@@ -272,60 +288,64 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         loadingDialog.setCanceledOnTouchOutside(false)
     }
 
-    private fun setupSession() {
-        if (arSceneView == null) {
-            return
-        }
-
-        if (arSceneView.session == null) {
-            try {
-                val session = AugmentedRealityLocationUtils.setupSession(this, arCoreInstallRequested)
-                if (session == null) {
-                    arCoreInstallRequested = true
-                    return
-                } else {
-                    arSceneView.setupSession(session)
-                }
-            } catch (e: UnavailableException) {
-                val message=AugmentedRealityLocationUtils.handleSessionException(this, e)
-
-                Analytics.logEvent(
-                    this,
-                    TAG,
-                    "arUnavailable",
-                    message
-                )
-                Utils.showPopup(
-                    IMAGE_POPUP_ID_IGNORE,
-                    this,
-                    this,
-                    getString(R.string.popup_ar_error_title),
-                    message,
-                    R.drawable.thumbs_down_circle,null
-                )
-                // On dismiss: Will continue onImagePopupDispose
-            }
-        }
-
-        if (locationScene == null) {
-            locationScene = LocationScene(this, arSceneView)
-            locationScene!!.setMinimalRefreshing(true)
-            locationScene!!.setOffsetOverlapping(true)
-//            locationScene!!.setRemoveOverlapping(true)
-            locationScene!!.anchorRefreshInterval = 2000
-        }
-
+    private fun setupSession():String{
+        var error:String="";
         try {
-            resumeArElementsTask.run()
-        } catch (e: CameraNotAvailableException) {
+            val session = AugmentedRealityLocationUtils.setupSession(this)
+            if (session != null) {
+                arSceneView.setupSession(session)
+            }
+        } catch (e: UnavailableException) {
+            error = AugmentedRealityLocationUtils.handleSessionException(this, e)
+        }
+        return error
+    }
+
+    private fun setupLocationScene(){
+        locationScene = LocationScene(this, arSceneView)
+        locationScene!!.setMinimalRefreshing(true)
+        locationScene!!.setOffsetOverlapping(true)
+//            locationScene!!.setRemoveOverlapping(true)
+        locationScene!!.anchorRefreshInterval = 2000
+    }
+
+    private fun createSession() {
+        var error:String="";
+
+        if (arSceneView != null) {
+            if (arSceneView.session == null) {
+                error=setupSession()
+            }
+
+            if (error.isEmpty()) {
+                if (locationScene == null) {
+                    setupLocationScene()
+                }
+
+                try {
+                    resumeArElementsTask.run()
+                } catch (e: CameraNotAvailableException) {
+                    error=getString(R.string.popup_camera_open_error_message);
+                }
+            }
+        } else {
+            error=getString(R.string.popup_ar_error_arsceneview_not_set);
+        }
+
+        if (!error.isEmpty()){
+            Analytics.logEvent(
+                this,
+                Analytics.CATEGORY_AR_ERRORS,
+                TAG,
+                error
+            )
             Utils.showPopup(
-                IMAGE_POPUP_ID_OPEN_CAMERA_ERROR,
+                IMAGE_POPUP_ID_START_AR_ERROR,
                 this,
                 this,
-                getString(R.string.popup_camera_open_error_title),
-                getString(R.string.popup_camera_open_error_message),
-                R.drawable.thumbs_down_circle,
-                null
+                getString(R.string.popup_ar_error_title),
+                error,
+                R.drawable.thumbs_down_circle, null
             )
             // On dismiss: Will continue onImagePopupDispose
         }
@@ -530,7 +550,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         if (!PermissionUtils.hasLocationAndCameraPermissions(this)) {
             PermissionUtils.requestCameraAndLocationPermissions(this)
         } else {
-            setupSession()
+            createSession()
         }
     }
 
@@ -580,8 +600,8 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
             IMAGE_POPUP_ID_AIS_RUNNING -> {
                 // AIS is running, invite to share data to cloud
             }
-            IMAGE_POPUP_ID_OPEN_CAMERA_ERROR -> {
-                // Not possible to open camera, exit activity
+            IMAGE_POPUP_ID_START_AR_ERROR -> {
+                // Not possible to start AR, exit activity
                 finish();
             }
             IMAGE_POPUP_ID_REQUEST_PERMISSIONS -> {

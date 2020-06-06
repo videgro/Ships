@@ -9,8 +9,6 @@ import android.provider.Settings
 import androidx.core.app.ActivityCompat
 
 object PermissionUtils {
-
-    private const val CAMERA_PERMISSION_CODE = 0
     private const val MULTIPLE_PERMISSION_CODE = 1
     private const val CAMERA_PERMISSION = Manifest.permission.CAMERA
     private val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -22,15 +20,6 @@ object PermissionUtils {
             }
         }
         return true
-    }
-
-    fun hasCameraPermission(activity: Activity): Boolean {
-        return (ActivityCompat.checkSelfPermission(activity, CAMERA_PERMISSION) == PackageManager.PERMISSION_GRANTED)
-    }
-
-    fun requestCameraPermission(activity: Activity) {
-        ActivityCompat.requestPermissions(
-                activity, arrayOf(CAMERA_PERMISSION), CAMERA_PERMISSION_CODE)
     }
 
     fun requestCameraAndLocationPermissions(activity: Activity) {
