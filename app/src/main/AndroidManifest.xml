@@ -89,18 +89,21 @@
 
         <service
             android:name=".services.RtlSdrAisService"
+            android:stopWithTask="true"
             android:enabled="true"
             android:exported="false"
             android:isolatedProcess="false" />
 
         <service
             android:name=".services.TrackService"
+            android:stopWithTask="true"
             android:enabled="true"
             android:foregroundServiceType="location"
             android:label="TrackService" />
 
         <service
             android:name=".services.NmeaClientService"
+            android:stopWithTask="true"
             android:enabled="true"
             android:label="NmeaClientService" />
 
