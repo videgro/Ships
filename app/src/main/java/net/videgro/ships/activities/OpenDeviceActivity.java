@@ -11,13 +11,15 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
-import android.util.Log;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
@@ -105,8 +107,15 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         Log.d(TAG, "setupRtlsdrServiceConnection");
         this.rtlSdrDevice = rtlSdrDevice;
         rtlsdrServiceConnection = new RtlsdrServiceConnection(this);
-        Intent serviceIntent = new Intent(this, RtlSdrAisService.class);
-        startService(serviceIntent);
+        final Intent serviceIntent = new Intent(this, RtlSdrAisService.class);
+
+        // On Android 8+ let service run in foreground
+        if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
         bindService(new Intent(this, RtlSdrAisService.class), rtlsdrServiceConnection, Context.BIND_AUTO_CREATE);
     }
 

@@ -43,8 +43,6 @@ import java.util.Locale;
 public final class Utils {
 	private static final String TAG = "Utils";
 
-    private static final String NOTIFICATION_CHANNEL_ID="net.videgro.ships-notifications";
-
 	public static final Long IMAGE_POPUP_AUTOMATIC_DISMISS=1000*5L;
 
 	private static final SimpleDateFormat LOG_TIME_FORMAT = new SimpleDateFormat("[HH:mm:ss] ", Locale.getDefault());
@@ -114,61 +112,6 @@ public final class Utils {
 	    final AdView adView = (AdView) view.findViewById(R.id.adView);
 	    adView.loadAd(builder.build());
 	}
-
-    private static void createNotificationChannel(final Context context){
-        /*
-         *  https://developer.android.com/training/notify-user/build-notification.html
-         */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Create the NotificationChannel, but only on API 26+ because
-            // the NotificationChannel class is new and not in the support library
-            final CharSequence name = context.getString(R.string.notification_channel_name);
-            final String description = context.getString(R.string.notification_channel_description);
-
-            final NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,name,NotificationManager.IMPORTANCE_DEFAULT);
-            //channel.setDescription(description);
-
-            final Object notificationManagerObj=context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManagerObj instanceof NotificationManager) {
-                ((NotificationManager) notificationManagerObj).createNotificationChannel(channel);
-            }
-        }
-    }
-
-    public static void sendNotification(final Context context,final String postfix,final String message){
-        final String tag="sendNotification - ";
-
-        createNotificationChannel(context);
-
-        final NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context,NOTIFICATION_CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_stat_notification)
-                        .setContentTitle(context.getText(R.string.app_name)+" "+postfix)
-                        .setContentText(message);
-        // Creates an explicit intent for an Activity in your app
-        final Intent resultIntent = new Intent(context, MainActivity.class);
-
-        // The stack builder object will contain an artificial back stack for the
-        // started Activity.
-        // This ensures that navigating backward from the Activity leads out of
-        // your application to the Home screen.
-        final TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        final PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        final NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (mNotificationManager!=null) {
-            // mId allows you to update the notification later on.
-            final int mId = (int)Calendar.getInstance().getTime().getTime();
-            mNotificationManager.notify(mId, mBuilder.build());
-            Analytics.logEvent(context,TAG, tag,message);
-        } else {
-            Analytics.logEvent(context,Analytics.CATEGORY_WARNINGS, tag,"NotificationManager == NULL");
-        }
-    }
 
 	public static void logStatus(final Activity activity,final TextView textView,final String status) {
 		final String tag="logStatus - ";

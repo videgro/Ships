@@ -1,5 +1,6 @@
 package net.videgro.ships.services;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,14 +9,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import net.videgro.ships.Analytics;
+import net.videgro.ships.Notifications;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
-import net.videgro.ships.Utils;
 import net.videgro.ships.listeners.OwnLocationReceivedListener;
 
 public class TrackService extends Service implements LocationListener {
@@ -89,16 +91,28 @@ public class TrackService extends Service implements LocationListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		int result = super.onStartCommand(intent, flags, startId);
+		final int result = super.onStartCommand(intent, flags, startId);
 		Log.d(TAG, "onStartCommand");
 
-		if (locationManager != null) {
+		// On Android 8+ let TrackService run in foreground
+		// More information: https://developer.android.com/about/versions/oreo/background-location-limits.html
+		//
+		// After startForegroundService, we must call startForeground in service.
+		//
+		// See: 1) https://stackoverflow.com/questions/44425584/context-startforegroundservice-did-not-then-call-service-startforeground
+		//      2) https://stackoverflow.com/questions/46375444/remoteserviceexception-context-startforegroundservice-did-not-then-call-servic
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			final Notification notification = Notifications.getInstance().createNotification(this, getString(R.string.notification_channel_services_id), getString(R.string.notification_service_tracker_title),getString(R.string.notification_service_tracker_description));
+			final int notificationId = (int) (System.currentTimeMillis() % 10000);
+			startForeground(notificationId, notification);
+		}
 
+		if (locationManager != null) {
 			// check if enabled and if not send user to the GPS settings
 			// Better solution would be to display a dialog and suggesting to
 			// go to the settings
 			if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				Utils.sendNotification(this,"Own location",getString(R.string.msg_gps_not_enabled));
+				Notifications.getInstance().send(this,getString(R.string.notification_channel_services_id),"Own location",getString(R.string.msg_gps_not_enabled));
 			} else {
 				askLocationManagerForLocationUpdates();
 			}

@@ -14,8 +14,26 @@
     <string name="action_settings">Settings</string>
 
     <!-- Notifications -->
-    <string name="notification_channel_name">Ships</string>
-    <string name="notification_channel_description">Ships notifications.</string>
+    <string name="notification_channel_general_id">net.videgro.ships-notifications</string>
+    <string name="notification_channel_general_name">Ships</string>
+    <string name="notification_channel_general_description">Ships notifications.</string>
+
+    <string name="notification_channel_services_id">net.videgro.ships-notifications-services</string>
+    <string name="notification_channel_services_name">Ships - services</string>
+    <string name="notification_channel_services_description">Ships services notifications.</string>
+
+    <string name="notification_channel_repeater_id">net.videgro.ships-notifications-repeater</string>
+    <string name="notification_channel_repeater_name">Ships - repeater</string>
+    <string name="notification_channel_repeater_description">Ships repeater notifications.</string>
+
+    <string name="notification_service_nmea_title">Running: NMEA service</string>
+    <string name="notification_service_nmea_description">Receiving NMEA messages via UDP.</string>
+    <string name="notification_service_rtlsdrais_title">Running: RTL-SDR-AIS service</string>
+    <string name="notification_service_rtlsdrais_description">RTL-SDR tuned to AIS frequencies.</string>
+    <string name="notification_service_tracker_title">Running: Own location service</string>
+    <string name="notification_service_tracker_description">Receiving GPS location.</string>
+
+    <string name="notification_repeater_title">Repeater</string>
 
     <!-- Pages -->
     <string name="page_show_map">Show map</string>

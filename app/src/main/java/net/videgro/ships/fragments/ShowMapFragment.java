@@ -414,8 +414,15 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             final Activity activity=getActivity();
             if (activity!=null){
                 locationServiceConnection = new LocationServiceConnection((OwnLocationReceivedListener) this);
-                Intent serviceIntent = new Intent(activity,TrackService.class);
-                activity.startService(serviceIntent);
+                final Intent serviceIntent = new Intent(activity,TrackService.class);
+
+                // On Android 8+ let service run in foreground
+                if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
+                    activity.startForegroundService(serviceIntent);
+                } else {
+                    activity.startService(serviceIntent);
+                }
+
                 activity.bindService(new Intent(activity,TrackService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
             } else {
                 Log.e(TAG,tag+"Activity is null.");
@@ -442,7 +449,14 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             if (activity!=null) {
                 nmeaClientServiceConnection = new NmeaClientServiceConnection((ShipReceivedListener) this);
                 final Intent serviceIntent = new Intent(activity, NmeaClientService.class);
-                activity.startService(serviceIntent);
+
+                // On Android 8+ let service run in foreground
+                if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
+                    activity.startForegroundService(serviceIntent);
+                } else {
+                    activity.startService(serviceIntent);
+                }
+
                 activity.bindService(new Intent(activity, NmeaClientService.class), nmeaClientServiceConnection, Context.BIND_AUTO_CREATE);
             } else {
                 Log.e(TAG,tag+"Activity is null.");

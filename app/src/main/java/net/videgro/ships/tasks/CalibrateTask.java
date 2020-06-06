@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -119,7 +120,14 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	private void setupNmeaUdpClientService(){
 		nmeaUdpClientServiceConnection = new NmeaUdpClientServiceConnection(this);
 		final Intent serviceIntent = new Intent(context, NmeaClientService.class);
-		context.startService(serviceIntent);
+
+		// On Android 8+ let service run in foreground
+		if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
+			context.startForegroundService(serviceIntent);
+		} else {
+			context.startService(serviceIntent);
+		}
+
         doBindService();
 	}
 	

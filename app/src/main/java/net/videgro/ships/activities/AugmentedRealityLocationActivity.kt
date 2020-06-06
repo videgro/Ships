@@ -238,7 +238,14 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
         nmeaClientServiceConnection = this.NmeaClientServiceConnection(this as ShipReceivedListener?)
         val serviceIntent = Intent(this, NmeaClientService::class.java)
-        this.startService(serviceIntent)
+
+        // On Android 8+ let service run in foreground
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+
         this.bindService(
             Intent(this, NmeaClientService::class.java),
             nmeaClientServiceConnection!!,

@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
+import net.videgro.ships.Notifications;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
@@ -93,7 +94,8 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		super.onCreate(savedInstanceState);
 		// FIXME: Observed exception "IllegalAccessException (@MainActivity:onCreate:16) {main}"
 
-        // Init singleton which need the Context
+        // Init singletons which needs the Context
+        Notifications.getInstance().init(this);
         SettingsUtils.getInstance().init(this);
 
 		setContentView(R.layout.activity_main);

@@ -1,17 +1,19 @@
 package net.videgro.ships.services;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
 import net.videgro.ships.Analytics;
+import net.videgro.ships.Notifications;
 import net.videgro.ships.R;
 import net.videgro.ships.StartRtlSdrRequest;
-import net.videgro.ships.Utils;
 import net.videgro.ships.activities.MainActivity;
 import net.videgro.ships.bridge.NativeRtlSdr;
 import net.videgro.ships.bridge.NativeRtlSdr.NativeRtlSdrListener;
@@ -42,9 +44,26 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 
 	@Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-    	super.onStartCommand(intent, flags, startId);
+		final String tag="onStartCommand - ";
+		final int result=super.onStartCommand(intent, flags, startId);
+
+		Log.d(TAG,tag);
+
+		// On Android 8+ let RtlSdrAisService run in foreground
+		// More information: https://developer.android.com/about/versions/oreo/background-location-limits.html
+		//
+		// After startForegroundService, we must call startForeground in service.
+		//
+		// See: 1) https://stackoverflow.com/questions/44425584/context-startforegroundservice-did-not-then-call-service-startforeground
+		//      2) https://stackoverflow.com/questions/46375444/remoteserviceexception-context-startforegroundservice-did-not-then-call-servic
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			final Notification notification= Notifications.getInstance().createNotification(this,getString(R.string.notification_channel_services_id),getString(R.string.notification_service_rtlsdrais_title),getString(R.string.notification_service_rtlsdrais_description));
+			final int notificationId = (int) (System.currentTimeMillis()%10000);
+			startForeground(notificationId, notification);
+		}
+
     	nativeRtlSdr.addListener(this);
-        return START_STICKY;
+        return result;
     }
 	
     @Override
@@ -156,7 +175,7 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 				
 		aquireWakeLock();
 		
-    	Utils.sendNotification(this,"is running","Touch to see the ships.");
+    	Notifications.getInstance().send(this,this.getString(R.string.notification_channel_services_id),"Ships is running","Touch to see the ships.");
 	}
 
     @Override
