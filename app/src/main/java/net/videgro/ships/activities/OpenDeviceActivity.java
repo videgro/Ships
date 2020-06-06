@@ -350,8 +350,13 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
 
     @Override
     public void onRtlSdrException(final int exitCode){
-        Log.d(TAG, "onRtlSdrException");
-        finish(ERROR_REASON_MISC, getString(R.string.connect_usb_device_status_exception_unknown)+" ("+exitCode+")");
+        final String tag="onRtlSdrException";
+        Log.d(TAG, tag);
+
+        // TODO: Currently we can not restart RTL-SDR native code, so stop application
+        Analytics.logEvent(this,TAG, "stopApplication",tag+"-"+exitCode);
+        finishAffinity();
+        System.exit(0);
     }
 
 	/* START implementation DeviceDialogListener */

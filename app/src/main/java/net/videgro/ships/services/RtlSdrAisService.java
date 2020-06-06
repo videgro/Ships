@@ -154,9 +154,9 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 	}
 
 	@Override
-	public void onException(int exitCode) {
+	public void onRtlSdrException(int exitCode) {
 
-		Log.d(TAG,"NativeRtlSdrListener - onException - "+exitCode);
+		Log.d(TAG,"NativeRtlSdrListener - onRtlSdrException - "+exitCode);
 
 		// Inform listeners
 		for (final RtlSdrServiceListener listener : listeners){

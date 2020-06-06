@@ -41,7 +41,7 @@ public class NativeRtlSdr {
         Log.i(TAG, "onException - exitCode: " + exitCode);
 
         for (final NativeRtlSdrListener listener : LISTENERS) {
-            listener.onException(exitCode);
+            listener.onRtlSdrException(exitCode);
         }
     }
 
@@ -102,7 +102,7 @@ public class NativeRtlSdr {
     }
 
     public interface NativeRtlSdrListener {
-        void onException(final int exitCode);
+        void onRtlSdrException(final int exitCode);
         void onRtlSdrStarted();
         void onRtlSdrStopped();
     }
