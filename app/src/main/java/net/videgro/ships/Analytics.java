@@ -17,11 +17,22 @@ public final class Analytics {
 		// Utility class, no public constructor
 	}
 
+	private static String cleanup(final String raw){
+		// letters, digits or _ (underscores)
+		// Maximum length 40
+		final int maxLength=40;
+		String result=raw.replaceAll("[^a-zA-Z0-9]", "_");
+		if (result.length()>maxLength){
+			result=result.substring(0,maxLength-1);
+		}
+		return result;
+	}
+
 	public static synchronized void logEvent(final Context context,final String category,final String action,final String label) {
-		MyFirebaseAnalytics.logEvent(context, category, action, label);
+		MyFirebaseAnalytics.logEvent(context, category, cleanup(action), cleanup(label));
 	}
 
 	public static synchronized void logEvent(final Context context,final String category,final String action,final String label,final long value){
-		MyFirebaseAnalytics.logEvent(context, category, action, label, value);
+		MyFirebaseAnalytics.logEvent(context, category, cleanup(action), cleanup(label), value);
 	}
 }
