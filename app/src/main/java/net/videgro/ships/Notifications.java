@@ -104,9 +104,9 @@ public class Notifications {
 
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager!=null) {
-            // mId allows you to update the notification later on.
-            final int mId = (int) Calendar.getInstance().getTime().getTime();
-            notificationManager.notify(mId, notification);
+            // messageId allows you to update the notification later on.
+            final int messageId=title.hashCode();
+            notificationManager.notify(messageId, notification);
             Analytics.logEvent(context,TAG, tag+channelId,title+" "+message);
         } else {
             Analytics.logEvent(context,Analytics.CATEGORY_WARNINGS, tag,"NotificationManager == NULL");

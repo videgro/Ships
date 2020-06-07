@@ -33,7 +33,7 @@
     <string name="notification_service_tracker_title">Running: Own location service</string>
     <string name="notification_service_tracker_description">Receiving GPS location.</string>
 
-    <string name="notification_repeater_title">Repeater</string>
+    <string name="notification_repeater_title">Repeater </string>
 
     <!-- Pages -->
     <string name="page_show_map">Show map</string>

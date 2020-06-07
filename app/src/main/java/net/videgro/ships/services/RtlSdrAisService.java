@@ -58,8 +58,8 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 		//      2) https://stackoverflow.com/questions/46375444/remoteserviceexception-context-startforegroundservice-did-not-then-call-servic
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			final Notification notification= Notifications.getInstance().createNotification(this,getString(R.string.notification_channel_services_id),getString(R.string.notification_service_rtlsdrais_title),getString(R.string.notification_service_rtlsdrais_description));
-			final int notificationId = (int) (System.currentTimeMillis()%10000);
-			startForeground(notificationId, notification);
+			// Send always the same ID (TAG.hashCode()) so user won't be spammed by different multiple instances of the same notification.
+			startForeground(TAG.hashCode(), notification);
 		}
 
     	nativeRtlSdr.addListener(this);

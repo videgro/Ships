@@ -137,8 +137,8 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         //      2) https://stackoverflow.com/questions/46375444/remoteserviceexception-context-startforegroundservice-did-not-then-call-servic
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             final Notification notification=Notifications.getInstance().createNotification(this,getString(R.string.notification_channel_services_id),getString(R.string.notification_service_nmea_title),getString(R.string.notification_service_nmea_description));
-            final int notificationId = (int) (System.currentTimeMillis()%10000);
-            startForeground(notificationId, notification);
+            // Send always the same ID (TAG.hashCode()) so user won't be spammed by different multiple instances of the same notification.
+            startForeground(TAG.hashCode(), notification);
         }
 
         init();
@@ -225,7 +225,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
 
         final String host1 = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationHost1();
         final int port1 = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationPort1();
-        final DatagramSocketConfig config1=createRepeaterConfig(host1,port1);
+        final DatagramSocketConfig config1=createRepeaterConfig("1",host1,port1);
         if (config1!=null){
             result.add(config1);
             Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_Config1",String.valueOf(config1));
@@ -233,7 +233,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
 
         final String host2 = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationHost2();
         final int port2 = SettingsUtils.getInstance().parseFromPreferencesAisMessagesDestinationPort2();
-        final DatagramSocketConfig config2=createRepeaterConfig(host2,port2);
+        final DatagramSocketConfig config2=createRepeaterConfig("2",host2,port2);
         if (config2!=null){
             result.add(config2);
             Analytics.logEvent(this,Analytics.CATEGORY_NMEA_REPEAT, "RepeatNMEA_Config2",String.valueOf(config2));
@@ -242,7 +242,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         return result;
     }
 
-    private DatagramSocketConfig createRepeaterConfig(final String host,final int port){
+    private DatagramSocketConfig createRepeaterConfig(final String name,final String host,final int port){
         final String tag="createRepeaterConfig - ";
 
         String informText;
@@ -263,7 +263,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         Log.d(TAG,tag+informText);
         if (port>0) {
             // When port is 0, asked to disable this repeater: Be quiet about this.
-            Notifications.getInstance().send(this,getString(R.string.notification_channel_repeater_id),getString(R.string.notification_repeater_title),informText);
+            Notifications.getInstance().send(this,getString(R.string.notification_channel_repeater_id),getString(R.string.notification_repeater_title)+name,informText);
         }
 
         return result;
