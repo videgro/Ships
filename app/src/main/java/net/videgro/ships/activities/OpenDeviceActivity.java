@@ -276,7 +276,11 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
             final String uspfsPathInput = UsbUtils.deriveProperDeviceName(device.getDeviceName());
 
             if (rtlSdrService != null) {
-                rtlSdrService.startRtlSdr(new StartRtlSdrRequest(arguments, usbFd, uspfsPathInput));
+                if (!rtlSdrService.isRtlSdrRunning()) {
+                    rtlSdrService.startRtlSdr(new StartRtlSdrRequest(arguments, usbFd, uspfsPathInput));
+                } else {
+                    result = R.string.connect_usb_device_status_error_running_already;
+                }
             }
             result = R.string.connect_usb_device_status_ok;
         }
@@ -303,6 +307,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
             Analytics.logEvent(this, Analytics.CATEGORY_RTLSDR_DEVICE, message, "");
         }
 
+        Log.d(TAG, "finish "+message);
         finish();
     }
 
@@ -350,13 +355,8 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
 
     @Override
     public void onRtlSdrException(final int exitCode){
-        final String tag="onRtlSdrException";
-        Log.d(TAG, tag);
-
-        // TODO: Currently we can not restart RTL-SDR native code, so stop application
-        Analytics.logEvent(this,TAG, "stopApplication",tag+"-"+exitCode);
-        finishAffinity();
-        System.exit(0);
+        Log.d(TAG, "onRtlSdrException - "+exitCode);
+        finish(ERROR_REASON_MISC, getString(R.string.connect_usb_device_status_exception_unknown_title)+" "+getString(R.string.connect_usb_device_status_exception_unknown_message)+" ("+exitCode+")");
     }
 
 	/* START implementation DeviceDialogListener */

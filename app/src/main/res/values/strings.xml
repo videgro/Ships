@@ -142,7 +142,9 @@
 	<string name="connect_usb_device_status_error_permission_denied">Permission denied to open device - Not possible to run this application without the right permissions. Sorry!</string>
 	<string name="connect_usb_device_status_error_security_exception">Security exception occurred while opening USB device.</string>
 	<string name="connect_usb_device_status_error_unknown">Unknown error while opening USB device.</string>
-    <string name="connect_usb_device_status_exception_unknown">Unknown exception while running USB device. Use a good quality connector between RTL-SDR and Android device and avoid using extension cables.</string>
+
+    <string name="connect_usb_device_status_exception_unknown_title">Hardware error</string>
+    <string name="connect_usb_device_status_exception_unknown_message">Check cable and RTL-SDR.</string>
 	
 	<string name="connect_usb_device_status_error_stop">Error occurred while stopping RTL-SDR device. Stopped already?"</string>
 	<string name="connect_usb_device_status_error_running_already">RTL-SDR is running already. Must stop before started again.</string>

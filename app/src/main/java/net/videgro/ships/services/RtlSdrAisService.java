@@ -29,8 +29,7 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
     
     private WakeLock wakelock;
     private final IBinder binder = new ServiceBinder();
-    private StartRtlSdrRequest pendingStartRtlSdrRequest;
-    
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
@@ -116,17 +115,8 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 
     public void startRtlSdr(StartRtlSdrRequest startRtlSdrRequest) {
     	final String tag="startRtlSdr - ";
-    	           
         Log.d(TAG,tag+"StartRtlSdrRequest: " + startRtlSdrRequest);
-        
-        if (nativeRtlSdr.isRunningAis()){
-        	// Store request to use after RTL-SDR has been stopped
-        	pendingStartRtlSdrRequest=startRtlSdrRequest;
-        	nativeRtlSdr.stopAis();
-        	// Will continue in: onStopped()
-        } else {
-        	nativeRtlSdr.startAis(startRtlSdrRequest);        	
-        }
+       	nativeRtlSdr.startAis(startRtlSdrRequest);
     }
     
     public boolean isRtlSdrRunning(){
@@ -158,8 +148,12 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
 
 		Log.d(TAG,"NativeRtlSdrListener - onRtlSdrException - "+exitCode);
 
+		Notifications.getInstance().send(this,this.getString(R.string.notification_channel_services_id),getString(R.string.connect_usb_device_status_exception_unknown_title),getString(R.string.connect_usb_device_status_exception_unknown_message)+" Exit code: "+exitCode);
+		Analytics.logEvent(this,Analytics.CATEGORY_RTLSDR_DEVICE, TAG,"onRtlSdrException",exitCode);
+
 		// Inform listeners
 		for (final RtlSdrServiceListener listener : listeners){
+			Log.d(TAG,"NativeRtlSdrListener - onRtlSdrException - listener "+listener);
 			listener.onRtlSdrException(exitCode);
 		}
 	}
@@ -181,25 +175,14 @@ public class RtlSdrAisService extends RtlSdrService implements NativeRtlSdrListe
     @Override
     public void onRtlSdrStopped() {
     	Log.d(TAG,"NativeRtlSdrListener - onRtlSdrStopped");
-    	
+
+		Analytics.logEvent(this,Analytics.CATEGORY_RTLSDR_DEVICE, TAG,"onRtlSdrStopped");
+
     	// Inform listeners
 		for (final RtlSdrServiceListener listener : listeners){
             listener.onRtlSdrStopped();
         }
 
     	releaseWakeLock();
-    	    	
-    	if (pendingStartRtlSdrRequest!=null){
-    		// Requested to stop AIS before starting again. Now it's time to start AIS
-
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				Log.e(TAG,"start - wait for closed device",e);
-			}
-    		
-        	nativeRtlSdr.startAis(pendingStartRtlSdrRequest);
-        	pendingStartRtlSdrRequest=null;
-    	}
     }
 }

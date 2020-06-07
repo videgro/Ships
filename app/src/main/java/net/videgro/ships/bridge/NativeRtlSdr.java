@@ -1,8 +1,11 @@
 package net.videgro.ships.bridge;
 
 import android.util.Log;
+
 import androidx.annotation.Keep;
+
 import net.videgro.ships.StartRtlSdrRequest;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,11 +58,13 @@ public class NativeRtlSdr {
     }
 
     public void startAis(final StartRtlSdrRequest startAisRequest) {
-        Log.d(TAG, "startAis");
+        final String tag="startAis - ";
+        Log.d(TAG, tag);
 
         new Thread() {
             public void run() {
                 startRtlSdrAis(startAisRequest.getArgs(), startAisRequest.getFd(), startAisRequest.getUspfsPath());
+                Log.d(TAG, tag+"STOPPED");
 
                 for (final NativeRtlSdrListener c : LISTENERS) {
                     c.onRtlSdrStopped();
