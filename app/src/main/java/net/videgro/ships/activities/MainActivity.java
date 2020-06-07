@@ -94,8 +94,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
 		super.onCreate(savedInstanceState);
 		// FIXME: Observed exception "IllegalAccessException (@MainActivity:onCreate:16) {main}"
 
-        // Init singletons which needs the Context
-        Notifications.getInstance().init(this);
+        // Init singleton which need the Context
         SettingsUtils.getInstance().init(this);
 
 		setContentView(R.layout.activity_main);

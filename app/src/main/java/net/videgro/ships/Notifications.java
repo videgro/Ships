@@ -13,12 +13,8 @@ import androidx.core.app.NotificationCompat;
 
 import net.videgro.ships.activities.MainActivity;
 
-import java.util.Calendar;
-
 public class Notifications {
     private static final String TAG = "Notifications";
-
-    private static final String ERR_NOT_INITIALIZED="Notifications not initialized. Please call init() first.";
 
     private static Notifications instance;
     private boolean initialized=false;
@@ -27,15 +23,15 @@ public class Notifications {
         // No public constructor, this is a singleton
     }
 
-    public void init(final Context context){
-        createChannels(context);
-    }
-
     public static Notifications getInstance(){
         if (instance==null){
             instance=new Notifications();
         }
         return instance;
+    }
+
+    private void init(final Context context){
+        createChannels(context);
     }
 
     private void createChannels(final Context context){
@@ -67,7 +63,7 @@ public class Notifications {
         final String tag="createNotification - ";
 
         if (!initialized){
-            throw new IllegalArgumentException(ERR_NOT_INITIALIZED);
+            init(context);
         }
 
         final NotificationCompat.Builder builder =
@@ -97,7 +93,7 @@ public class Notifications {
         final String tag="send - ";
 
         if (!initialized){
-            throw new IllegalArgumentException(ERR_NOT_INITIALIZED);
+            init(context);
         }
 
         final Notification notification=createNotification(context,channelId,title,message);
