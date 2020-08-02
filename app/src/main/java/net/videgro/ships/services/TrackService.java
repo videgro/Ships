@@ -23,8 +23,6 @@ import net.videgro.ships.listeners.OwnLocationReceivedListener;
 public class TrackService extends Service implements LocationListener {
 	private static final String TAG = "TrackService";
 
-	public final static String LISTENER = "listener";
-
 	private LocationManager locationManager;
 	private final IBinder binder = new ServiceBinder();
 	private OwnLocationReceivedListener listener;

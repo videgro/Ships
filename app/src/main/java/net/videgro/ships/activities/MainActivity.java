@@ -9,15 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import net.videgro.ships.Analytics;
-import net.videgro.ships.Notifications;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
 import net.videgro.ships.Utils;
