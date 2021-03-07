@@ -4,8 +4,8 @@
     package="net.videgro.ships"
     android:hardwareAccelerated="false"
     android:largeHeap="true"
-    android:versionCode="406"
-    android:versionName="4.06">
+    android:versionCode="407"
+    android:versionName="4.07">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
