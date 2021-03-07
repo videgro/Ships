@@ -6,7 +6,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "net.videgro.ships"
@@ -14,7 +14,7 @@ android {
         multiDexEnabled true
 
         // TODO: Update this only when you have a real device available for development and testing.
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         externalNativeBuild {
             cmake {
@@ -64,22 +64,22 @@ dependencies {
     implementation "com.github.hotchemi:permissionsdispatcher:${permissionsdispatcher_version}"
 
     /* Firebase */
-    implementation 'com.google.firebase:firebase-core:17.4.4'
-    implementation 'com.google.firebase:firebase-analytics:17.4.4'
-    implementation 'com.google.firebase:firebase-ads:19.3.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.1.1'
-    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.1.1'
-    implementation 'com.google.firebase:firebase-messaging:20.2.4'
+    implementation 'com.google.firebase:firebase-core:18.0.2'
+    implementation 'com.google.firebase:firebase-analytics:18.0.2'
+    implementation 'com.google.firebase:firebase-ads:19.7.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
+    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.3.1'
+    implementation 'com.google.firebase:firebase-messaging:21.0.1'
 
     /* Android support libs */
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'androidx.browser:browser:1.2.0'
-    implementation 'androidx.media:media:1.1.0'
+    implementation 'androidx.browser:browser:1.3.0'
+    implementation 'androidx.media:media:1.2.1'
 
     /* ARCore */
-    implementation 'com.google.ar:core:1.17.0'
-    implementation "com.google.ar.sceneform:core:1.15.0"
+    implementation 'com.google.ar:core:1.23.0'
+    implementation "com.google.ar.sceneform:core:1.15.0" /* Can not be upgraded without code change */
     implementation 'com.github.appoly:ARCore-Location:1.2'
 
     /* Glide - An image loading and caching library for Android - https://github.com/bumptech/glide */
