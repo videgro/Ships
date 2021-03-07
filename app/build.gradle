@@ -92,4 +92,18 @@ dependencies {
     implementation "de.codecrafters.tableview:tableview:2.8.1"
     implementation 'com.android.volley:volley:1.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    /*
+      Higher implementation also needs an increasement of the minimum SDK version.
+      > 3.13 needs Android 5.0+ / API 21+
+
+      Higher version of OkHttp will cause this exception:
+       Caused by: java.lang.ExceptionInInitializerError:
+       at okhttp3.OkHttpClient.<init> (OkHttpClient.kt:219)
+       at okhttp3.OkHttpClient$Builder.build (OkHttpClient.kt:955)
+       at net.videgro.walktracker.geocoding.GeoCoderNominatim.<init> (GeoCoderNominatim.java:44)
+
+      See also: https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
+    */
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
 }

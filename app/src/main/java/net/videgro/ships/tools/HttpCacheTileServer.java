@@ -13,7 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Objects;
@@ -22,6 +21,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import fi.iki.elonen.NanoHTTPD;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 public class HttpCacheTileServer extends NanoHTTPD {
 	private static final String TAG = "HttpCacheTileServer - ";
@@ -34,7 +35,10 @@ public class HttpCacheTileServer extends NanoHTTPD {
 	
 	private static HttpCacheTileServer instance;
 
-	private ExecutorService executor = Executors.newFixedThreadPool(1);
+	private final ExecutorService executor = Executors.newFixedThreadPool(1);
+	private final OkHttpClient client = new OkHttpClient();
+	private static final String USER_AGENT="Mozilla/4.0 (compatible; CachingTileServer)";
+
 	private boolean running=false;
 	private FutureTask<String> httpCacheFifoTask=null;
 	
@@ -119,7 +123,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 
 	private File getImage(final String urlAsString) {
 		final String tag = "getImage - ";
-		HttpURLConnection connection = null;
+
 		InputStream inputStream = null;
 		OutputStream outputStream = null;
 
@@ -136,19 +140,21 @@ public class HttpCacheTileServer extends NanoHTTPD {
                 networkCount++;
                 try {
                     final URL url = new URL(urlAsString);
-                    connection = (HttpURLConnection) url.openConnection();
-                    // connection.setRequestProperty("User-Agent", "");
-                    // connection.setRequestMethod("POST");
-                    // connection.setDoInput(true);
-                    connection.connect();
 
-                    inputStream = connection.getInputStream();
+					final Request request = new Request.Builder()
+							.url(url)
+							.header("User-Agent", USER_AGENT)
+							.build();
+
+					final okhttp3.Response response = client.newCall(request).execute();
+					inputStream = response.body().byteStream();
                     outputStream = new FileOutputStream(file);
                     byte[] buf = new byte[512];
                     int num;
                     while ((num = inputStream.read(buf)) != -1) {
                         outputStream.write(buf, 0, num);
                     }
+                    response.body().close();
                     applyFifo();
                 } catch (IOException e) {
                     Log.e(TAG, tag, e);
@@ -166,9 +172,6 @@ public class HttpCacheTileServer extends NanoHTTPD {
                         } catch (IOException e) {
                             Log.e(TAG, tag, e);
                         }
-                    }
-                    if (connection != null) {
-                        connection.disconnect();
                     }
                 }
             }
