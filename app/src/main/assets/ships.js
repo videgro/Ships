@@ -299,6 +299,7 @@ function createMap(){
 				new OpenLayers.Control.LayerSwitcher(),
 				new OpenLayers.Control.MousePosition(),
 				// new OpenLayers.Control.PanZoomBar(),
+				new OpenLayers.Control.Attribution(),
 				new OpenLayers.Control.TouchNavigation()],
 		numZoomLevels : ZOOM_LEVELS,
 		maxResolution : 156543,
