@@ -1,21 +1,24 @@
 package net.videgro.ships.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import net.videgro.ships.Analytics;
+import androidx.fragment.app.Fragment;
+
 import net.videgro.ships.R;
 import net.videgro.ships.Utils;
 
 public class HelpFragment extends Fragment {
 	private static final String TAG = "HelpFragment";
+
+	private RelativeLayout adView;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -28,7 +31,12 @@ public class HelpFragment extends Fragment {
 		textView.setText(Html.fromHtml(getString(R.string.text_help)));
 		textView.setMovementMethod(LinkMovementMethod.getInstance());
 
-		Utils.loadAd(rootView);
+		final RelativeLayout adView = rootView.findViewById(R.id.adView);
+
+		if (isAdded()) {
+			Utils.loadAd(getActivity(),adView,getString(R.string.adUnitId_HelpFragment));
+		}
+
 		return rootView;
 	}
 }

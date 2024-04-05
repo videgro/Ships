@@ -11,7 +11,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -108,14 +107,7 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         this.rtlSdrDevice = rtlSdrDevice;
         rtlsdrServiceConnection = new RtlsdrServiceConnection(this);
         final Intent serviceIntent = new Intent(this, RtlSdrAisService.class);
-
-        // On Android 8+ let service run in foreground
-        if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
-
+        startForegroundService(serviceIntent);
         bindService(new Intent(this, RtlSdrAisService.class), rtlsdrServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -133,8 +125,9 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
         setContentView(R.layout.progress);
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION),PendingIntent.FLAG_IMMUTABLE);
 
+        // Field requires API level 33 (current min is 26): android.content.Context#RECEIVER_NOT_EXPORTED
         registerReceiver(usbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
 
         Log.d(TAG, "onCreate");
@@ -313,28 +306,20 @@ public class OpenDeviceActivity extends FragmentActivity implements RtlSdrServic
 
     private void processConnectUsbDeviceStatus(final int connectUsbDeviceStatus) {
         // On error, finish this Action with an error result
-        switch (connectUsbDeviceStatus) {
-            case R.string.connect_usb_device_status_error_no_device_found:
-            case R.string.connect_usb_device_status_error_permission_denied:
-            case R.string.connect_usb_device_status_error_security_exception:
-            case R.string.connect_usb_device_status_error_unknown:
-                finish(ERROR_REASON_MISC, getString(connectUsbDeviceStatus));
-                break;
-            case R.string.connect_usb_device_status_error_stop:
-                finish(ERROR_REASON_STOP_FAILED, getString(connectUsbDeviceStatus));
-                break;
-            case R.string.connect_usb_device_status_error_running_already:
-                finish(ERROR_REASON_RUNNING_ALREADY, getString(connectUsbDeviceStatus));
-                break;
-            case R.string.connect_usb_device_status_change_ppm_failed:
-                finish(ERROR_REASON_CHANGE_PPM_FAILED, getString(connectUsbDeviceStatus));
-                break;
-            case R.string.connect_usb_device_status_change_ppm_ok:
-                finish(NO_ERROR, getString(connectUsbDeviceStatus));
-                break;
-            default:
-                // Do nothing
-                break;
+        if (    connectUsbDeviceStatus == R.string.connect_usb_device_status_error_no_device_found ||
+                connectUsbDeviceStatus == R.string.connect_usb_device_status_error_permission_denied ||
+                connectUsbDeviceStatus == R.string.connect_usb_device_status_error_security_exception ||
+                connectUsbDeviceStatus == R.string.connect_usb_device_status_error_unknown) {
+            finish(ERROR_REASON_MISC, getString(connectUsbDeviceStatus));
+        } else if (connectUsbDeviceStatus == R.string.connect_usb_device_status_error_stop) {
+            finish(ERROR_REASON_STOP_FAILED, getString(connectUsbDeviceStatus));
+
+        } else if (connectUsbDeviceStatus == R.string.connect_usb_device_status_error_running_already) {
+            finish(ERROR_REASON_RUNNING_ALREADY, getString(connectUsbDeviceStatus));
+        } else if (connectUsbDeviceStatus == R.string.connect_usb_device_status_change_ppm_failed) {
+            finish(ERROR_REASON_CHANGE_PPM_FAILED, getString(connectUsbDeviceStatus));
+        } else if (connectUsbDeviceStatus == R.string.connect_usb_device_status_change_ppm_ok) {
+            finish(NO_ERROR, getString(connectUsbDeviceStatus));
         }
     }
 

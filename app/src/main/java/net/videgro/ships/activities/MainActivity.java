@@ -1,8 +1,6 @@
 package net.videgro.ships.activities;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
+
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
 import net.videgro.ships.SettingsUtils;
@@ -23,7 +30,9 @@ import net.videgro.ships.fragments.ShowMapFragment;
 import net.videgro.ships.listeners.ImagePopupListener;
 import net.videgro.usb.UsbUtils;
 
-public class MainActivity extends Activity implements ImagePopupListener {
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class MainActivity extends AppCompatActivity implements ImagePopupListener {
     private static final String TAG="MainActivity";
 
     private static final int IMAGE_POPUP_ID_CALIBRATE_START = 1101;
@@ -37,6 +46,9 @@ public class MainActivity extends Activity implements ImagePopupListener {
     private boolean tryingToCalibrate=false;
     private boolean failedToCalibrate=false;
     private boolean showingMap=false;
+
+    private final AtomicBoolean isMobileAdsInitializeCalled = new AtomicBoolean(false);
+    private ConsentInformation consentInformation;
 
 	/*
      * Load native shared object library
@@ -95,7 +107,9 @@ public class MainActivity extends Activity implements ImagePopupListener {
         SettingsUtils.getInstance().init(this);
 
 		setContentView(R.layout.activity_main);
-	
+
+        performConsentRequest();
+
 		final ActionBar actionBar=getActionBar();
 		if (actionBar!=null) {
             actionBar.setDisplayShowTitleEnabled(true);
@@ -116,6 +130,63 @@ public class MainActivity extends Activity implements ImagePopupListener {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         registerReceiver(usbReceiver,filter);
 	}
+
+    private boolean isPrivacyOptionsRequired() {
+        return consentInformation!=null && consentInformation.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
+    }
+
+    private void performConsentRequest() {
+        // Create a ConsentRequestParameters object.
+        ConsentRequestParameters params = new ConsentRequestParameters
+                .Builder()
+                .build();
+
+        consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        consentInformation.requestConsentInfoUpdate(
+                this,
+                params,
+                () -> {
+                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                            this,
+                            loadAndShowError -> {
+                                if (loadAndShowError != null) {
+                                    // Consent gathering failed.
+                                    Log.w(TAG, String.format("%s: %s",
+                                            loadAndShowError.getErrorCode(),
+                                            loadAndShowError.getMessage()));
+                                }
+
+                                // Consent has been gathered.
+                                if (consentInformation.canRequestAds()) {
+                                    initializeMobileAdsSdk();
+                                }
+                            }
+                    );
+
+                },
+                requestConsentError -> {
+                    // Consent gathering failed.
+                    Log.w(TAG, String.format("%s: %s",
+                            requestConsentError.getErrorCode(),
+                            requestConsentError.getMessage()));
+                });
+
+        // Check if you can initialize the Google Mobile Ads SDK in parallel
+        // while checking for new consent information. Consent obtained in
+        // the previous session can be used to request ads.
+        if (consentInformation.canRequestAds()) {
+            initializeMobileAdsSdk();
+        }
+    }
+
+    private void initializeMobileAdsSdk() {
+        if (isMobileAdsInitializeCalled.getAndSet(true)) {
+            return;
+        }
+
+        // Initialize the Google Mobile Ads SDK.
+        MobileAds.initialize(this);
+    }
 
     @Override
     public void onStart() {
@@ -160,20 +231,17 @@ public class MainActivity extends Activity implements ImagePopupListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result;
 		// Handle presses on the action bar items
-		switch (item.getItemId()) {
-            case R.id.action_ar:
-                openAr();
-                result = true;
-                break;
-			case R.id.action_help:
-				openHelp();
-				result = true;
-				break;
-			case R.id.action_settings:
-				openSettings();
-				result = true;
-				break;
-		default:
+        final int id=item.getItemId();
+		if (id==R.id.action_ar) {
+            openAr();
+            result = true;
+        } else if (id==R.id.action_help) {
+            openHelp();
+            result = true;
+        } else if (id==R.id.action_settings) {
+            openSettings();
+            result = true;
+        } else {
 			result = super.onOptionsItemSelected(item);
 		}
 		return result;
@@ -239,14 +307,23 @@ public class MainActivity extends Activity implements ImagePopupListener {
         }
     }
 
-    private void gotoFragment(final Fragment fragment){
-        getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+    private void gotoFragment(final Fragment fragment,final boolean addToBackStack) {
+        Log.d(TAG, "openFragment: ");
+        final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // This is a helper class that replaces the container with the fragment. You can replace or add fragments.
+        transaction.replace(R.id.container, fragment);
+        // If you add fragments it will be added to the backStack. If you replace the fragment it will add only the last fragment
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        // commit() performs the action
+        transaction.commit();
     }
 
     private void showMap(){
         if (!showingMap){
             showingMap=true;
-            gotoFragment(new ShowMapFragment());
+            gotoFragment(new ShowMapFragment(),true);
         }
     }
 
@@ -262,7 +339,7 @@ public class MainActivity extends Activity implements ImagePopupListener {
             case IMAGE_POPUP_ID_CALIBRATE_START:
                 // Start calibration attempt
                 SettingsUtils.getInstance().setToPreferencesInternalIsCalibrationFailed(false);
-                gotoFragment(new CalibrateFragment());
+                gotoFragment(new CalibrateFragment(),true);
                 break;
             case IMAGE_POPUP_ID_USB_CONNECTED_DURING_RUNNING:
                 // Re-enable calibration utility

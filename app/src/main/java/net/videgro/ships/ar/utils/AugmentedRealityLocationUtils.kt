@@ -16,19 +16,27 @@ object AugmentedRealityLocationUtils {
     const val INITIAL_MARKER_SCALE_MODIFIER = 0.5f
 
     fun checkAvailability(activity: Activity): String {
-        var result:String="AR not available"
+        var result: String = "AR not available"
         val availability = ArCoreApk.getInstance().checkAvailability(activity)
-        when (availability) {
-            ArCoreApk.Availability.SUPPORTED_INSTALLED -> result = ""
-            ArCoreApk.Availability.SUPPORTED_APK_TOO_OLD, ArCoreApk.Availability.SUPPORTED_NOT_INSTALLED -> try {
-                val installStatus = ArCoreApk.getInstance().requestInstall(activity, true)
-                if (ArCoreApk.InstallStatus.INSTALLED == installStatus) {
-                    result="";
+        if (availability != null){
+            when (availability) {
+                ArCoreApk.Availability.SUPPORTED_INSTALLED -> result = ""
+                ArCoreApk.Availability.SUPPORTED_APK_TOO_OLD, ArCoreApk.Availability.SUPPORTED_NOT_INSTALLED -> try {
+                    val installStatus = ArCoreApk.getInstance().requestInstall(activity, true)
+                    if (ArCoreApk.InstallStatus.INSTALLED == installStatus) {
+                        result = "";
+                    }
+                } catch (e: UnavailableDeviceNotCompatibleException) {
+                    result = "Device not compatible - " + e.message
+                } catch (e: UnavailableUserDeclinedInstallationException) {
+                    result = "User declined installation - " + e.message
                 }
-            } catch (e: UnavailableDeviceNotCompatibleException) {
-                result="Device not compatible - "+e.message
-            } catch (e: UnavailableUserDeclinedInstallationException) {
-                result="User declined installation - "+e.message
+
+                ArCoreApk.Availability.UNKNOWN_ERROR -> result = "Unknown error"
+                ArCoreApk.Availability.UNKNOWN_CHECKING -> result = "Unknown checking"
+                ArCoreApk.Availability.UNKNOWN_TIMED_OUT -> result = "Unknown time out"
+                ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE -> result =
+                    "Device not capable"
             }
         }
         return result

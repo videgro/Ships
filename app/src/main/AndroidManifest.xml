@@ -3,9 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.videgro.ships"
     android:hardwareAccelerated="false"
-    android:largeHeap="true"
-    android:versionCode="407"
-    android:versionName="4.07">
+    android:largeHeap="true">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,7 +33,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.AppCompat"
         android:networkSecurityConfig="@xml/network_security_config">
 
         <meta-data
@@ -45,7 +43,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name">
+            android:exported="true">
             <!--android:launchMode="singleInstance"
              Not possible in combination with 'startActivityForResult'
              See: https://stackoverflow.com/questions/28106855/android-singleinstance-and-startactivityforresult
@@ -66,7 +64,6 @@
         <activity
             android:name=".activities.OpenDeviceActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Dialog">
             <intent-filter>

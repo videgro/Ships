@@ -2,7 +2,6 @@ package net.videgro.ships.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,8 +14,11 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import androidx.fragment.app.Fragment;
 
 import net.videgro.ships.Analytics;
 import net.videgro.ships.R;
@@ -53,38 +55,39 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
 		final View rootView = inflater.inflate(R.layout.fragment_calibrate, container, false);
 		setHasOptionsMenu(true);
 
-		logTextView = (TextView) rootView.findViewById(R.id.textView1);
+		logTextView = rootView.findViewById(R.id.textView1);
 		logTextView.setText("");
 
-		calibrateProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar1);
+		calibrateProgressBar = rootView.findViewById(R.id.progressBar1);
 		
 		// Percentage
 		calibrateProgressBar.setMax(100);
 
-		startStopCalibrateButtonNormal = (ToggleButton) rootView.findViewById(R.id.startStopCalibrateNormalButton);
-		startStopCalibrateButtonNormal.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					startNormalCalibrating();
-				} else {
-					stopNormalCalibrating();
-				}
-			}
-		});
+		startStopCalibrateButtonNormal = rootView.findViewById(R.id.startStopCalibrateNormalButton);
+		startStopCalibrateButtonNormal.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                startNormalCalibrating();
+            } else {
+                stopNormalCalibrating();
+            }
+        });
 		
-		startStopCalibrateButtonThorough = (ToggleButton) rootView.findViewById(R.id.startStopCalibrateThoroughButton);
-		startStopCalibrateButtonThorough.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					startThoroughCalibrating();
-				} else {
-					stopThoroughCalibrating();
-				}
-			}
-		});
-		
+		startStopCalibrateButtonThorough = rootView.findViewById(R.id.startStopCalibrateThoroughButton);
+		startStopCalibrateButtonThorough.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                startThoroughCalibrating();
+            } else {
+                stopThoroughCalibrating();
+            }
+        });
+
+		final RelativeLayout adView = rootView.findViewById(R.id.adView);
+		if (isAdded()) {
+			Utils.loadAd(getActivity(),adView,getString(R.string.adUnitId_CalibrateFragment));
+		}
+
 		setHasOptionsMenu(true);
-		Utils.loadAd(rootView);
+
 		return rootView;
 	}
 
@@ -217,7 +220,7 @@ public class CalibrateFragment extends Fragment implements CalibrateListener, Im
         Analytics.logEvent(getActivity(),TAG, "onCalibrateReady",""+ppm);
 
         if (isAdded()){
-            SettingsUtils.getInstance().setToPreferencesPpm(ppm);
+			SettingsUtils.getInstance().setToPreferencesPpm(ppm);
 			Utils.showPopup(IMAGE_POPUP_ID_CALIBRATE_READY, getActivity(), this, getString(R.string.popup_found_ppm_title), getString(R.string.popup_found_ppm_message) + " " + ppm, R.drawable.thumbs_up_circle, null);
 		}
 	}

@@ -1,12 +1,13 @@
 package net.videgro.ships.fragments.internal;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+
+import androidx.fragment.app.Fragment;
 
 import net.videgro.ships.R;
 import net.videgro.ships.activities.OpenDeviceActivity;
@@ -33,9 +34,12 @@ public final class FragmentUtils {
 		Log.d(TAG,tag);
 		boolean result=false;
 		if (fragment!=null && fragment.isAdded()) {
-			final Intent intent = createOpenDeviceIntent(fragment.getActivity(), createArgumentsToReceiveAis(ppm));
-			fragment.startActivityForResult(intent, reqCode);
-			result = true;
+			final Activity activity = fragment.getActivity();
+			if (activity!=null){
+				final Intent intent = createOpenDeviceIntent(activity, createArgumentsToReceiveAis(ppm));
+				fragment.startActivityForResult(intent, reqCode);
+				result = true;
+			}
 		} else {
 			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}
@@ -50,22 +54,40 @@ public final class FragmentUtils {
 		return true;
 	}
 
+	public static void changeRtlSdrPpm(final android.app.Fragment fragment,final int reqCode,final int ppm) {
+		final String tag="changeRtlSdrPpm - android - ";
+		Log.d(TAG,tag);
+		if (fragment!=null && fragment.isAdded()) {
+			final Activity activity=fragment.getActivity();
+			if (activity!=null) {
+				changePpmAtDevice(activity,reqCode,ppm);
+			}
+		} else {
+			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
+		}
+	}
+
 	public static boolean changeRtlSdrPpm(final Fragment fragment,final int reqCode,final int ppm) {
-		final String tag="changeRtlSdrPpm - ";
+		final String tag="changeRtlSdrPpm - androidx - ";
 		Log.d(TAG,tag);
 		boolean result=false;
 		if (fragment!=null && fragment.isAdded()) {
-			final Intent intent=createOpenDeviceIntent(fragment.getActivity(),null);
-
-			// Request to change PPM instead of (re)starting RTL-SDR
-			intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM,ppm);
-
-			fragment.startActivityForResult(intent, reqCode);
-			result=true;
+			final Activity activity=fragment.getActivity();
+			if (activity!=null) {
+				changePpmAtDevice(activity,reqCode,ppm);
+				result = true;
+			}
 		} else {
 			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}
 		return result;
+	}
+
+	private static void changePpmAtDevice(final Activity activity,final int reqCode,final int ppm){
+		final Intent intent = createOpenDeviceIntent(activity, null);
+		// Request to change PPM instead of (re)starting RTL-SDR
+		intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM, ppm);
+		activity.startActivityForResult(intent, reqCode);
 	}
 
 	public static boolean stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){
@@ -73,11 +95,14 @@ public final class FragmentUtils {
 		Log.d(TAG,tag);
 		boolean result=false;
 		if (fragment!=null && fragment.isAdded()) {
-			final Intent intent=createOpenDeviceIntent(fragment.getActivity(),null);
+			final Activity activity = fragment.getActivity();
+			if (activity!=null) {
+				final Intent intent = createOpenDeviceIntent(activity, null);
 
-			intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
-			fragment.startActivityForResult(intent, reqCode);
-			result=true;
+				intent.putExtra(OpenDeviceActivity.EXTRA_DISCONNECT, Boolean.TRUE);
+				fragment.startActivityForResult(intent, reqCode);
+				result = true;
+			}
 		} else {
 			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
 		}

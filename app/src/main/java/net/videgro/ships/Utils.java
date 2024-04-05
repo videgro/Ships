@@ -2,32 +2,28 @@ package net.videgro.ships;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
+import android.view.Display;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdRequest.Builder;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 
-import net.videgro.ships.activities.MainActivity;
 import net.videgro.ships.listeners.ImagePopupListener;
 
 import java.net.Inet4Address;
@@ -35,7 +31,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -93,24 +90,35 @@ public final class Utils {
 		return null;
 	}
 
-	public static void loadAd(final View view){
+	public static void loadAd(final FragmentActivity activity,final RelativeLayout layout, final String adUnitId) {
+		final String tag = "loadAd - ";
+			if (activity!=null && layout != null) {
+			// Must create the complete AdView programmatically,
+			// because we would like to set adUnitId programmatically.
+			final AdView adView = new AdView(layout.getContext());
+			adView.setAdSize(AdSize.BANNER);
+			adView.setAdUnitId(adUnitId);
+			layout.addView(adView);
 
-		// Create bundle to set non-personalized ads
-		final Bundle extras = new Bundle();
-		extras.putString("npa", "1");
+			final ArrayList<String> testDevices = new ArrayList<>(Arrays.asList(activity.getString(R.string.testDevices).split(",")));
+			testDevices.add(AdRequest.DEVICE_ID_EMULATOR); // Emulator
 
-		final Builder builder = new AdRequest.Builder();
-		builder.addNetworkExtrasBundle(AdMobAdapter.class, extras); // Add bundle to builder
-		builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR); // Emulator
+			final RequestConfiguration requestConfiguration
+					= new RequestConfiguration.Builder()
+					.setTestDeviceIds(testDevices)
+					.build();
+			MobileAds.setRequestConfiguration(requestConfiguration);
 
-		// Add test devices
-		final String[] testDevices = view.getContext().getString(R.string.testDevices).split(",");		
-	    for (final String testDevice:testDevices){
-	    	builder.addTestDevice(testDevice);
-	    }
-	    
-	    final AdView adView = (AdView) view.findViewById(R.id.adView);
-	    adView.loadAd(builder.build());
+			// Request non-personalized ads
+			final Bundle extras = new Bundle();
+			//extras.putString("npa", "1");
+
+			final AdRequest request = new AdRequest.Builder()
+					.addNetworkExtrasBundle(AdMobAdapter.class, extras)
+					.build();
+
+			adView.loadAd(request);
+		}
 	}
 
 	public static void logStatus(final Activity activity,final TextView textView,final String status) {
@@ -128,17 +136,15 @@ public final class Utils {
 		final String tag="updateText - ";
 		final int maxLines=100;
 		if (activity!=null){
-			activity.runOnUiThread(new Runnable() {
-				public void run() {
-					final String[] lines=textView.getText().toString().split("\n");
-					StringBuilder txt=new StringBuilder();
-					txt.append(text);
-					for (int i=0;i<maxLines && i<lines.length;i++){
-						txt.append("\n").append(lines[i]);
-					}
-					textView.setText(txt);
-				}
-			});
+			activity.runOnUiThread(() -> {
+                final String[] lines=textView.getText().toString().split("\n");
+                StringBuilder txt=new StringBuilder();
+                txt.append(text);
+                for (int i=0;i<maxLines && i<lines.length;i++){
+                    txt.append("\n").append(lines[i]);
+                }
+                textView.setText(txt);
+            });
 		} else {
 			Log.e(TAG,tag+"Huh? No activity set. ("+text+")");
 		}
@@ -147,18 +153,15 @@ public final class Utils {
 	public static void showPopup(final int id,final Activity activity,final ImagePopupListener listener,final String title,final String message,final int imageResource,final Long automaticDismissDelay){
 		final String tag="showPopup - ";
 
-		activity.runOnUiThread(new Runnable() {
-		    public void run() {
-		    	final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
+		if (activity!=null) {
+			activity.runOnUiThread(() -> {
+				final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
 				ad.setTitle(title);
 				ad.setMessage(Html.fromHtml(message));
 				ad.setIcon(imageResource);
-				ad.setNeutralButton("OK", new DialogInterface.OnClickListener(){
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						if (listener!=null){
-							listener.onImagePopupDispose(id);
-						}
+				ad.setNeutralButton("OK", (arg0, arg1) -> {
+					if (listener != null) {
+						listener.onImagePopupDispose(id);
 					}
 				});
 
@@ -166,61 +169,51 @@ public final class Utils {
 				alert.show();
 
 				// Make the textview clickable. Must be called after show()
-				((TextView)alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+				((TextView) alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
 
 				if (automaticDismissDelay != null) {
 					final Handler handler = new Handler();
-					final Runnable runnable = new Runnable() {
-						public void run() {
-							if (alert.isShowing()) {
-								try {
-									alert.dismiss();
-								} catch (IllegalArgumentException e) {
-									// FIXME: Ugly fix (View not attached to window manager)
-									Log.e(TAG,tag+"Auto dismiss", e);
-								}
+					final Runnable runnable = () -> {
+						if (alert.isShowing()) {
+							try {
+								alert.dismiss();
+							} catch (IllegalArgumentException e) {
+								// FIXME: Ugly fix (View not attached to window manager)
+								Log.e(TAG, tag + "Auto dismiss", e);
 							}
 						}
 					};
 					handler.postDelayed(runnable, automaticDismissDelay);
 				}
-		    }
-		});		
+			});
+		}
 	}
 
 	public static void showQuestion(final String labelPositive,final String labelNegative,final int idPositive,final int idNegative,final Activity activity,final ImagePopupListener listener,final String title,final String message,final int imageResource){
 		final String tag="showQuestion - ";
 
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
-				ad.setTitle(title);
-				ad.setMessage(Html.fromHtml(message));
-				ad.setIcon(imageResource);
-				ad.setPositiveButton(labelPositive, new DialogInterface.OnClickListener(){
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						if (listener!=null){
-							listener.onImagePopupDispose(idPositive);
-						}
-					}
-				});
-				ad.setNegativeButton(labelNegative, new DialogInterface.OnClickListener(){
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						if (listener!=null){
-							listener.onImagePopupDispose(idNegative);
-						}
-					}
-				});
+		activity.runOnUiThread(() -> {
+            final AlertDialog.Builder ad = new AlertDialog.Builder(activity);
+            ad.setTitle(title);
+            ad.setMessage(Html.fromHtml(message));
+            ad.setIcon(imageResource);
+            ad.setPositiveButton(labelPositive, (arg0, arg1) -> {
+                if (listener!=null){
+                    listener.onImagePopupDispose(idPositive);
+                }
+            });
+            ad.setNegativeButton(labelNegative, (arg0, arg1) -> {
+                if (listener!=null){
+                    listener.onImagePopupDispose(idNegative);
+                }
+            });
 
-				final AlertDialog alert = ad.create();
-				alert.show();
+            final AlertDialog alert = ad.create();
+            alert.show();
 
-				// Make the textview clickable. Must be called after show()
-				((TextView)alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
-			}
-		});
+            // Make the textview clickable. Must be called after show()
+            ((TextView)alert.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+        });
 	}
 
 	public static boolean is64bit(){

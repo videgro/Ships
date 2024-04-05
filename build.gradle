@@ -1,28 +1,36 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '1.4.31'
+    ext.kotlin_version = '1.9.10'
     repositories {
-        jcenter()
+        mavenCentral()
         google()
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.gms:google-services:4.3.5' // google-services plugin
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1' // Firebase Crashlytics Gradle plugin
+        classpath 'com.google.gms:google-services:4.4.1' // google-services plugin
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9' // Firebase Crashlytics Gradle plugin
     }
 }
 
 allprojects {
     repositories {
+        /*
+         * Still here:
+         *  Can not find "de.codecrafters.tableview:tableview:2.8.1" in other repos
+         *  org.gradle.internal.resolve.ModuleVersionNotFoundException: Could not find de.codecrafters.tableview:tableview:2.8.1.
+         */
         jcenter()
+
+        mavenCentral()
         google()
         maven { url 'https://jitpack.io' }
+        maven { url "https://maven.google.com" }
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
 

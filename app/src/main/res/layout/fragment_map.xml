@@ -8,7 +8,7 @@
 	    android:id="@+id/webview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/promo" />
+        android:layout_above="@+id/adView" />
 
     <ImageView
         android:id="@+id/indicatorReceivingExternal"
@@ -17,7 +17,7 @@
         android:visibility="invisible"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/promo"
+        android:layout_above="@+id/adView"
         android:contentDescription="@string/indicator_ship_received_external"
         android:src="@drawable/ic_green_sphere" />
 
@@ -28,7 +28,7 @@
         android:visibility="invisible"
         android:layout_toStartOf="@+id/indicatorReceivingExternal"
         android:layout_toLeftOf="@+id/indicatorReceivingExternal"
-        android:layout_above="@+id/promo"
+        android:layout_above="@+id/adView"
         android:contentDescription="@string/indicator_ship_received_internal"
         android:src="@drawable/ic_green_sphere" />
 
@@ -70,7 +70,7 @@
 
 	<SlidingDrawer
 		android:id="@+id/slidingDrawer1"
-        android:layout_above="@id/promo"
+        android:layout_above="@id/adView"
 		android:layout_width="match_parent"
 		android:layout_height="150dp"
 		android:content="@+id/loggingScrollView"
@@ -99,6 +99,12 @@
 
 	</SlidingDrawer>
 
-    <include android:id="@+id/promo" android:layout_alignParentBottom="true" android:layout_width="match_parent" android:layout_height="wrap_content" layout="@layout/promo" />
+    <RelativeLayout
+	    android:id="@+id/adView"
+		android:layout_alignParentBottom="true"
+	    android:layout_width="match_parent"
+	    android:background="@android:color/black"
+	    android:layout_height="55dp"
+	    android:gravity="bottom|center_horizontal"/>
 
 </RelativeLayout>

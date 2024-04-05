@@ -69,7 +69,12 @@
 	        android:layout_height="wrap_content" />
     </ScrollView>
 	
-	<include layout="@layout/promo" />
+   <RelativeLayout
+	    android:id="@+id/adView"
+	    android:layout_width="match_parent"
+	    android:background="@android:color/black"
+	    android:layout_height="55dp"
+	    android:gravity="bottom|center_horizontal"/>
 
 </LinearLayout>
 

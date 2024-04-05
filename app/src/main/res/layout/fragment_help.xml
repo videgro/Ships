@@ -10,6 +10,7 @@
         android:id="@+id/textViewTitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textColor="#000000"
         android:text="@string/title_help_information"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -20,10 +21,16 @@
 			android:id="@+id/textViewHelp"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
+		        android:textColor="#000000"
 			android:textAppearance="?android:attr/textAppearanceMedium" />
 	</ScrollView>
 	
-	<include layout="@layout/promo" />
+	<RelativeLayout
+	    android:id="@+id/adView"
+	    android:layout_width="match_parent"
+	    android:background="@android:color/black"
+	    android:layout_height="55dp"
+	    android:gravity="bottom|center_horizontal"/>
 
 </LinearLayout>
 

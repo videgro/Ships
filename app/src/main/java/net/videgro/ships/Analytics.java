@@ -23,10 +23,17 @@ public final class Analytics {
 		// letters, digits or _ (underscores)
 		// Maximum length 40
 		final int maxLength=40;
-		String result=raw.replaceAll("[^a-zA-Z0-9]", "_");
-		if (result.length()>maxLength){
-			result=result.substring(0,maxLength-1);
+
+		String result=raw;
+		if (result!=null) {
+			result = result.replaceAll("[^a-zA-Z0-9]", "_");
+			if (result.length() > maxLength) {
+				result = result.substring(0, maxLength - 1);
+			}
+		} else {
+			result="";
 		}
+
 		return result;
 	}
 

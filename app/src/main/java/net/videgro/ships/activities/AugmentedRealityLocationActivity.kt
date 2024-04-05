@@ -1,18 +1,21 @@
 package net.videgro.ships.activities
 
-import android.app.Activity
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.annotation.RequiresApi
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.ar.core.TrackingState
@@ -20,8 +23,6 @@ import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.UnavailableException
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.rendering.ViewRenderable
-import kotlinx.android.synthetic.main.activity_augmented_reality_location.*
-import kotlinx.android.synthetic.main.augmented_reality_location.view.*
 import net.videgro.ships.Analytics
 import net.videgro.ships.R
 import net.videgro.ships.SettingsUtils
@@ -30,6 +31,7 @@ import net.videgro.ships.ar.utils.AugmentedRealityLocationUtils
 import net.videgro.ships.ar.utils.AugmentedRealityLocationUtils.INITIAL_MARKER_SCALE_MODIFIER
 import net.videgro.ships.ar.utils.AugmentedRealityLocationUtils.INVALID_MARKER_SCALE_MODIFIER
 import net.videgro.ships.ar.utils.PermissionUtils
+import net.videgro.ships.databinding.ActivityAugmentedRealityLocationBinding
 import net.videgro.ships.fragments.internal.FragmentUtils
 import net.videgro.ships.fragments.internal.OpenDeviceResult
 import net.videgro.ships.listeners.ImagePopupListener
@@ -40,10 +42,9 @@ import uk.co.appoly.arcorelocation.LocationMarker
 import uk.co.appoly.arcorelocation.LocationScene
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.util.*
+import java.util.Calendar
 import java.util.concurrent.CompletableFuture
 
-@RequiresApi(Build.VERSION_CODES.N)
 class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListener, ImagePopupListener {
     private val TAG = "ARLocationActivity"
 
@@ -57,6 +58,8 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     private val REQ_CODE_START_RTLSDR = 1201
     private val REQ_CODE_STOP_RTLSDR = 1202
 
+    private lateinit var binding: ActivityAugmentedRealityLocationBinding
+
     // Our ARCore-Location scene
     private var locationScene: LocationScene? = null
 
@@ -65,7 +68,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
     private val resumeArElementsTask = Runnable {
         locationScene?.resume()
-        arSceneView.resume()
+        binding.arSceneView.resume()
     }
 
     private var shipsMap: HashMap<Int, Ship> = hashMapOf()
@@ -87,6 +90,10 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         val error=AugmentedRealityLocationUtils.checkAvailability(this);
         if (error.isEmpty()) {
             setContentView(R.layout.activity_augmented_reality_location)
+            binding = ActivityAugmentedRealityLocationBinding.inflate(layoutInflater)
+            val view = binding.root
+            setContentView(view)
+
             setupLoadingDialog()
             setupNmeaClientService()
         } else {
@@ -139,9 +146,9 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
             msg
         )
 
-        arSceneView.session?.let {
+        binding.arSceneView.session?.let {
             locationScene?.pause()
-            arSceneView?.pause()
+            binding.arSceneView?.pause()
         }
     }
 
@@ -166,7 +173,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
                     OpenDeviceResult.TAG,startRtlSdrResultAsString + " - " + Utils.retrieveAbi()
                 )
                 logStatus(startRtlSdrResultAsString)
-                if (resultCode != Activity.RESULT_OK) {
+                if (resultCode != RESULT_OK) {
                     Utils.showPopup(
                         IMAGE_POPUP_ID_OPEN_RTLSDR_ERROR,
                         this,
@@ -255,17 +262,12 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         nmeaClientServiceConnection = this.NmeaClientServiceConnection(this as ShipReceivedListener?)
         val serviceIntent = Intent(this, NmeaClientService::class.java)
 
-        // On Android 8+ let service run in foreground
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+        startForegroundService(serviceIntent)
 
         this.bindService(
             Intent(this, NmeaClientService::class.java),
             nmeaClientServiceConnection!!,
-            Context.BIND_AUTO_CREATE
+            BIND_AUTO_CREATE
         )
     }
 
@@ -293,7 +295,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         try {
             val session = AugmentedRealityLocationUtils.setupSession(this)
             if (session != null) {
-                arSceneView.setupSession(session)
+                binding.arSceneView.setupSession(session)
             }
         } catch (e: UnavailableException) {
             error = AugmentedRealityLocationUtils.handleSessionException(this, e)
@@ -302,7 +304,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     }
 
     private fun setupLocationScene(){
-        locationScene = LocationScene(this, arSceneView)
+        locationScene = LocationScene(this, binding.arSceneView)
         locationScene!!.setMinimalRefreshing(true)
         locationScene!!.setOffsetOverlapping(true)
 //            locationScene!!.setRemoveOverlapping(true)
@@ -310,26 +312,22 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     }
 
     private fun createSession() {
-        var error:String="";
+        var error="";
 
-        if (arSceneView != null) {
-            if (arSceneView.session == null) {
-                error=setupSession()
+        if (binding.arSceneView.session == null) {
+            error=setupSession()
+        }
+
+        if (error.isEmpty()) {
+            if (locationScene == null) {
+                setupLocationScene()
             }
 
-            if (error.isEmpty()) {
-                if (locationScene == null) {
-                    setupLocationScene()
-                }
-
-                try {
-                    resumeArElementsTask.run()
-                } catch (e: CameraNotAvailableException) {
-                    error=getString(R.string.popup_camera_open_error_message);
-                }
+            try {
+                resumeArElementsTask.run()
+            } catch (e: CameraNotAvailableException) {
+                error=getString(R.string.popup_camera_open_error_message);
             }
-        } else {
-            error=getString(R.string.popup_ar_error_arsceneview_not_set);
         }
 
         if (!error.isEmpty()){
@@ -408,7 +406,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
     }
 
     private fun updateMarkers() {
-        arSceneView.scene.addOnUpdateListener()
+        binding.arSceneView.scene.addOnUpdateListener()
         {
             if (!areAllMarkersLoaded) {
                 return@addOnUpdateListener
@@ -424,7 +422,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
                 }
             }
 
-            val frame = arSceneView!!.arFrame ?: return@addOnUpdateListener
+            val frame = binding.arSceneView!!.arFrame ?: return@addOnUpdateListener
             if (frame.camera.trackingState != TrackingState.TRACKING) {
                 return@addOnUpdateListener
             }
@@ -442,7 +440,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
             arHandler.post {
                 locationScene?.refreshAnchors()
-                layoutRendarable.pinContainer.visibility = View.VISIBLE
+                layoutRendarable.findViewById<RelativeLayout>(R.id.pinContainer).visibility = View.VISIBLE
             }
         }
     }
@@ -460,11 +458,11 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
 
             arHandler.post {
                 locationScene?.refreshAnchors()
-                layoutRendarable.pinContainer.visibility = View.VISIBLE
+                layoutRendarable.findViewById<RelativeLayout>(R.id.pinContainer).visibility = View.VISIBLE
             }
         }
         locationMarker.setRenderEvent { locationNode ->
-            layoutRendarable.distance.text = AugmentedRealityLocationUtils.showDistance(locationNode.distance)
+            layoutRendarable.findViewById<AppCompatTextView>(R.id.distance).text = AugmentedRealityLocationUtils.showDistance(locationNode.distance)
             resumeArElementsTask.run {
                 computeNewScaleModifierBasedOnDistance(locationMarker, locationNode.distance)
             }
@@ -497,8 +495,8 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         node.renderable = completableFuture.get()
 
         val nodeLayout = completableFuture.get().view
-        val name = nodeLayout.name
-        val markerLayoutContainer = nodeLayout.pinContainer
+        val name = nodeLayout.findViewById<AppCompatTextView>(R.id.name)
+        val markerLayoutContainer = nodeLayout.findViewById<RelativeLayout>(R.id.pinContainer)
         name.text = ship.name + " (" + ship.mmsi + ")"
         markerLayoutContainer.visibility = View.GONE
         nodeLayout.setOnTouchListener { _, _ ->
@@ -541,7 +539,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         Glide.with(this)
             .load("file:///android_asset/images/flags/" + ship.countryFlag + ".png")
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .into(nodeLayout.arMarkerCountry)
+            .into(nodeLayout.findViewById<ImageView>(R.id.arMarkerCountry))
 
         return node
     }
@@ -626,7 +624,7 @@ class AugmentedRealityLocationActivity : AppCompatActivity(), ShipReceivedListen
         cleanUpShipsMap()
 
         runOnUiThread(Runnable {
-            arNumberOfShipsInView.setText(getString(R.string.ar_number_ships,shipsMap.size))
+            binding.arNumberOfShipsInView.setText(getString(R.string.ar_number_ships,shipsMap.size))
             areAllMarkersLoaded = false
             //     locationScene!!.clearMarkers()
             render()

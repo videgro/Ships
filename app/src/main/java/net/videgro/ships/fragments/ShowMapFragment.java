@@ -1,10 +1,11 @@
 package net.videgro.ships.fragments;
 
+import static java.text.DateFormat.getDateTimeInstance;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,13 +40,13 @@ import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
-import android.widget.ShareActionProvider;
-import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
 
 import com.google.ar.core.ArCoreApk;
 import com.google.gson.Gson;
@@ -74,7 +75,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 import de.codecrafters.tableview.SortableTableView;
 import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
@@ -85,8 +85,6 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
-
-import static java.text.DateFormat.getDateTimeInstance;
 
 @RuntimePermissions
 public class ShowMapFragment extends Fragment implements OwnLocationReceivedListener, ShipReceivedListener, ImagePopupListener, TextToSpeech.OnInitListener {
@@ -121,6 +119,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private final DialogRepeatToCloudClickListener dialogRepeatToCloudClickListener=new DialogRepeatToCloudClickListener();
 
+    private RelativeLayout adView;
+
     private WebView webView;
     private ImageView indicatorReceivingInternal;
     private ImageView indicatorReceivingExternal;
@@ -138,7 +138,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     /* TTS */
     private TextToSpeech tts;
-    private List<Integer> nameSpoken=new ArrayList<>();
+    private final List<Integer> nameSpoken=new ArrayList<>();
 
     @SuppressLint("NewApi")
     @Override
@@ -147,18 +147,25 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         final View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
-        indicatorReceivingInternal = (ImageView)rootView.findViewById(R.id.indicatorReceivingInternal);
-        indicatorReceivingExternal = (ImageView)rootView.findViewById(R.id.indicatorReceivingExternal);
+        indicatorReceivingInternal = rootView.findViewById(R.id.indicatorReceivingInternal);
+        indicatorReceivingExternal = rootView.findViewById(R.id.indicatorReceivingExternal);
 
         createShipsTable(rootView.findViewById(R.id.shipsTable));
-        logTextView = (TextView) rootView.findViewById(R.id.textView1);
+        logTextView = rootView.findViewById(R.id.textView1);
+        adView = rootView.findViewById(R.id.adView);
 
         if (isAdded()) {
-            final File filesDirectory = Objects.requireNonNull(getActivity()).getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            fileMap = new File(filesDirectory, FILE_MAP);
+            final Activity activity=getActivity();
+            if (activity!=null) {
+                final File filesDirectory = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                fileMap = new File(filesDirectory, FILE_MAP);
+            }
         }
 
-        Utils.loadAd(rootView);
+        if (isAdded()) {
+            Utils.loadAd(getActivity(),adView,getString(R.string.adUnitId_ShowMapFragment));
+        }
+
         setHasOptionsMenu(true);
         setupWebView(rootView);
         setupNmeaClientService();
@@ -629,23 +636,36 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
 	}
 
-	@Override
+    /**
+     * See also: https://developer.android.com/guide/topics/ui/menus.html#checkable
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean result = true;
+        final int id = item.getItemId();
+        if (id == R.id.menu_share) {
+            Analytics.logEvent(getActivity(),TAG, "share","");
+
+            updateShareData();
+
+            // Android Sharesheet
+            // https://developer.android.com/training/sharing/send
+            startActivity(Intent.createChooser(getShareIntent(), getString(R.string.share_action_text)));
+        }
+        return result;
+    }
+
+    private void updateShareData() {
+        final String tag = "updateShareData - ";
+        takeScreenShotWithCheck();
+    }
+
+    @Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.setGroupVisible(R.id.main_menu_group_show_map, true);
 
         // Enable AR related functionality on ARCore supported devices only.
         maybeEnableArButton(menu.findItem(R.id.action_ar));
-
-		final ShareActionProvider shareActionProvider = (ShareActionProvider) menu.findItem(R.id.menu_share).getActionProvider();
-		shareActionProvider.setShareIntent(getShareIntent());
-		shareActionProvider.setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
-			@Override
-			public boolean onShareTargetSelected(ShareActionProvider actionProvider, Intent intent) {
-            Analytics.logEvent(getActivity(),TAG, "share","");
-            takeScreenShotWithCheck();
-            return false;
-			}
-		});
 	}
 
     @Override
