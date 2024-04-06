@@ -42,6 +42,8 @@ public final class SettingsUtils {
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_HOST_2 = "pref_aisMessagesDestinationHost2";
 	private static final String KEY_PREF_AIS_MESSAGES_DESTINATION_PORT_2 = "pref_aisMessagesDestinationPort2";
 
+	private static final String KEY_PREF_IN_APP_REVIEW_LAST = "pref_inAppReviewLast";
+
 	private static final boolean DEFAULT_LOGGING_VERBOSE = false;
     private static final boolean DEFAULT_INTERNAL_CALIBRATION_FAILED = false;
 	private static final boolean DEFAULT_INTERNAL_USE_ONLY_EXTERNAL_SOURCES = false;
@@ -73,6 +75,8 @@ public final class SettingsUtils {
     /* AR (defaults) */
 	private static final int DEFAULT_AR_DISTANCE_MAX = 2000;
 	private static final int DEFAULT_AR_AGE_MAX = 10;
+
+	private static final long DEFAULT_IN_APP_REVIEW_LAST = 0;
 
     private static SettingsUtils instance=null;
 
@@ -349,5 +353,15 @@ public final class SettingsUtils {
 		}
 
 		return result;
+	}
+
+	public void putToPreferencesInAppReviewLast(final long inAppReviewLast) {
+		validateSharedPreferences();
+		sharedPreferences.edit().putLong(KEY_PREF_IN_APP_REVIEW_LAST, inAppReviewLast).apply();
+	}
+
+	public long parseFromPreferencesInAppReviewLast() {
+		validateSharedPreferences();
+		return sharedPreferences.getLong(KEY_PREF_IN_APP_REVIEW_LAST, DEFAULT_IN_APP_REVIEW_LAST);
 	}
 }

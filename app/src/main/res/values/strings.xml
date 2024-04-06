@@ -2,6 +2,7 @@
 <resources>
     <!-- General -->        
     <string name="app_name">Ships</string>
+    <string name="app_package_name">net.videgro.ships</string>
     <string name="app_url">https://play.google.com/store/apps/details?id=net.videgro.ships</string>
     <string name="app_market_url">market://details?id=net.videgro.ships</string>
     <string name="dot_provider">.provider</string>

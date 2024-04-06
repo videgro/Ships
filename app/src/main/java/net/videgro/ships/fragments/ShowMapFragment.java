@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -47,6 +48,11 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.review.testing.FakeReviewManager;
 import com.google.ar.core.ArCoreApk;
 import com.google.gson.Gson;
 
@@ -106,6 +112,21 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
      */
     private static final String PLACEHOLDER_MMSI = "PLACEHOLDER_MMSI";
 
+    /**
+     * App review - minimal installation time - 10 days
+     */
+    private static final long APP_REVIEW_MINIMAL_INSTALLATION_TIME_IN_MILLIS = 1000L * 60 * 60 * 24 * 10;
+
+    /**
+     * App review - wait time - 90 days
+     */
+    private static final long APP_REVIEW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 60 * 24 * 90;
+
+    /**
+     * App review - number of ships - 2
+     */
+    private static final int APP_REVIEW_SHIPS_MIN = 2;
+
     private static final int[] TABLE_HEADERS = {
         R.string.ships_table_col_country,
         R.string.ships_table_col_type,
@@ -136,6 +157,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     /* TTS */
     private TextToSpeech tts;
     private final List<Integer> nameSpoken=new ArrayList<>();
+
+    private int numShipsInternalReceived=0;
 
     @SuppressLint("NewApi")
     @Override
@@ -536,6 +559,78 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         return shareIntent;
     }
 
+    private boolean isDestroyed() {
+        return isRemoving() || getActivity() == null || isDetached() || !isAdded() || getView() == null;
+    }
+
+    private void checkEligibleinAppReview(){
+        if (numShipsInternalReceived>=APP_REVIEW_SHIPS_MIN && retrieveInstallationAge()>APP_REVIEW_MINIMAL_INSTALLATION_TIME_IN_MILLIS){
+            final long now=Calendar.getInstance().getTimeInMillis();
+            final long timeSinceLastReviewRequest=now-SettingsUtils.getInstance().parseFromPreferencesInAppReviewLast();
+            if (timeSinceLastReviewRequest>APP_REVIEW_WAIT_TIME_IN_MILLIS){
+                final String logLabel="Ships"+numShipsInternalReceived+" Last"+timeSinceLastReviewRequest;
+                Analytics.logEvent(getActivity(), Analytics.CATEGORY_STATISTICS, "EligibleForInAppReview",logLabel);
+                inAppReview();
+            }
+        }
+    }
+
+    private void inAppReview() {
+        if (!isDestroyed()) {
+            final Activity activity = getActivity();
+            if (activity != null) {
+                final ReviewManager manager = ReviewManagerFactory.create(activity);
+//                final ReviewManager manager = new FakeReviewManager(activity);
+
+                final Task<ReviewInfo> request = manager.requestReviewFlow();
+                request.addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Ignore unsuccessful result
+                        final ReviewInfo reviewInfo = task.getResult();
+                        launchInAppReviewFlow(manager, reviewInfo);
+                    }
+                });
+            }
+        }
+    }
+
+    private void launchInAppReviewFlow(final ReviewManager manager, final ReviewInfo reviewInfo) {
+        if (!isDestroyed()) {
+            final Activity activity = getActivity();
+            if (activity != null) {
+                SettingsUtils.getInstance().putToPreferencesInAppReviewLast(Calendar.getInstance().getTimeInMillis());
+                final Task<Void> flow = manager.launchReviewFlow(activity, reviewInfo);
+                flow.addOnCompleteListener(task -> {
+                    // The flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even whether the review dialog was shown. Thus, no
+                    // matter the result, we continue our app flow.
+                });
+            }
+        }
+    }
+    private long retrieveInstallationAge(){
+        final String tag="retrieveInstallationAge - ";
+        long result=0;
+
+        final Activity activity=getActivity();
+        if (activity!=null) {
+            final PackageManager pm = activity.getPackageManager();
+            PackageInfo packageInfo = null;
+            try {
+                packageInfo = pm.getPackageInfo(getString(R.string.app_package_name), 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG,tag,e);
+            }
+
+            if (packageInfo!=null) {
+                final long firstInstallTime = packageInfo.firstInstallTime;
+                final long now = Calendar.getInstance().getTimeInMillis();
+                result=now-firstInstallTime;
+            }
+        }
+
+        return result;
+    }
     private boolean checkCameraAvailable() {
         boolean result = false;
         final Activity activity = getActivity();
@@ -546,7 +641,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         return result;
     }
-
     private boolean gpsAvailable() {
         boolean result = false;
         final Activity activity = getActivity();
@@ -556,7 +650,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
         return result;
     }
-
     private void maybeEnableArButton(final MenuItem menuItem) {
         boolean enable = false;
 
@@ -729,6 +822,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	public void onShipReceived(final Ship ship) {
 		final String tag="onShipReceived - ";
 
+        if (Ship.Source.INTERNAL.equals(ship.getSource())) {
+            numShipsInternalReceived++;
+        }
+
         final String shipIdent="MMSI: "+ ship.getMmsi() + (ship.getName() != null  && !ship.getName().isEmpty() ? " "+ship.getName() : "")+" Country: "+ship.getCountryName();
         logStatus("Ship location received ("+shipIdent+")"+(SettingsUtils.getInstance().parseFromPreferencesLoggingVerbose() ? "\n"+ship.toString().replace(",","\n   ") : ""));
 
@@ -748,6 +845,8 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
                 indicator.startAnimation(new IndicatorAnimation(false));
 
                 webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
+
+                checkEligibleinAppReview();
             });
 
             // Slow down a bit. Give the map time to draw the ship and tiles
