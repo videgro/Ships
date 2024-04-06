@@ -17,11 +17,11 @@ public class ShipsTableManager {
     private final ShipsTableDataAdapter shipsTableDataAdapter;
     private final long maxAgeInMs;
 
-    private Map<Ship.Source,Boolean> enabledSources=new HashMap<>();
+    private final Map<Ship.Source,Boolean> enabledSources=new HashMap<>();
 
     public ShipsTableManager(final ShipsTableDataAdapter shipsTableDataAdapter,final int maxAge){
         this.shipsTableDataAdapter=shipsTableDataAdapter;
-        this.maxAgeInMs=1000*60*maxAge;
+        this.maxAgeInMs=1000L*60*maxAge;
         enabledSources.put(Ship.Source.INTERNAL,true);
         enabledSources.put(Ship.Source.EXTERNAL,true);
         enabledSources.put(Ship.Source.CLOUD,true);

@@ -19,8 +19,8 @@ public class Ship {
 
     private Source source;
     private final int mmsi;
-    private String countryName;
-    private String countryFlag;
+    private final String countryName;
+    private final String countryFlag;
     private String name="";
     private double lat;
     private double lon;

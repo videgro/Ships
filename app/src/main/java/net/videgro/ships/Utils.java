@@ -91,8 +91,7 @@ public final class Utils {
 	}
 
 	public static void loadAd(final FragmentActivity activity,final RelativeLayout layout, final String adUnitId) {
-		final String tag = "loadAd - ";
-			if (activity!=null && layout != null) {
+		if (activity!=null && layout != null) {
 			// Must create the complete AdView programmatically,
 			// because we would like to set adUnitId programmatically.
 			final AdView adView = new AdView(layout.getContext());

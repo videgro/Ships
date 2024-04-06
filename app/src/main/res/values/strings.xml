@@ -44,11 +44,11 @@
     <string name="share_action_text">Share</string>
 
     <!-- Buttons -->
-	<string name="toggle_turn_on_calibrating_normal">START (dense traffic)</string>
-	<string name="toggle_turn_off_calibrating_normal">STOP (dense traffic)</string>
+	<string name="toggle_turn_on_calibrating_normal">START\n(dense traffic)</string>
+	<string name="toggle_turn_off_calibrating_normal">STOP\n(dense traffic)</string>
 
-	<string name="toggle_turn_on_calibrating_thorough">START (calm traffic)</string>
-	<string name="toggle_turn_off_calibrating_thorough">STOP (calm traffic)</string>
+	<string name="toggle_turn_on_calibrating_thorough">START\n(calm traffic)</string>
+	<string name="toggle_turn_off_calibrating_thorough">STOP\n(calm traffic)</string>
 
 	<string name="toggle_turn_on_ais">START</string>
 	<string name="toggle_turn_off_ais">STOP</string>

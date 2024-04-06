@@ -19,7 +19,6 @@ import android.graphics.Picture;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -119,8 +118,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private final DialogRepeatToCloudClickListener dialogRepeatToCloudClickListener=new DialogRepeatToCloudClickListener();
 
-    private RelativeLayout adView;
-
     private WebView webView;
     private ImageView indicatorReceivingInternal;
     private ImageView indicatorReceivingExternal;
@@ -152,7 +149,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
         createShipsTable(rootView.findViewById(R.id.shipsTable));
         logTextView = rootView.findViewById(R.id.textView1);
-        adView = rootView.findViewById(R.id.adView);
+        final RelativeLayout adView = rootView.findViewById(R.id.adView);
 
         if (isAdded()) {
             final Activity activity=getActivity();
@@ -422,14 +419,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             if (activity!=null){
                 locationServiceConnection = new LocationServiceConnection((OwnLocationReceivedListener) this);
                 final Intent serviceIntent = new Intent(activity,TrackService.class);
-
-                // On Android 8+ let service run in foreground
-                if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
-                    activity.startForegroundService(serviceIntent);
-                } else {
-                    activity.startService(serviceIntent);
-                }
-
+                activity.startForegroundService(serviceIntent);
                 activity.bindService(new Intent(activity,TrackService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
             } else {
                 Log.e(TAG,tag+"Activity is null.");
@@ -456,14 +446,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             if (activity!=null) {
                 nmeaClientServiceConnection = new NmeaClientServiceConnection((ShipReceivedListener) this);
                 final Intent serviceIntent = new Intent(activity, NmeaClientService.class);
-
-                // On Android 8+ let service run in foreground
-                if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
-                    activity.startForegroundService(serviceIntent);
-                } else {
-                    activity.startService(serviceIntent);
-                }
-
+                activity.startForegroundService(serviceIntent);
                 activity.bindService(new Intent(activity, NmeaClientService.class), nmeaClientServiceConnection, Context.BIND_AUTO_CREATE);
             } else {
                 Log.e(TAG,tag+"Activity is null.");
@@ -476,8 +459,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             trackService.setListener(null);
         }
 
-        if (locationServiceConnection != null) {
-            getActivity().unbindService(locationServiceConnection);
+        final Activity activity=getActivity();
+        if (locationServiceConnection != null && activity!=null) {
+            activity.unbindService(locationServiceConnection);
             locationServiceConnection = null;
         }
     }
@@ -487,8 +471,9 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
             nmeaClientService.removeListener(this);
         }
 
-        if (nmeaClientServiceConnection != null) {
-            getActivity().unbindService(nmeaClientServiceConnection);
+        final Activity activity=getActivity();
+        if (nmeaClientServiceConnection != null && activity!=null) {
+            activity.unbindService(nmeaClientServiceConnection);
             nmeaClientServiceConnection = null;
         }
     }
@@ -551,20 +536,31 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         return shareIntent;
     }
 
-    private boolean checkCameraAvailable(){
-        final PackageManager pm = getActivity().getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    private boolean checkCameraAvailable() {
+        boolean result = false;
+        final Activity activity = getActivity();
+        if (activity != null) {
+            final PackageManager pm = activity.getPackageManager();
+            result = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+        }
+
+        return result;
     }
 
     private boolean gpsAvailable() {
-        final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        return (locationManager != null && locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER));
+        boolean result = false;
+        final Activity activity = getActivity();
+        if (activity != null) {
+            final LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+            result = locationManager != null && locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER);
+        }
+        return result;
     }
 
     private void maybeEnableArButton(final MenuItem menuItem) {
         boolean enable = false;
 
-        if (isAdded() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)) {
+        if (isAdded()) {
             try {
                 final ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
 
@@ -743,17 +739,15 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
 
         if (isAdded() && getActivity()!=null){
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    shipsTableManager.update(ship);
+            getActivity().runOnUiThread(() -> {
+                shipsTableManager.update(ship);
 
-                    // Show indicator (animation)
-                    final ImageView indicator=(Ship.Source.EXTERNAL.equals(ship.getSource()) || Ship.Source.CLOUD.equals(ship.getSource())) ? indicatorReceivingExternal : indicatorReceivingInternal;
-                    indicator.setVisibility(View.VISIBLE);
-                    indicator.startAnimation(new IndicatorAnimation(false));
+                // Show indicator (animation)
+                final ImageView indicator=(Ship.Source.EXTERNAL.equals(ship.getSource()) || Ship.Source.CLOUD.equals(ship.getSource())) ? indicatorReceivingExternal : indicatorReceivingInternal;
+                indicator.setVisibility(View.VISIBLE);
+                indicator.startAnimation(new IndicatorAnimation(false));
 
-                    webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
-                }
+                webView.loadUrl("javascript:onShipReceived('" + new Gson().toJson(ship) + "')");
             });
 
             // Slow down a bit. Give the map time to draw the ship and tiles

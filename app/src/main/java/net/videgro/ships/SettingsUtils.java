@@ -1,6 +1,5 @@
 package net.videgro.ships;
 
-//import net.videgro.ships.domain.TrackingSettings;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;

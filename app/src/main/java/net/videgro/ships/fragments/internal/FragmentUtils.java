@@ -58,9 +58,9 @@ public final class FragmentUtils {
 		final String tag="changeRtlSdrPpm - android - ";
 		Log.d(TAG,tag);
 		if (fragment!=null && fragment.isAdded()) {
-			final Activity activity=fragment.getActivity();
-			if (activity!=null) {
-				changePpmAtDevice(activity,reqCode,ppm);
+			final Context context=fragment.getContext();
+			if (context!=null) {
+				fragment.startActivityForResult(createIntentChangePpm(context, ppm), reqCode);
 			}
 		} else {
 			Log.w(TAG,tag+"Fragment is null or not added to its activity.");
@@ -72,9 +72,9 @@ public final class FragmentUtils {
 		Log.d(TAG,tag);
 		boolean result=false;
 		if (fragment!=null && fragment.isAdded()) {
-			final Activity activity=fragment.getActivity();
-			if (activity!=null) {
-				changePpmAtDevice(activity,reqCode,ppm);
+			final Context context=fragment.getContext();
+			if (context!=null) {
+				fragment.startActivityForResult(createIntentChangePpm(context,ppm),reqCode);
 				result = true;
 			}
 		} else {
@@ -83,11 +83,11 @@ public final class FragmentUtils {
 		return result;
 	}
 
-	private static void changePpmAtDevice(final Activity activity,final int reqCode,final int ppm){
-		final Intent intent = createOpenDeviceIntent(activity, null);
+	private static Intent createIntentChangePpm(final Context context,final int ppm){
+		final Intent intent = createOpenDeviceIntent(context, null);
 		// Request to change PPM instead of (re)starting RTL-SDR
 		intent.putExtra(OpenDeviceActivity.EXTRA_CHANGE_PPM, ppm);
-		activity.startActivityForResult(intent, reqCode);
+		return intent;
 	}
 
 	public static boolean stopReceivingAisFromAntenna(final Fragment fragment,final int reqCode){

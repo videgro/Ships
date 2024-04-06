@@ -32,9 +32,9 @@ public class CalibrateTask extends AsyncTask<Void, Void, String> implements Ship
 	
 	private static final int NUMBER_OF_STEPS=Math.round((PPM_MAXIMAL-PPM_MINIMAL)/PPM_STEP_SIZE*1f);
 	
-	private ScanType scanType;
+	private final ScanType scanType;
 	private Context context;
-	private CalibrateListener listener;
+	private final CalibrateListener listener;
 
 	private NmeaClientService nmeaClientService;
 	private ServiceConnection nmeaUdpClientServiceConnection;
