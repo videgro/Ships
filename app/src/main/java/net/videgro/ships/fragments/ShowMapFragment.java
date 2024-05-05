@@ -125,7 +125,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     /**
      * App review - number of ships - 2
      */
-    private static final int APP_REVIEW_SHIPS_MIN = 2;
+    private static final int APP_REVIEW_SHIPS = 2;
 
     private static final int[] TABLE_HEADERS = {
         R.string.ships_table_col_country,
@@ -564,7 +564,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     }
 
     private void checkEligibleinAppReview(){
-        if (numShipsInternalReceived>=APP_REVIEW_SHIPS_MIN && retrieveInstallationAge()>APP_REVIEW_MINIMAL_INSTALLATION_TIME_IN_MILLIS){
+        if (numShipsInternalReceived==APP_REVIEW_SHIPS && retrieveInstallationAge()>APP_REVIEW_MINIMAL_INSTALLATION_TIME_IN_MILLIS){
             final long now=Calendar.getInstance().getTimeInMillis();
             final long timeSinceLastReviewRequest=now-SettingsUtils.getInstance().parseFromPreferencesInAppReviewLast();
             if (timeSinceLastReviewRequest>APP_REVIEW_WAIT_TIME_IN_MILLIS){
