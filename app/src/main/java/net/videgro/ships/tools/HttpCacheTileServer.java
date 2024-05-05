@@ -71,7 +71,7 @@ public class HttpCacheTileServer extends NanoHTTPD {
 		final String tag="retrieveCacheDir - ";
 		dirCache = null;
 		if (isExternalStorageWritable()){
-			final File dir=new File(Objects.requireNonNull(context).getExternalFilesDir(Environment.DIRECTORY_PICTURES),DIRECTORY_TILES_CACHE);
+			final File dir=new File(Objects.requireNonNull(context).getFilesDir(),DIRECTORY_TILES_CACHE);
 			if (!dir.exists()) {
 				try {
 					if (!dir.mkdirs()){

@@ -121,11 +121,6 @@
     <string name="popup_ar_accuracy_message">The locations of moving vessels depicted on the screen are not their exact locations. Vessels are not continuously sending their position, so more accurate data is simply not available.</string>
 
 	<!-- Permissions -->
-	<string name="permission_externalstorage_rationale">The app needs storage permission to cache map-tiles and to make sharing available.</string>
-    <string name="permission_externalstorage_denied_title">Denied storage permission</string>
-	<string name="permission_externalstorage_denied">You denied storage permission. The app won\'t function as expected.</string>
-	<string name="permission_externalstorage_neverask">You denied storage permission. The app won\'t function as expected. Please grant permission via Settings-App-Ships-Permissions</string>
-
 	<string name="permission_location_rationale">The app needs location permission to plot your location on the map.</string>
     <string name="permission_location_denied_title">Denied location permission</string>
 	<string name="permission_location_denied">You denied location permission. The app won\'t function as expected.</string>

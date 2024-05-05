@@ -21,7 +21,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -52,7 +51,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.review.testing.FakeReviewManager;
 import com.google.ar.core.ArCoreApk;
 import com.google.gson.Gson;
 
@@ -177,7 +175,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         if (isAdded()) {
             final Activity activity=getActivity();
             if (activity!=null) {
-                final File filesDirectory = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                final File filesDirectory = activity.getExternalFilesDir(null);
                 fileMap = new File(filesDirectory, FILE_MAP);
             }
         }
@@ -213,7 +211,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         super.onStart();
 
         // Start tiles caching server, will also load the OpenStreetMap after server has started
-        ShowMapFragmentPermissionsDispatcher.setupHttpCachingTileServerWithPermissionCheck(this);
+        setupHttpCachingTileServer();
 
         ShowMapFragmentPermissionsDispatcher.setupLocationServiceWithPermissionCheck(this);
 
@@ -279,10 +277,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         }
     }
 
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    // Must be public to use PermissionsDispatcher
-    public void setupHttpCachingTileServer() {
-        final String tag = "setupHttpCachingTileServer - ";
+    private void setupHttpCachingTileServer() {
         final HttpCacheTileServer httpCacheTileServer = HttpCacheTileServer.getInstance();
         httpCacheTileServer.init(getActivity(), SettingsUtils.getInstance().parseFromPreferencesMapCacheDiskUsageMax());
 
@@ -545,9 +540,10 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
     private Intent getShareIntent() {
         final Intent shareIntent = new Intent();
 
-        if (fileMap!=null) {
+        final Activity activity=getActivity();
+        if (fileMap!=null && activity!=null) {
             final ArrayList<Uri> uris = new ArrayList<>();
-            uris.add(FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + getString(R.string.dot_provider), fileMap));
+            uris.add(FileProvider.getUriForFile(activity, activity.getApplicationContext().getPackageName() + getString(R.string.dot_provider), fileMap));
 
             shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
             shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
@@ -690,13 +686,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
         menuItem.setEnabled(enable);
     }
 
-    private void takeScreenShotWithCheck() {
-        ShowMapFragmentPermissionsDispatcher.takeScreenShotWithPermissionCheck(this);
-    }
-
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    // Must be public to use PermissionsDispatcher
-	public void takeScreenShot() {
+	private void takeScreenShot() {
         final String tag="takeScreenShot - ";
 		Log.i(TAG,tag);
 
@@ -746,7 +736,7 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 
     private void updateShareData() {
         final String tag = "updateShareData - ";
-        takeScreenShotWithCheck();
+        takeScreenShot();
     }
 
     @Override
@@ -942,39 +932,6 @@ public class ShowMapFragment extends Fragment implements OwnLocationReceivedList
 	}
 
     /************************** PermissionsDispatcher IMPLEMENTATIONS ******************/
-
-    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void showRationaleForExternalStorage(final PermissionRequest request) {
-        new AlertDialog.Builder(getActivity())
-                .setMessage(R.string.permission_externalstorage_rationale)
-                .setPositiveButton(R.string.button_allow, new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        request.proceed();
-                    }
-                })
-                .setNegativeButton(R.string.button_deny, new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        request.cancel();
-                    }
-                })
-                .show();
-    }
-
-    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void showDeniedForExternalStorage() {
-        if (isAdded()) {
-            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.permission_externalstorage_denied_title), getString(R.string.permission_externalstorage_denied), R.drawable.thumbs_down_circle, null);
-        }
-    }
-
-    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void showNeverAskForExternalStorage() {
-        if (isAdded()) {
-            Utils.showPopup(IMAGE_POPUP_ID_IGNORE, getActivity(), this, getString(R.string.permission_externalstorage_denied_title), getString(R.string.permission_externalstorage_neverask), R.drawable.thumbs_down_circle, null);
-        }
-    }
 
     @OnShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)
     void showRationaleForLocation(final PermissionRequest request) {
