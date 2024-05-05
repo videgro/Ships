@@ -22,8 +22,8 @@ android {
         targetSdkVersion 33
         compileSdk 34
 
-        versionCode 409
-        versionName "4.09"
+        versionCode 410
+        versionName "4.10"
 
         externalNativeBuild {
             cmake {
