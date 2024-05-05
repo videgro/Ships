@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -40,6 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class NmeaClientService extends Service implements NmeaReceivedListener {
 	private static final String TAG = "NmeaClientService";
@@ -61,24 +62,24 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
 	private final IBinder binder = new ServiceBinder();
 	private final Set<ShipReceivedListener> listeners=new HashSet<>();
 
-    private Nmea2Ship nmea2Ship = new Nmea2Ship();
+    private final Nmea2Ship nmea2Ship = new Nmea2Ship();
 
     private static final Source[] SOURCES={Source.INTERNAL,Source.EXTERNAL,Source.CLOUD};
 
-    private Map<Source,DatagramSocketConfig> clients=new HashMap<>();
-    private Map<Source,Boolean> mustRepeatFrom=new HashMap<>();
+    private final Map<Source,DatagramSocketConfig> clients=new HashMap<>();
+    private final Map<Source,Boolean> mustRepeatFrom=new HashMap<>();
 
     private Repeater repeater=null;
     private NmeaMessagesCache cache;
 
-	private Map<Source,NmeaUdpClientTask> nmeaUdpClientTasks=new HashMap<>();
+	private final Map<Source,NmeaUdpClientTask> nmeaUdpClientTasks=new HashMap<>();
 
     /**
      * Contains all received MMSIs. A set contains unique entries.
      */
-    private Map<Source,Set<Integer>> mmsiReceived = new HashMap<>();
+    private final Map<Source,Set<Integer>> mmsiReceived = new HashMap<>();
 
-    private ConnectivityChangeReceiver connectivityChangeReceiver=new ConnectivityChangeReceiver();
+    private final ConnectivityChangeReceiver connectivityChangeReceiver=new ConnectivityChangeReceiver();
 
     @Override
 	public IBinder onBind(Intent intent) {
@@ -135,11 +136,9 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         //
         // See: 1) https://stackoverflow.com/questions/44425584/context-startforegroundservice-did-not-then-call-service-startforeground
         //      2) https://stackoverflow.com/questions/46375444/remoteserviceexception-context-startforegroundservice-did-not-then-call-servic
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final Notification notification=Notifications.getInstance().createNotification(this,getString(R.string.notification_channel_services_id),getString(R.string.notification_service_nmea_title),getString(R.string.notification_service_nmea_description));
-            // Send always the same ID (TAG.hashCode()) so user won't be spammed by different multiple instances of the same notification.
-            startForeground(TAG.hashCode(), notification);
-        }
+        final Notification notification=Notifications.getInstance().createNotification(this,getString(R.string.notification_channel_services_id),getString(R.string.notification_service_nmea_title),getString(R.string.notification_service_nmea_description));
+        // Send always the same ID (TAG.hashCode()) so user won't be spammed by different multiple instances of the same notification.
+        startForeground(TAG.hashCode(), notification);
 
         init();
         return result;
@@ -270,21 +269,14 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
     }
 
     private static DatagramSocketConfig createDatagramSocketConfig(final String host, final int port){
-        final String tag="createDatagramSocketConfig - ";
-
         DatagramSocketConfig result=null;
 
         // Validate loop, not empty
         if ((port > 0) && host!=null && !host.isEmpty()) {
-            try {
-                // Ignore result, only interested whether an UnknownHostException is thrown.
-                //noinspection ResultOfMethodCallIgnored
-                InetAddress.getByName(host);
-                result=new DatagramSocketConfig(host, port);
-            } catch (UnknownHostException e) {
-                Log.w(TAG, tag + "Invalid host: " + host, e);
-            }
+           final DatagramSocketConfigCreator datagramSocketConfigCreator = new DatagramSocketConfigCreator();
+           result=datagramSocketConfigCreator.create(host,port);
         }
+
         return result;
     }
 
@@ -401,7 +393,7 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
         if (intent != null) {
@@ -431,6 +423,38 @@ public class NmeaClientService extends Service implements NmeaReceivedListener {
                     cache.processCachedMessages();
                 }
             }
+        }
+    }
+
+    private static class DatagramSocketConfigCreator {
+        private final String tag = "DatagramSocketConfigCreator - ";
+
+        public DatagramSocketConfig create(final String host, final int port) {
+            DatagramSocketConfig result = null;
+            FutureTask<DatagramSocketConfig> futureTask = new FutureTask<>(() -> {
+                DatagramSocketConfig datagramSocketConfig = null;
+                try {
+                    // Ignore result, only interested whether an UnknownHostException is thrown.
+                    //noinspection ResultOfMethodCallIgnored
+                    InetAddress.getByName(host);
+
+                    datagramSocketConfig = new DatagramSocketConfig(host, port);
+                } catch (UnknownHostException e) {
+                    Log.w(TAG, tag + "Invalid host: " + host, e);
+                }
+                return datagramSocketConfig;
+            });
+
+            new Thread(futureTask).start();
+
+            // Wait for the result and return it
+            try {
+                result = futureTask.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e(TAG, tag, e);
+            }
+
+            return result;
         }
     }
 }
